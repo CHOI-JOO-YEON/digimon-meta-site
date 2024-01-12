@@ -1,5 +1,6 @@
 package com.joo.digimon.crawling.service;
 
+import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.junit.jupiter.api.Assertions;
@@ -25,7 +26,7 @@ class CrawlingServiceImplTest {
     }
 
     @Test
-    void urlToDocumentListFailedTest() throws IOException {
+    void urlToDocumentListFailTest() throws IOException {
         Assertions.assertThrows(IllegalArgumentException.class,() ->
                 crawlingService.getDocumentListByFirstPageUrl("https://www.naver.com/"));
     }
@@ -36,6 +37,13 @@ class CrawlingServiceImplTest {
         List<Element> elements = crawlingService.getCardElementsByDocument(documentListByFirstPageUrl.get(0));
         Assertions.assertEquals(20,elements.size());
 
+    }
+
+    @Test
+    void documentToElementListFailTest() throws IOException {
+        Document document = Jsoup.connect("https://www.naver.com/").get();
+        List<Element> elements = crawlingService.getCardElementsByDocument(document);
+        Assertions.assertEquals(0,elements.size());
     }
 
 }
