@@ -1,6 +1,7 @@
 package com.joo.digimon.crawling.service;
 
 import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,5 +30,12 @@ class CrawlingServiceImplTest {
                 crawlingService.getDocumentListByFirstPageUrl("https://www.naver.com/"));
     }
 
+    @Test
+    void documentToElementListSuccessTest() throws IOException {
+        List<Document> documentListByFirstPageUrl = crawlingService.getDocumentListByFirstPageUrl("https://digimoncard.co.kr/index.php?mid=cardlist&category=1078");
+        List<Element> elements = crawlingService.getCardElementsByDocument(documentListByFirstPageUrl.get(0));
+        Assertions.assertEquals(20,elements.size());
+
+    }
 
 }
