@@ -11,9 +11,11 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Service
-public class CrawlingServiceImpl implements CrawlingService{
+public class CrawlingServiceImpl implements CrawlingService {
     @Override
     public List<CrawlingCardEntity> crawlUrlAndBuildEntityList(String url) {
         return null;
@@ -21,7 +23,7 @@ public class CrawlingServiceImpl implements CrawlingService{
 
     @Override
     public List<Document> getDocumentListByFirstPageUrl(String url) throws IOException {
-        Document doc= Jsoup.connect(url).get();
+        Document doc = Jsoup.connect(url).get();
         List<Document> documentList = new ArrayList<>();
         documentList.add(doc);
         try {
@@ -31,7 +33,7 @@ public class CrawlingServiceImpl implements CrawlingService{
                     break;
                 documentList.add(Jsoup.connect(url).get());
             }
-        }catch (NullPointerException e){
+        } catch (NullPointerException e) {
             throw new IllegalArgumentException("paging 클래스 태그를 찾을 수 없음");
         }
 
@@ -41,12 +43,62 @@ public class CrawlingServiceImpl implements CrawlingService{
 
     @Override
     public List<Element> getCardElementsByDocument(Document document) {
-        List<Element> elements = document.select(".cardlistCol .popup");
-        return elements;
+        return document.select(".cardlistCol .popup");
     }
 
     @Override
     public CrawlingCardDto crawlingCardByElement(Element element) {
-        return null;
+        CrawlingCardDto crawlingCardDto = new CrawlingCardDto();
+
+        crawlingCardDto.setIsParallel(!element.select(".cardtype cardParallel").isEmpty());
+        extractCardColor(crawlingCardDto, element);
+        extractCardInfoHead(element, crawlingCardDto);
+        extractCardInfoBody(element, crawlingCardDto);
+        extractCardInfoBottom(element, crawlingCardDto);
+
+        return crawlingCardDto;
+    }
+
+    private void extractCardInfoBottom(Element element, CrawlingCardDto crawlingCardDto) {
+        crawlingCardDto.setEffect(element.select(".cardinfo_bottom dl:contains(상단 텍스트) dd").text());
+        crawlingCardDto.setSourceEffect(element.select(".cardinfo_bottom dl:contains(하단 텍스트) dd").text());
+        crawlingCardDto.setNote(element.select(".cardinfo_bottom dl:contains(입수 정보) dd").text());
+    }
+
+    private void extractCardInfoBody(Element element, CrawlingCardDto crawlingCardDto) {
+        Element lvElement = element.selectFirst(".cardlv");
+        if (lvElement != null) {
+            crawlingCardDto.setLv(lvElement.text());
+        }
+
+        crawlingCardDto.setCardName(element.selectFirst(".card_name").text());
+        crawlingCardDto.setImgUrl(element.select(".card_img>img").attr("src"));
+        crawlingCardDto.setForm(element.select(".cardinfo_top_body dl:contains(형태) dd").text());
+        crawlingCardDto.setAttribute(element.select(".cardinfo_top_body dl:contains(속성) dd").text());
+        crawlingCardDto.setType(element.select(".cardinfo_top_body dl:contains(유형) dd").text());
+        crawlingCardDto.setDP(element.select(".cardinfo_top_body dl:contains(DP) dd").text());
+        crawlingCardDto.setPlayCost(element.select(".cardinfo_top_body dl:contains(등장 코스트) dd").text());
+        crawlingCardDto.setDigivolveCost1(element.select(".cardinfo_top_body dl:contains(진화 코스트 1) dd").text());
+        crawlingCardDto.setDigivolveCost2(element.select(".cardinfo_top_body dl:contains(진화 코스트 2) dd").text());
+    }
+
+    private void extractCardInfoHead(Element element, CrawlingCardDto crawlingCardDto) {
+        crawlingCardDto.setCardNo(element.selectFirst(".cardno").text());
+        crawlingCardDto.setRarity(element.select(".cardinfo_head>li").get(1).text());
+        crawlingCardDto.setCardType(element.selectFirst(".cardtype").text());
+    }
+
+    private void extractCardColor(CrawlingCardDto crawlingCardDto, Element element) {
+        String classAttribute = element.selectFirst(".card_detail").className();
+        Pattern pattern = Pattern.compile("card_detail_(\\w+)");
+        Matcher matcher = pattern.matcher(classAttribute);
+
+        if (matcher.find()) {
+            String[] colorText = matcher.group(1).split("_");
+            crawlingCardDto.setColor1(colorText[0]);
+            if (colorText.length == 2) {
+                crawlingCardDto.setColor2(colorText[1]);
+            }
+        }
     }
 }
