@@ -11,7 +11,7 @@ spring:
     driver-class-name: org.h2.Driver
     url: jdbc:h2:mem:testdb
   application:
-    name: Digimon-Meta
+    name: Digimon-Meta-Dev
   cloud:
     consul:
       config:
@@ -34,3 +34,10 @@ spring:
             authorization-uri: https://kauth.kakao.com/oauth/authorize
             token-uri: https://kauth.kakao.com/oauth/token
             user-info-uri: https://kapi.kakao.com/v2/user/
+
+admin:
+  id: adminJoo
+  password: adad23415
+jwt:
+  secret: kfqwokfpqgfjopjagopjsgopjapgjaipgasfasdas
+  expiration-ms: 360000000
