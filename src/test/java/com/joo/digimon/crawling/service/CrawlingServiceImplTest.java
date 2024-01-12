@@ -18,9 +18,15 @@ class CrawlingServiceImplTest {
     CrawlingServiceImpl crawlingService;
 
     @Test
-    void urlToDocumentListTest() throws IOException {
+    void urlToDocumentListSuccessTest() throws IOException {
         List<Document> documentListByFirstPageUrl = crawlingService.getDocumentListByFirstPageUrl("https://digimoncard.co.kr/index.php?mid=cardlist&category=1078");
         Assertions.assertEquals(11,documentListByFirstPageUrl.size());
+    }
+
+    @Test
+    void urlToDocumentListFailedTest() throws IOException {
+        Assertions.assertThrows(IllegalArgumentException.class,() ->
+                crawlingService.getDocumentListByFirstPageUrl("https://www.naver.com/"));
     }
 
 

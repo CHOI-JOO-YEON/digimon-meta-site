@@ -24,12 +24,18 @@ public class CrawlingServiceImpl implements CrawlingService{
         Document doc= Jsoup.connect(url).get();
         List<Document> documentList = new ArrayList<>();
         documentList.add(doc);
-        Elements pages = doc.selectFirst(".paging").select("ul>li>a");
-        for (Element page : pages) {
-            if (page.text().equals("Next"))
-                break;
-            documentList.add(Jsoup.connect(url).get());
+        try {
+            Elements pages = doc.selectFirst(".paging").select("ul>li>a");
+            for (Element page : pages) {
+                if (page.text().equals("Next"))
+                    break;
+                documentList.add(Jsoup.connect(url).get());
+            }
+        }catch (NullPointerException e){
+            throw new IllegalArgumentException("paging 클래스 태그를 찾을 수 없음");
         }
+
+
         return documentList;
     }
 
