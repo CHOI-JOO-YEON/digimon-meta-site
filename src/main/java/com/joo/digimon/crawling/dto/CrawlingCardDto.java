@@ -1,6 +1,7 @@
 package com.joo.digimon.crawling.dto;
 
 import com.joo.digimon.crawling.enums.CardType;
+import com.joo.digimon.crawling.enums.Form;
 import com.joo.digimon.crawling.enums.Rarity;
 import lombok.Data;
 import lombok.NonNull;
@@ -21,7 +22,7 @@ public class CrawlingCardDto {
     Boolean isParallel;
     @NonNull
     String cardName;
-    String form;
+    Form form;
     String attribute;
     String type;
     Integer dP;

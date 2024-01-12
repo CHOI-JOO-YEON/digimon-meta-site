@@ -1,14 +1,11 @@
 package com.joo.digimon.crawling.model;
 
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import com.joo.digimon.crawling.enums.CardType;
+import com.joo.digimon.crawling.enums.Form;
+import com.joo.digimon.crawling.enums.Rarity;
+import jakarta.persistence.*;
+import lombok.*;
 
 @Entity
 @Getter
@@ -20,4 +17,31 @@ public class CrawlingCardEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Integer id;
 
+    String cardNo;
+
+    @Enumerated(EnumType.STRING)
+    Rarity rarity;
+    @Enumerated(EnumType.STRING)
+    CardType cardType;
+
+    String lv;
+
+    @NonNull
+    Boolean isParallel;
+    @NonNull
+    String cardName;
+    @Enumerated(EnumType.STRING)
+    Form form;
+    String attribute;
+    String type;
+    Integer dP;
+    Integer playCost;
+    String digivolveCost1;
+    String digivolveCost2;
+    String effect;
+    String sourceEffect;
+    String note;
+
+    @NonNull
+    String imgUrl;
 }
