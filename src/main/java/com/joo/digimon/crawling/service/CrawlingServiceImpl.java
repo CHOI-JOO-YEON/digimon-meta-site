@@ -60,9 +60,9 @@ public class CrawlingServiceImpl implements CrawlingService {
     }
 
     private void extractCardInfoBottom(Element element, CrawlingCardDto crawlingCardDto) {
-        crawlingCardDto.setEffect(element.select(".cardinfo_bottom dl:contains(상단 텍스트) dd").text());
-        crawlingCardDto.setSourceEffect(element.select(".cardinfo_bottom dl:contains(하단 텍스트) dd").text());
-        crawlingCardDto.setNote(element.select(".cardinfo_bottom dl:contains(입수 정보) dd").text());
+        crawlingCardDto.setEffect(changeJapanMiddlePoint(element.select(".cardinfo_bottom dl:contains(상단 텍스트) dd").text()));
+        crawlingCardDto.setSourceEffect(changeJapanMiddlePoint(element.select(".cardinfo_bottom dl:contains(하단 텍스트) dd").text()));
+        crawlingCardDto.setNote(changeJapanMiddlePoint(element.select(".cardinfo_bottom dl:contains(입수 정보) dd").text()));
     }
 
     private void extractCardInfoBody(Element element, CrawlingCardDto crawlingCardDto) {
@@ -71,7 +71,9 @@ public class CrawlingServiceImpl implements CrawlingService {
             crawlingCardDto.setLv(lvElement.text());
         }
 
-        crawlingCardDto.setCardName(element.selectFirst(".card_name").text());
+
+        crawlingCardDto.setCardName(changeJapanMiddlePoint(element.selectFirst(".card_name").text()));
+
         crawlingCardDto.setImgUrl(element.select(".card_img>img").attr("src"));
         crawlingCardDto.setForm(element.select(".cardinfo_top_body dl:contains(형태) dd").text());
         crawlingCardDto.setAttribute(element.select(".cardinfo_top_body dl:contains(속성) dd").text());
@@ -100,5 +102,15 @@ public class CrawlingServiceImpl implements CrawlingService {
                 crawlingCardDto.setColor2(colorText[1]);
             }
         }
+    }
+
+    private String changeJapanMiddlePoint(String text) {
+        char[] textArray = text.toCharArray();
+        for (int i = 0; i < textArray.length; i++) {
+            if (textArray[i] == 12539) {
+                textArray[i] = '·';
+            }
+        }
+        return new String(textArray);
     }
 }
