@@ -41,7 +41,8 @@ public class CrawlingServiceImpl implements CrawlingService{
 
     @Override
     public List<Element> getCardElementsByDocument(Document document) {
-        return null;
+        List<Element> elements = document.select(".cardlistCol .popup");
+        return elements;
     }
 
     @Override
