@@ -1,39 +1,39 @@
 package com.joo.digimon.crawling.dto;
 
 import com.joo.digimon.crawling.enums.CardType;
+import com.joo.digimon.crawling.enums.Color;
 import com.joo.digimon.crawling.enums.Form;
 import com.joo.digimon.crawling.enums.Rarity;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.NonNull;
 
 @Data
+@NoArgsConstructor
 public class CrawlingCardDto {
 
-    @NonNull
     String cardNo;
-    @NonNull
-    Rarity rarity;
-    @NonNull
-    CardType cardType;
+    String rarity;
+    String cardType;
 
     String lv;
 
-    @NonNull
     Boolean isParallel;
-    @NonNull
     String cardName;
-    Form form;
+    String form;
     String attribute;
     String type;
-    Integer dP;
-    Integer playCost;
+    String dP;
+    String playCost;
     String digivolveCost1;
     String digivolveCost2;
     String effect;
     String sourceEffect;
     String note;
 
-    @NonNull
+    String color1;
+    String color2;
+
     String imgUrl;
 
 
