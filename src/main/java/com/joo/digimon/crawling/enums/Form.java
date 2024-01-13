@@ -32,4 +32,13 @@ public enum Form {
         }
         throw new IllegalArgumentException("No corresponding Korean name found for: " + englishName);
     }
+
+    public static Form findByKor(String kor){
+        for (Form value : Form.values()) {
+            if (value.kor.equals(kor)) {
+                return value;
+            }
+        }
+        throw new IllegalArgumentException("잘못된 한글 형태");
+    }
 }
