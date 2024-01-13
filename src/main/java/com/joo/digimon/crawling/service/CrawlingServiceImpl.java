@@ -57,9 +57,9 @@ public class CrawlingServiceImpl implements CrawlingService {
         List<ReflectCardResponseDto> reflectCardResponseDtoList = new ArrayList<>();
         for (ReflectCardRequestDto reflectCardRequestDto : reflectCardRequestDtoList) {
             try {
-                reflectCardResponseDtoList.add(new ReflectCardResponseDto(reflectCardRequestDto.getId(),saveCardByReflectCardRequest(reflectCardRequestDto)));
+                reflectCardResponseDtoList.add(new ReflectCardResponseDto(reflectCardRequestDto.getId(), saveCardByReflectCardRequest(reflectCardRequestDto)));
             } catch (Exception e) {
-                reflectCardResponseDtoList.add(new ReflectCardResponseDto(reflectCardRequestDto.getId(),false));
+                reflectCardResponseDtoList.add(new ReflectCardResponseDto(reflectCardRequestDto.getId(), false));
             }
 
         }
@@ -137,10 +137,10 @@ public class CrawlingServiceImpl implements CrawlingService {
         List<CrawlingCardEntity> crawlingCardEntities = crawlUrlAndBuildEntityList(url);
         int cnt = 0;
         for (CrawlingCardEntity crawlingCardEntity : crawlingCardEntities) {
-            try {
+            if (crawlingCardRepository.findByImgUrl(crawlingCardEntity.getImgUrl()).isEmpty()) {
+
                 crawlingCardRepository.save(crawlingCardEntity);
                 cnt++;
-            } catch (DataIntegrityViolationException ignore) {
             }
         }
         return cnt;
@@ -181,7 +181,7 @@ public class CrawlingServiceImpl implements CrawlingService {
             for (Element page : pages) {
                 if (page.text().equals("Next"))
                     break;
-                documentList.add(Jsoup.connect(url).get());
+                documentList.add(Jsoup.connect(page.attr("href")).get());
             }
         } catch (NullPointerException e) {
             throw new IllegalArgumentException("paging 클래스 태그를 찾을 수 없음");
