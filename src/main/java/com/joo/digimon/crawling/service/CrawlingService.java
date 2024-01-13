@@ -10,7 +10,7 @@ import java.util.List;
 
 public interface CrawlingService {
 
-    List<CrawlingCardEntity> crawlUrlAndBuildEntityList(String url);
+    List<CrawlingCardEntity> crawlUrlAndBuildEntityList(String url) throws IOException;
     List<Document> getDocumentListByFirstPageUrl(String url) throws IOException;
     List<Element> getCardElementsByDocument(Document document);
     CrawlingCardDto crawlingCardByElement(Element element);

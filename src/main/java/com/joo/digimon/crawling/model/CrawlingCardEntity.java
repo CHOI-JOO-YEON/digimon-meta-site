@@ -1,6 +1,7 @@
 package com.joo.digimon.crawling.model;
 
 
+import com.joo.digimon.crawling.dto.CrawlingCardDto;
 import com.joo.digimon.crawling.enums.CardType;
 import com.joo.digimon.crawling.enums.Form;
 import com.joo.digimon.crawling.enums.Rarity;
@@ -18,30 +19,49 @@ public class CrawlingCardEntity {
     Integer id;
 
     String cardNo;
-
-    @Enumerated(EnumType.STRING)
-    Rarity rarity;
-    @Enumerated(EnumType.STRING)
-    CardType cardType;
-
+    String rarity;
+    String cardType;
     String lv;
-
-    @NonNull
     Boolean isParallel;
-    @NonNull
     String cardName;
-    @Enumerated(EnumType.STRING)
-    Form form;
+    String form;
     String attribute;
     String type;
-    Integer dP;
-    Integer playCost;
+    String dP;
+    String playCost;
     String digivolveCost1;
     String digivolveCost2;
+
+    @Column(length = 1000)
     String effect;
+
+    @Column(length = 1000)
     String sourceEffect;
     String note;
-
-    @NonNull
+    String color1;
+    String color2;
     String imgUrl;
+
+    public CrawlingCardEntity(CrawlingCardDto dto) {
+        this.cardNo = dto.getCardNo();
+        this.rarity = dto.getRarity();
+        this.cardType = dto.getCardType();
+        this.lv = dto.getLv();
+        this.isParallel = dto.getIsParallel();
+        this.cardName = dto.getCardName();
+        this.form = dto.getForm();
+        this.attribute = dto.getAttribute();
+        this.type = dto.getType();
+        this.dP = dto.getDP();
+        this.playCost = dto.getPlayCost();
+        this.digivolveCost1 = dto.getDigivolveCost1();
+        this.digivolveCost2 = dto.getDigivolveCost2();
+        this.effect = dto.getEffect();
+        this.sourceEffect = dto.getSourceEffect();
+        this.note = dto.getNote();
+        this.color1 = dto.getColor1();
+        this.color2 = dto.getColor2();
+        this.imgUrl = dto.getImgUrl();
+    }
+
 }

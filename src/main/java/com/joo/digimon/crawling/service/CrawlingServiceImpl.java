@@ -17,8 +17,27 @@ import java.util.regex.Pattern;
 @Service
 public class CrawlingServiceImpl implements CrawlingService {
     @Override
-    public List<CrawlingCardEntity> crawlUrlAndBuildEntityList(String url) {
-        return null;
+    public List<CrawlingCardEntity> crawlUrlAndBuildEntityList(String url) throws IOException {
+        List<Document> documentListByFirstPageUrl = getDocumentListByFirstPageUrl(url);
+
+        List<Element> cardElement = new ArrayList<>();
+        for (Document document : documentListByFirstPageUrl) {
+            cardElement.addAll(getCardElementsByDocument(document));
+        }
+        List<CrawlingCardDto> crawlingCardDtoList = new ArrayList<>();
+        for (Element element : cardElement) {
+            crawlingCardDtoList.add(crawlingCardByElement(element));
+        }
+        List<CrawlingCardEntity> crawlingCardEntities = new ArrayList<>();
+
+        for (CrawlingCardDto crawlingCardDto : crawlingCardDtoList) {
+            crawlingCardEntities.add(
+                    new CrawlingCardEntity(crawlingCardDto)
+            );
+        }
+
+
+        return crawlingCardEntities;
     }
 
     @Override
