@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -23,6 +24,15 @@ import java.util.regex.Pattern;
 public class CrawlingServiceImpl implements CrawlingService {
 
     private final CrawlingCardRepository crawlingCardRepository;
+
+    public List<CrawlingCardDto> getUnreflectedCrawlingCardDtoList(){
+        List<CrawlingCardEntity> crawlingCardEntities = crawlingCardRepository.findByCardImgEntityIsNullAndParallelCardImgEntityIsNull();
+        List<CrawlingCardDto> crawlingCardDtoList = new ArrayList<>();
+        for (CrawlingCardEntity crawlingCardEntity : crawlingCardEntities) {
+            crawlingCardDtoList.add(new CrawlingCardDto(crawlingCardEntity));
+        }
+        return crawlingCardDtoList;
+    }
 
     @Override
     @Transactional

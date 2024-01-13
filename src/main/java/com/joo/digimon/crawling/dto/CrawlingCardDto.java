@@ -1,16 +1,12 @@
 package com.joo.digimon.crawling.dto;
-
-import com.joo.digimon.crawling.enums.CardType;
-import com.joo.digimon.crawling.enums.Color;
-import com.joo.digimon.crawling.enums.Form;
-import com.joo.digimon.crawling.enums.Rarity;
+import com.joo.digimon.crawling.model.CrawlingCardEntity;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.NonNull;
 
 @Data
 @NoArgsConstructor
 public class CrawlingCardDto {
+    Integer id;
 
     String cardNo;
     String rarity;
@@ -36,8 +32,27 @@ public class CrawlingCardDto {
 
     String imgUrl;
 
-
-
-
+    public CrawlingCardDto(CrawlingCardEntity crawlingCardEntity) {
+        this.id = crawlingCardEntity.getId();
+        this.cardNo = crawlingCardEntity.getCardNo();
+        this.rarity = crawlingCardEntity.getRarity();
+        this.cardType = crawlingCardEntity.getCardType();
+        this.lv = crawlingCardEntity.getLv();
+        this.isParallel = crawlingCardEntity.getIsParallel();
+        this.cardName = crawlingCardEntity.getCardName();
+        this.form = crawlingCardEntity.getForm();
+        this.attribute = crawlingCardEntity.getAttribute();
+        this.type = crawlingCardEntity.getType();
+        this.dP = crawlingCardEntity.getDP();
+        this.playCost = crawlingCardEntity.getPlayCost();
+        this.digivolveCost1 = crawlingCardEntity.getDigivolveCost1();
+        this.digivolveCost2 = crawlingCardEntity.getDigivolveCost2();
+        this.effect = crawlingCardEntity.getEffect();
+        this.sourceEffect = crawlingCardEntity.getSourceEffect();
+        this.note = crawlingCardEntity.getNote();
+        this.color1 = crawlingCardEntity.getColor1();
+        this.color2 = crawlingCardEntity.getColor2();
+        this.imgUrl = crawlingCardEntity.getImgUrl();
+    }
 
 }
