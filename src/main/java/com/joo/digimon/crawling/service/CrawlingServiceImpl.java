@@ -7,6 +7,7 @@ import com.joo.digimon.card.model.ParallelCardImgEntity;
 import com.joo.digimon.card.repository.*;
 import com.joo.digimon.crawling.dto.CrawlingCardDto;
 import com.joo.digimon.crawling.dto.ReflectCardRequestDto;
+import com.joo.digimon.crawling.dto.ReflectCardResponseDto;
 import com.joo.digimon.crawling.enums.CardType;
 import com.joo.digimon.crawling.enums.Color;
 import com.joo.digimon.crawling.enums.Form;
@@ -49,6 +50,22 @@ public class CrawlingServiceImpl implements CrawlingService {
         }
         return crawlingCardDtoList;
     }
+
+    @Override
+    @Transactional
+    public List<ReflectCardResponseDto> saveCardByReflectCardRequestList(List<ReflectCardRequestDto> reflectCardRequestDtoList) {
+        List<ReflectCardResponseDto> reflectCardResponseDtoList = new ArrayList<>();
+        for (ReflectCardRequestDto reflectCardRequestDto : reflectCardRequestDtoList) {
+            try {
+                reflectCardResponseDtoList.add(new ReflectCardResponseDto(reflectCardRequestDto.getId(),saveCardByReflectCardRequest(reflectCardRequestDto)));
+            } catch (Exception e) {
+                reflectCardResponseDtoList.add(new ReflectCardResponseDto(reflectCardRequestDto.getId(),false));
+            }
+
+        }
+        return reflectCardResponseDtoList;
+    }
+
 
     @Transactional
     public boolean saveCardByReflectCardRequest(ReflectCardRequestDto reflectCardRequestDto) {
