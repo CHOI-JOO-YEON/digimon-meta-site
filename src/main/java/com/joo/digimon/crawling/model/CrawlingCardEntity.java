@@ -1,6 +1,8 @@
 package com.joo.digimon.crawling.model;
 
 
+import com.joo.digimon.card.model.CardImgEntity;
+import com.joo.digimon.card.model.ParallelCardImgEntity;
 import com.joo.digimon.crawling.dto.CrawlingCardDto;
 import com.joo.digimon.crawling.enums.CardType;
 import com.joo.digimon.crawling.enums.Form;
@@ -13,6 +15,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@Table(name = "CRAWLING_CARDS_TB")
 public class CrawlingCardEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -66,4 +69,9 @@ public class CrawlingCardEntity {
         this.imgUrl = dto.getImgUrl();
     }
 
+    @OneToOne(mappedBy = "crawlingCardEntity")
+    CardImgEntity cardImgEntity;
+
+    @OneToOne(mappedBy = "crawlingCardEntity")
+    ParallelCardImgEntity parallelCardImgEntity;
 }
