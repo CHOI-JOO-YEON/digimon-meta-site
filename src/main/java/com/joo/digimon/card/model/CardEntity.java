@@ -41,7 +41,6 @@ public class CardEntity {
     String effect;
     @Column(length = 1000)
     String sourceEffect;
-    String note;
 
     @Enumerated(EnumType.STRING)
     Color color1;
@@ -61,5 +60,9 @@ public class CardEntity {
     Set<ParallelCardImgEntity> parallelCardImgEntities;
 
     @OneToMany(mappedBy = "cardEntity")
-    Set<CardTypeEntity> cardTypeEntities;
+    Set<CardCombineTypeEntity> cardCombineTypeEntities;
+
+    @ManyToOne
+    @JoinColumn(name = "note_tb_id")
+    NoteEntity noteEntity;
 }
