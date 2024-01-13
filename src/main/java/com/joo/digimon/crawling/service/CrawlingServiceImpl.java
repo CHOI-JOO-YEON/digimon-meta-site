@@ -2,6 +2,8 @@ package com.joo.digimon.crawling.service;
 
 import com.joo.digimon.crawling.dto.CrawlingCardDto;
 import com.joo.digimon.crawling.model.CrawlingCardEntity;
+import com.joo.digimon.crawling.repository.CrawlingCardRepository;
+import lombok.RequiredArgsConstructor;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -15,7 +17,17 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @Service
+@RequiredArgsConstructor
 public class CrawlingServiceImpl implements CrawlingService {
+
+    private final CrawlingCardRepository crawlingCardRepository;
+
+    @Override
+    public int crawlAndSaveByUrl(String url) throws IOException {
+        List<CrawlingCardEntity> crawlingCardEntities = crawlUrlAndBuildEntityList(url);
+        return crawlingCardRepository.saveAll(crawlingCardEntities).size();
+
+    }
     @Override
     public List<CrawlingCardEntity> crawlUrlAndBuildEntityList(String url) throws IOException {
         List<Document> documentListByFirstPageUrl = getDocumentListByFirstPageUrl(url);
