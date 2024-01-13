@@ -1,6 +1,16 @@
 package com.joo.digimon.crawling.service;
 
+import com.joo.digimon.card.model.CardEntity;
+import com.joo.digimon.card.model.CardImgEntity;
+import com.joo.digimon.card.model.NoteEntity;
+import com.joo.digimon.card.model.ParallelCardImgEntity;
+import com.joo.digimon.card.repository.*;
 import com.joo.digimon.crawling.dto.CrawlingCardDto;
+import com.joo.digimon.crawling.dto.ReflectCardRequestDto;
+import com.joo.digimon.crawling.enums.CardType;
+import com.joo.digimon.crawling.enums.Color;
+import com.joo.digimon.crawling.enums.Form;
+import com.joo.digimon.crawling.enums.Rarity;
 import com.joo.digimon.crawling.model.CrawlingCardEntity;
 import com.joo.digimon.crawling.repository.CrawlingCardRepository;
 import jakarta.transaction.Transactional;
@@ -14,7 +24,6 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -24,14 +33,85 @@ import java.util.regex.Pattern;
 public class CrawlingServiceImpl implements CrawlingService {
 
     private final CrawlingCardRepository crawlingCardRepository;
+    private final CardRepository cardRepository;
+    private final CardImgRepository cardImgRepository;
+    private final CardTypeRepository cardTypeRepository;
+    private final ParallelCardImgRepository parallelCardImgRepository;
+    private final TypeRepository typeRepository;
+    private final NoteRepository noteRepository;
 
-    public List<CrawlingCardDto> getUnreflectedCrawlingCardDtoList(){
+    @Override
+    public List<CrawlingCardDto> getUnreflectedCrawlingCardDtoList() {
         List<CrawlingCardEntity> crawlingCardEntities = crawlingCardRepository.findByCardImgEntityIsNullAndParallelCardImgEntityIsNull();
         List<CrawlingCardDto> crawlingCardDtoList = new ArrayList<>();
         for (CrawlingCardEntity crawlingCardEntity : crawlingCardEntities) {
             crawlingCardDtoList.add(new CrawlingCardDto(crawlingCardEntity));
         }
         return crawlingCardDtoList;
+    }
+
+    @Transactional
+    public boolean saveCardByReflectCardRequest(ReflectCardRequestDto reflectCardRequestDto) {
+        CrawlingCardEntity crawlingCardEntity = crawlingCardRepository.findById(reflectCardRequestDto.getId()).orElseThrow();
+        NoteEntity noteEntity = noteRepository.findByName(reflectCardRequestDto.getNote())
+                .orElseGet(() -> noteRepository.save(NoteEntity.builder()
+                        .name(reflectCardRequestDto.getNote())
+                        .build()));
+
+        CardEntity cardEntity = getCardEntityOrInsert(reflectCardRequestDto, noteEntity);
+        try {
+            if (reflectCardRequestDto.getIsParallel()) {
+                parallelCardImgRepository.save(
+                        ParallelCardImgEntity.builder()
+                                .crawlingCardEntity(crawlingCardEntity)
+                                .cardEntity(cardEntity)
+                                .originUrl(reflectCardRequestDto.getOriginUrl())
+                                .build()
+                );
+                return true;
+            }
+            cardImgRepository.save(
+                    CardImgEntity.builder()
+                            .crawlingCardEntity(crawlingCardEntity)
+                            .cardEntity(cardEntity)
+                            .originUrl(reflectCardRequestDto.getOriginUrl())
+                            .build()
+            );
+        } catch (DataIntegrityViolationException e) {
+            return false;
+        }
+
+        return true;
+
+
+    }
+
+    private CardEntity getCardEntityOrInsert(ReflectCardRequestDto reflectCardRequestDto, NoteEntity noteEntity) {
+        CardEntity cardEntity = cardRepository.findByCardNo(reflectCardRequestDto.getCardNo()).orElseGet(
+                () -> cardRepository.save(
+                        CardEntity.builder()
+                                .cardNo(reflectCardRequestDto.getCardNo())
+                                .cardName(reflectCardRequestDto.getCardName())
+                                .attribute(reflectCardRequestDto.getAttribute())
+                                .dP(reflectCardRequestDto.getDP())
+                                .playCost(reflectCardRequestDto.getPlayCost())
+                                .digivolveCondition1(reflectCardRequestDto.getDigivolveCondition1())
+                                .digivolveCondition2(reflectCardRequestDto.getDigivolveCondition2())
+                                .digivolveCost1(reflectCardRequestDto.getDigivolveCost1())
+                                .digivolveCost2(reflectCardRequestDto.getDigivolveCost2())
+                                .lv(reflectCardRequestDto.getLv())
+                                .effect(reflectCardRequestDto.getEffect())
+                                .sourceEffect(reflectCardRequestDto.getSourceEffect())
+                                .noteEntity(noteEntity)
+                                .cardType(CardType.findByKor(reflectCardRequestDto.getCardType()))
+                                .form(Form.findByKor(reflectCardRequestDto.getForm()))
+                                .rarity(Rarity.valueOf(reflectCardRequestDto.getRarity()))
+                                .color1(Color.getColorByString(reflectCardRequestDto.getColor1()))
+                                .color2(Color.getColorByString(reflectCardRequestDto.getColor2()))
+                                .build()
+                )
+        );
+        return cardEntity;
     }
 
     @Override
@@ -43,11 +123,13 @@ public class CrawlingServiceImpl implements CrawlingService {
             try {
                 crawlingCardRepository.save(crawlingCardEntity);
                 cnt++;
-            } catch (DataIntegrityViolationException ignore){}
+            } catch (DataIntegrityViolationException ignore) {
+            }
         }
         return cnt;
 
     }
+
     @Override
     public List<CrawlingCardEntity> crawlUrlAndBuildEntityList(String url) throws IOException {
         List<Document> documentListByFirstPageUrl = getDocumentListByFirstPageUrl(url);

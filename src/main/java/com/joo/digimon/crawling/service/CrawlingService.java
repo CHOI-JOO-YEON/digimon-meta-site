@@ -10,6 +10,8 @@ import java.util.List;
 
 public interface CrawlingService {
 
+    List<CrawlingCardDto> getUnreflectedCrawlingCardDtoList();
+
     int crawlAndSaveByUrl(String url) throws IOException;
 
     List<CrawlingCardEntity> crawlUrlAndBuildEntityList(String url) throws IOException;
