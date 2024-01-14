@@ -36,7 +36,7 @@ public class CrawlingServiceImpl implements CrawlingService {
     private final CrawlingCardRepository crawlingCardRepository;
     private final CardRepository cardRepository;
     private final CardImgRepository cardImgRepository;
-    private final CardTypeRepository cardTypeRepository;
+    private final CardCombineTypeRepository cardCombineTypeRepository;
     private final ParallelCardImgRepository parallelCardImgRepository;
     private final TypeRepository typeRepository;
     private final NoteRepository noteRepository;
