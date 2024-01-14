@@ -104,7 +104,7 @@ public class CrawlingServiceImpl implements CrawlingService {
     }
 
     private CardEntity getCardEntityOrInsert(ReflectCardRequestDto reflectCardRequestDto, NoteEntity noteEntity) {
-        CardEntity cardEntity = cardRepository.findByCardNo(reflectCardRequestDto.getCardNo()).orElseGet(
+        return cardRepository.findByCardNo(reflectCardRequestDto.getCardNo()).orElseGet(
                 () -> cardRepository.save(
                         CardEntity.builder()
                                 .cardNo(reflectCardRequestDto.getCardNo())
@@ -128,7 +128,6 @@ public class CrawlingServiceImpl implements CrawlingService {
                                 .build()
                 )
         );
-        return cardEntity;
     }
 
     @Override
@@ -210,9 +209,13 @@ public class CrawlingServiceImpl implements CrawlingService {
     }
 
     private void extractCardInfoBottom(Element element, CrawlingCardDto crawlingCardDto) {
-        crawlingCardDto.setEffect(changeJapanMiddlePoint(element.select(".cardinfo_bottom dl:contains(상단 텍스트) dd").text()));
-        crawlingCardDto.setSourceEffect(changeJapanMiddlePoint(element.select(".cardinfo_bottom dl:contains(하단 텍스트) dd").text()));
+        crawlingCardDto.setEffect(changeJapanMiddlePoint(parseElementToPlainText(element.select(".cardinfo_bottom dl:contains(상단 텍스트) dd"))));
+        crawlingCardDto.setSourceEffect(changeJapanMiddlePoint(parseElementToPlainText(element.select(".cardinfo_bottom dl:contains(하단 텍스트) dd"))));
         crawlingCardDto.setNote(changeJapanMiddlePoint(element.select(".cardinfo_bottom dl:contains(입수 정보) dd").text()));
+    }
+
+    private String parseElementToPlainText(Elements select) {
+        return select.html().replace("<br>\n", "");
     }
 
     private void extractCardInfoBody(Element element, CrawlingCardDto crawlingCardDto) {
