@@ -29,4 +29,8 @@ public class ParallelCardImgEntity {
     @JoinColumn(name = "crawling_cards_tb_id")
     CrawlingCardEntity crawlingCardEntity;
 
+    @ManyToOne
+    @JoinColumn(name = "note_tb_id")
+    NoteEntity noteEntity;
+
 }

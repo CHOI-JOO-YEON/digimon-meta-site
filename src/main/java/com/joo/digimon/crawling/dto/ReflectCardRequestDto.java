@@ -2,6 +2,8 @@ package com.joo.digimon.crawling.dto;
 
 import lombok.Data;
 
+import java.util.List;
+
 @Data
 public class ReflectCardRequestDto {
     Integer id;
@@ -14,7 +16,7 @@ public class ReflectCardRequestDto {
     String cardName;
     String form;
     String attribute;
-    String type;
+    List<String> type;
     Integer dP;
     Integer playCost;
     Integer digivolveCost1;

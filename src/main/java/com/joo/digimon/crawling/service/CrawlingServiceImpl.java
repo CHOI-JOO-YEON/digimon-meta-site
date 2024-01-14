@@ -1,9 +1,6 @@
 package com.joo.digimon.crawling.service;
 
-import com.joo.digimon.card.model.CardEntity;
-import com.joo.digimon.card.model.CardImgEntity;
-import com.joo.digimon.card.model.NoteEntity;
-import com.joo.digimon.card.model.ParallelCardImgEntity;
+import com.joo.digimon.card.model.*;
 import com.joo.digimon.card.repository.*;
 import com.joo.digimon.crawling.dto.CrawlingCardDto;
 import com.joo.digimon.crawling.dto.ReflectCardRequestDto;
@@ -70,16 +67,20 @@ public class CrawlingServiceImpl implements CrawlingService {
     @Transactional
     public boolean saveCardByReflectCardRequest(ReflectCardRequestDto reflectCardRequestDto) {
         CrawlingCardEntity crawlingCardEntity = crawlingCardRepository.findById(reflectCardRequestDto.getId()).orElseThrow();
-        NoteEntity noteEntity = noteRepository.findByName(reflectCardRequestDto.getNote())
-                .orElseGet(() -> noteRepository.save(NoteEntity.builder()
-                        .name(reflectCardRequestDto.getNote())
-                        .build()));
 
-        CardEntity cardEntity = getCardEntityOrInsert(reflectCardRequestDto, noteEntity);
+
+        CardEntity cardEntity = getCardEntityOrInsert(reflectCardRequestDto);
+        NoteEntity noteEntity = noteRepository.findByName(reflectCardRequestDto.getNote()).orElseGet(
+                () -> noteRepository.save(NoteEntity.builder()
+                        .name(reflectCardRequestDto.getNote())
+                        .build())
+        );
+
         try {
             if (reflectCardRequestDto.getIsParallel()) {
                 parallelCardImgRepository.save(
                         ParallelCardImgEntity.builder()
+                                .noteEntity(noteEntity)
                                 .crawlingCardEntity(crawlingCardEntity)
                                 .cardEntity(cardEntity)
                                 .originUrl(reflectCardRequestDto.getOriginUrl())
@@ -89,6 +90,7 @@ public class CrawlingServiceImpl implements CrawlingService {
             }
             cardImgRepository.save(
                     CardImgEntity.builder()
+                            .noteEntity(noteEntity)
                             .crawlingCardEntity(crawlingCardEntity)
                             .cardEntity(cardEntity)
                             .originUrl(reflectCardRequestDto.getOriginUrl())
@@ -103,30 +105,45 @@ public class CrawlingServiceImpl implements CrawlingService {
 
     }
 
-    private CardEntity getCardEntityOrInsert(ReflectCardRequestDto reflectCardRequestDto, NoteEntity noteEntity) {
+    private CardEntity getCardEntityOrInsert(ReflectCardRequestDto reflectCardRequestDto) {
         return cardRepository.findByCardNo(reflectCardRequestDto.getCardNo()).orElseGet(
-                () -> cardRepository.save(
-                        CardEntity.builder()
-                                .cardNo(reflectCardRequestDto.getCardNo())
-                                .cardName(reflectCardRequestDto.getCardName())
-                                .attribute(reflectCardRequestDto.getAttribute())
-                                .dP(reflectCardRequestDto.getDP())
-                                .playCost(reflectCardRequestDto.getPlayCost())
-                                .digivolveCondition1(reflectCardRequestDto.getDigivolveCondition1())
-                                .digivolveCondition2(reflectCardRequestDto.getDigivolveCondition2())
-                                .digivolveCost1(reflectCardRequestDto.getDigivolveCost1())
-                                .digivolveCost2(reflectCardRequestDto.getDigivolveCost2())
-                                .lv(reflectCardRequestDto.getLv())
-                                .effect(reflectCardRequestDto.getEffect())
-                                .sourceEffect(reflectCardRequestDto.getSourceEffect())
-                                .noteEntity(noteEntity)
-                                .cardType(CardType.findByKor(reflectCardRequestDto.getCardType()))
-                                .form(Form.findByKor(reflectCardRequestDto.getForm()))
-                                .rarity(Rarity.valueOf(reflectCardRequestDto.getRarity()))
-                                .color1(Color.getColorByString(reflectCardRequestDto.getColor1()))
-                                .color2(Color.getColorByString(reflectCardRequestDto.getColor2()))
-                                .build()
-                )
+                () -> {
+                    CardEntity save = cardRepository.save(
+                            CardEntity.builder()
+                                    .cardNo(reflectCardRequestDto.getCardNo())
+                                    .cardName(reflectCardRequestDto.getCardName())
+                                    .attribute(reflectCardRequestDto.getAttribute())
+                                    .dP(reflectCardRequestDto.getDP())
+                                    .playCost(reflectCardRequestDto.getPlayCost())
+                                    .digivolveCondition1(reflectCardRequestDto.getDigivolveCondition1())
+                                    .digivolveCondition2(reflectCardRequestDto.getDigivolveCondition2())
+                                    .digivolveCost1(reflectCardRequestDto.getDigivolveCost1())
+                                    .digivolveCost2(reflectCardRequestDto.getDigivolveCost2())
+                                    .lv(reflectCardRequestDto.getLv())
+                                    .effect(reflectCardRequestDto.getEffect())
+                                    .sourceEffect(reflectCardRequestDto.getSourceEffect())
+                                    .cardType(CardType.findByKor(reflectCardRequestDto.getCardType()))
+                                    .form(Form.findByKor(reflectCardRequestDto.getForm()))
+                                    .rarity(Rarity.valueOf(reflectCardRequestDto.getRarity()))
+                                    .color1(Color.getColorByString(reflectCardRequestDto.getColor1()))
+                                    .color2(Color.getColorByString(reflectCardRequestDto.getColor2()))
+                                    .build());
+                    for (String type : reflectCardRequestDto.getType()) {
+                        TypeEntity typeEntity = typeRepository.findByName(type)
+                                .orElseGet(() ->
+                                        typeRepository.save(TypeEntity.builder()
+                                                .name(type)
+                                                .build())
+                                );
+                        cardCombineTypeRepository.save(
+                                CardCombineTypeEntity.builder()
+                                        .cardEntity(save)
+                                        .typeEntity(typeEntity)
+                                        .build()
+                        );
+                    }
+                    return save;
+                }
         );
     }
 

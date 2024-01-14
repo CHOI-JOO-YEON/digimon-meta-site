@@ -61,8 +61,4 @@ public class CardEntity {
 
     @OneToMany(mappedBy = "cardEntity")
     Set<CardCombineTypeEntity> cardCombineTypeEntities;
-
-    @ManyToOne
-    @JoinColumn(name = "note_tb_id")
-    NoteEntity noteEntity;
 }
