@@ -33,6 +33,7 @@ public class SecurityConfig {
                 .oauth2Login(oauth2 -> {})
                 .authorizeHttpRequests(
                         request -> request
+                                .requestMatchers("/crawling/**").hasRole("ADMIN")
                                 .requestMatchers("/api/account/**").permitAll()
                                 .anyRequest().authenticated())
                 .sessionManagement(session -> session.

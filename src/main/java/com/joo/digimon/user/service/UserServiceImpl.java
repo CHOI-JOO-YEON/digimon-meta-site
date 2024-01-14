@@ -10,6 +10,7 @@ import com.joo.digimon.user.model.User;
 import com.joo.digimon.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -27,6 +28,7 @@ public class UserServiceImpl implements UserService {
     private final KakaoApiClient kakaoApiClient;
     private final NicknameService nicknameService;
     private final JwtProvider jwtProvider;
+    private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
     @Override
     public LoginResponseDto getKakaoToken(String code) throws IOException {
@@ -46,5 +48,14 @@ public class UserServiceImpl implements UserService {
         return new LoginResponseDto(jwtProvider.generateToken(user), user.getNickName(), user.getRole());
     }
 
+    @Override
+    public LoginResponseDto usernameLogin(UsernameLoginRequestDto usernameLoginRequestDto) throws IOException {
+        User user = userRepository.findByUsername(usernameLoginRequestDto.getUsername()).orElseThrow();
+        if(!bCryptPasswordEncoder.matches(usernameLoginRequestDto.getPassword(),user.getPassword()))
+        {
+            return null;
+        }
+        return new LoginResponseDto(jwtProvider.generateToken(user), user.getNickName(), user.getRole());
+    }
 
 }
