@@ -18,6 +18,8 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -39,8 +41,9 @@ public class CrawlingServiceImpl implements CrawlingService {
     private final NoteRepository noteRepository;
 
     @Override
-    public List<CrawlingCardDto> getUnreflectedCrawlingCardDtoList() {
-        List<CrawlingCardEntity> crawlingCardEntities = crawlingCardRepository.findByCardImgEntityIsNullAndParallelCardImgEntityIsNull();
+    public List<CrawlingCardDto> getUnreflectedCrawlingCardDtoList(Integer size) {
+        Pageable pageable = PageRequest.of(0, size);
+        List<CrawlingCardEntity> crawlingCardEntities = crawlingCardRepository.findByCardImgEntityIsNullAndParallelCardImgEntityIsNull(pageable);
         List<CrawlingCardDto> crawlingCardDtoList = new ArrayList<>();
         for (CrawlingCardEntity crawlingCardEntity : crawlingCardEntities) {
             crawlingCardDtoList.add(new CrawlingCardDto(crawlingCardEntity));
@@ -56,6 +59,7 @@ public class CrawlingServiceImpl implements CrawlingService {
             try {
                 reflectCardResponseDtoList.add(new ReflectCardResponseDto(reflectCardRequestDto.getId(), saveCardByReflectCardRequest(reflectCardRequestDto)));
             } catch (Exception e) {
+                e.printStackTrace();
                 reflectCardResponseDtoList.add(new ReflectCardResponseDto(reflectCardRequestDto.getId(), false));
             }
 
@@ -113,7 +117,7 @@ public class CrawlingServiceImpl implements CrawlingService {
                                     .cardNo(reflectCardRequestDto.getCardNo())
                                     .cardName(reflectCardRequestDto.getCardName())
                                     .attribute(reflectCardRequestDto.getAttribute())
-                                    .dP(reflectCardRequestDto.getDP())
+                                    .dp(reflectCardRequestDto.getDp())
                                     .playCost(reflectCardRequestDto.getPlayCost())
                                     .digivolveCondition1(reflectCardRequestDto.getDigivolveCondition1())
                                     .digivolveCondition2(reflectCardRequestDto.getDigivolveCondition2())
@@ -123,10 +127,10 @@ public class CrawlingServiceImpl implements CrawlingService {
                                     .effect(reflectCardRequestDto.getEffect())
                                     .sourceEffect(reflectCardRequestDto.getSourceEffect())
                                     .cardType(CardType.findByKor(reflectCardRequestDto.getCardType()))
-                                    .form(Form.findByKor(reflectCardRequestDto.getForm()))
+                                    .form(reflectCardRequestDto.getForm()!=null?Form.findByKor(reflectCardRequestDto.getForm()):null)
                                     .rarity(Rarity.valueOf(reflectCardRequestDto.getRarity()))
                                     .color1(Color.getColorByString(reflectCardRequestDto.getColor1()))
-                                    .color2(Color.getColorByString(reflectCardRequestDto.getColor2()))
+                                    .color2(reflectCardRequestDto.getColor2()!=null? Color.getColorByString(reflectCardRequestDto.getColor2()):null)
                                     .build());
                     for (String type : reflectCardRequestDto.getType()) {
                         TypeEntity typeEntity = typeRepository.findByName(type)
@@ -216,7 +220,7 @@ public class CrawlingServiceImpl implements CrawlingService {
     public CrawlingCardDto crawlingCardByElement(Element element) {
         CrawlingCardDto crawlingCardDto = new CrawlingCardDto();
 
-        crawlingCardDto.setIsParallel(!element.select(".cardtype cardParallel").isEmpty());
+        crawlingCardDto.setIsParallel(!element.select(".cardParallel").isEmpty());
         extractCardColor(crawlingCardDto, element);
         extractCardInfoHead(element, crawlingCardDto);
         extractCardInfoBody(element, crawlingCardDto);
@@ -283,4 +287,6 @@ public class CrawlingServiceImpl implements CrawlingService {
         }
         return new String(textArray);
     }
+
+
 }

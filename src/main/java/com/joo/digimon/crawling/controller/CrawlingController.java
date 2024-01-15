@@ -27,8 +27,8 @@ public class CrawlingController {
     }
 
     @GetMapping("/list")
-    public ResponseEntity<?> getUnReflectCrawlingCardList() {
-        return new ResponseEntity<>(crawlingService.getUnreflectedCrawlingCardDtoList(), HttpStatus.OK);
+    public ResponseEntity<?> getUnReflectCrawlingCardList(@RequestParam("size") Integer size) {
+        return new ResponseEntity<>(crawlingService.getUnreflectedCrawlingCardDtoList(size), HttpStatus.OK);
     }
 
 }

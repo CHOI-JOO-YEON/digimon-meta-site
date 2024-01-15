@@ -13,7 +13,7 @@ import java.util.List;
 
 public interface CrawlingService {
 
-    List<CrawlingCardDto> getUnreflectedCrawlingCardDtoList();
+    List<CrawlingCardDto> getUnreflectedCrawlingCardDtoList(Integer size);
 
     @Transactional
     List<ReflectCardResponseDto> saveCardByReflectCardRequestList(List<ReflectCardRequestDto> reflectCardRequestDtoList);

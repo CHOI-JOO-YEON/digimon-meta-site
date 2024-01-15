@@ -34,6 +34,7 @@ public class UserInitializationComponent {
                             .username(username)
                             .password(bCryptPasswordEncoder.encode(password))
                             .authSupplier(AuthSupplier.USERNAME)
+                            .nickName("관리자")
                             .role(Role.ADMIN)
                             .build()
             );

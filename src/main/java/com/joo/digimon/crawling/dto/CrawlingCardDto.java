@@ -6,31 +6,31 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 public class CrawlingCardDto {
-    Integer id;
+        Integer id;
 
-    String cardNo;
-    String rarity;
-    String cardType;
+        String cardNo;
+        String rarity;
+        String cardType;
 
-    String lv;
+        String lv;
 
-    Boolean isParallel;
-    String cardName;
-    String form;
-    String attribute;
-    String type;
-    String dP;
-    String playCost;
-    String digivolveCost1;
-    String digivolveCost2;
-    String effect;
-    String sourceEffect;
-    String note;
+        Boolean isParallel;
+        String cardName;
+        String form;
+        String attribute;
+        String type;
+        String dP;
+        String playCost;
+        String digivolveCost1;
+        String digivolveCost2;
+        String effect;
+        String sourceEffect;
+        String note;
 
-    String color1;
-    String color2;
+        String color1;
+        String color2;
 
-    String imgUrl;
+        String imgUrl;
 
     public CrawlingCardDto(CrawlingCardEntity crawlingCardEntity) {
         this.id = crawlingCardEntity.getId();

@@ -30,7 +30,7 @@ public class CardEntity {
     String cardName;
     String attribute;
 
-    Integer dP;
+    Integer dp;
     Integer playCost;
     Integer digivolveCost1;
     Integer digivolveCondition1;

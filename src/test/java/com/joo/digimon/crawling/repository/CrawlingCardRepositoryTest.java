@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.ActiveProfiles;
 
 @SpringBootTest
@@ -44,7 +45,7 @@ class CrawlingCardRepositoryTest {
                 .build());
 
         Assertions.assertEquals(3, crawlingCardRepository.findAll().size());
-        Assertions.assertEquals(1, crawlingCardRepository.findByCardImgEntityIsNullAndParallelCardImgEntityIsNull().size());
+        Assertions.assertEquals(1, crawlingCardRepository.findByCardImgEntityIsNullAndParallelCardImgEntityIsNull(PageRequest.of(0,3)).size());
     }
 
 }

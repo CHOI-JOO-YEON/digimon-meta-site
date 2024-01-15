@@ -17,7 +17,7 @@ public class ReflectCardRequestDto {
     String form;
     String attribute;
     List<String> type;
-    Integer dP;
+    Integer dp;
     Integer playCost;
     Integer digivolveCost1;
     Integer digivolveCondition1;
