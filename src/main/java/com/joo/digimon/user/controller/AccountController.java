@@ -1,5 +1,6 @@
 package com.joo.digimon.user.controller;
 
+import com.joo.digimon.user.dto.UsernameLoginRequestDto;
 import com.joo.digimon.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -16,8 +17,12 @@ public class AccountController {
 
     @GetMapping("/token/kakao")
     public ResponseEntity<?> getKakaoToken(@RequestParam String code) throws IOException {
-
         return new ResponseEntity<>(userService.getKakaoToken(code),HttpStatus.OK);
+    }
+
+    @PostMapping("/login/username")
+    public ResponseEntity<?> loginUsername(@RequestBody UsernameLoginRequestDto usernameLoginRequestDto) throws IOException {
+        return new ResponseEntity<>(userService.usernameLogin(usernameLoginRequestDto),HttpStatus.OK);
     }
 
 

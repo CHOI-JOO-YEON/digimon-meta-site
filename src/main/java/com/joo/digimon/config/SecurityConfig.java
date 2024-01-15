@@ -9,6 +9,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 
+import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -25,14 +26,19 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
         http
+                .headers(headers -> headers.frameOptions(
+                        HeadersConfigurer.FrameOptionsConfig::disable))
                 .exceptionHandling(exceptionHandling -> exceptionHandling
                         .accessDeniedHandler(customAccessDeniedHandler)
                         .authenticationEntryPoint(customAuthenticationEntryPoint))
                 .csrf(AbstractHttpConfigurer::disable)
                 .formLogin(AbstractHttpConfigurer::disable)
-                .oauth2Login(oauth2 -> {})
+                .oauth2Login(oauth2 -> {
+                })
                 .authorizeHttpRequests(
                         request -> request
+                                .requestMatchers("/crawling/**").hasRole("ADMIN")
+                                .requestMatchers("/h2-console/**").permitAll()
                                 .requestMatchers("/api/account/**").permitAll()
                                 .anyRequest().authenticated())
                 .sessionManagement(session -> session.
@@ -45,6 +51,7 @@ public class SecurityConfig {
         return http.build();
 
     }
+
     @Bean
     public BCryptPasswordEncoder bCryptPasswordEncoder() {
         return new BCryptPasswordEncoder();

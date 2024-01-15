@@ -35,6 +35,8 @@ dependencies {
     implementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-openfeign', version: '4.1.0'
     implementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-consul-config', version: '4.1.0'
     runtimeOnly 'org.mariadb.jdbc:mariadb-java-client'
+    implementation group: 'org.jsoup', name: 'jsoup', version: '1.16.1'
+
 
 }
 
