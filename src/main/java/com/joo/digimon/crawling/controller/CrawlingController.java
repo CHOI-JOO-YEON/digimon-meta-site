@@ -1,5 +1,6 @@
 package com.joo.digimon.crawling.controller;
 
+import com.joo.digimon.card.service.CardImageService;
 import com.joo.digimon.crawling.dto.ReflectCardRequestDto;
 import com.joo.digimon.crawling.service.CrawlingService;
 import lombok.RequiredArgsConstructor;
@@ -15,6 +16,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class CrawlingController {
     private final CrawlingService crawlingService;
+    private final CardImageService cardImageService;
 
     @PostMapping("/page")
     public ResponseEntity<?> crawlingPage(@RequestParam(name = "page-url") String pageUrl) throws IOException {
@@ -29,6 +31,11 @@ public class CrawlingController {
     @GetMapping("/list")
     public ResponseEntity<?> getUnReflectCrawlingCardList(@RequestParam("size") Integer size) {
         return new ResponseEntity<>(crawlingService.getUnreflectedCrawlingCardDtoList(size), HttpStatus.OK);
+    }
+
+    @PostMapping("/upload-all")
+    public ResponseEntity<?> uploadAll() {
+        return new ResponseEntity<>(cardImageService.uploadNotUploadYetCardImages(), HttpStatus.OK);
     }
 
 }
