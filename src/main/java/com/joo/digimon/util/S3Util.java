@@ -26,9 +26,8 @@ public class S3Util {
     private final S3Client s3Client;
 
 
-    boolean uploadImagePng(String imageUrl, String keyName) {
+    public boolean uploadImagePng(byte[] imageData, String keyName) {
         try {
-            byte[] imageData = downloadImage(imageUrl);
             uploadToS3(keyName, imageData, "image/png");
         } catch (Exception e) {
             return false;
