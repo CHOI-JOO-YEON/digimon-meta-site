@@ -13,6 +13,9 @@ import lombok.NoArgsConstructor;
 @Builder
 @Getter
 @Table(name = "PARALLEL_CARDS_IMG_TB")
+@NamedEntityGraph(name = "ParallelCardImgEntity.detail",
+        attributeNodes = {@NamedAttributeNode("cardEntity")}
+)
 public class ParallelCardImgEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -33,4 +36,7 @@ public class ParallelCardImgEntity {
     @JoinColumn(name = "note_tb_id")
     NoteEntity noteEntity;
 
+    public void updateUploadUrl(String url) {
+        this.uploadUrl = url;
+    }
 }
