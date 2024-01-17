@@ -13,6 +13,9 @@ import lombok.NoArgsConstructor;
 @Builder
 @Getter
 @Table(name = "CARDS_IMG_TB")
+@NamedEntityGraph(name = "CardImgEntity.detail",
+        attributeNodes = {@NamedAttributeNode("cardEntity")}
+)
 public class CardImgEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -32,4 +35,8 @@ public class CardImgEntity {
     @ManyToOne
     @JoinColumn(name = "note_tb_id")
     NoteEntity noteEntity;
+
+    public void updateUploadUrl(String url) {
+        this.uploadUrl = url;
+    }
 }
