@@ -1,5 +1,6 @@
 package com.joo.digimon.crawling.dto;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
@@ -7,29 +8,23 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Data
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class CrawlingResultDto {
     int successCount;
     int failedCount;
-    List<CrawlingCardFailedDto> crawlingCardFailedDtoList;
+    List<CrawlingCardDto> crawlingCardDtoList;
 
     public CrawlingResultDto() {
         this.successCount = 0;
         this.failedCount = 0;
-        this.crawlingCardFailedDtoList = new ArrayList<>();
+        this.crawlingCardDtoList = new ArrayList<>();
     }
     public void successCountIncrease(){
         successCount++;
     }
 
-    public void addFailedCrawling(CrawlingCardDto crawlingCardDto, String msg) {
+    public void addFailedCrawling(CrawlingCardDto crawlingCardDto) {
         failedCount++;
-        this.crawlingCardFailedDtoList.add(new CrawlingCardFailedDto(crawlingCardDto, msg));
-    }
-
-    @Data
-    @AllArgsConstructor
-    private static class CrawlingCardFailedDto {
-        CrawlingCardDto crawlingCardDto;
-        String msg;
+        this.crawlingCardDtoList.add(crawlingCardDto);
     }
 }
