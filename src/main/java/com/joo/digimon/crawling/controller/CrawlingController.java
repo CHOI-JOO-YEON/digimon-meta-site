@@ -2,6 +2,7 @@ package com.joo.digimon.crawling.controller;
 
 import com.joo.digimon.card.service.CardImageService;
 import com.joo.digimon.crawling.dto.ReflectCardRequestDto;
+import com.joo.digimon.crawling.dto.UpdateCrawlingRequestDto;
 import com.joo.digimon.crawling.service.CrawlingService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -23,11 +24,16 @@ public class CrawlingController {
         return new ResponseEntity<>(crawlingService.crawlAndSaveByUrl(pageUrl), HttpStatus.CREATED);
     }
 
-    @PostMapping("/save")
-    public ResponseEntity<?> crawlingCard(@RequestBody List<ReflectCardRequestDto> reflectCardRequestDtoList) {
-        return new ResponseEntity<>(crawlingService.saveCardByReflectCardRequestList(reflectCardRequestDtoList), HttpStatus.CREATED);
-    }
+//    @PostMapping("/save")
+//    public ResponseEntity<?> crawlingCard(@RequestBody List<ReflectCardRequestDto> reflectCardRequestDtoList) {
+//        return new ResponseEntity<>(crawlingService.saveCardByReflectCardRequestList(reflectCardRequestDtoList), HttpStatus.CREATED);
+//    }
 
+
+    @PostMapping("/update")
+    public ResponseEntity<?> crawlingCard(@RequestBody List<UpdateCrawlingRequestDto> updateCrawlingRequestDtoList) {
+        return new ResponseEntity<>(crawlingService.updateCrawlingEntityAndSaveCard(updateCrawlingRequestDtoList), HttpStatus.OK);
+    }
     @GetMapping("/list")
     public ResponseEntity<?> getUnReflectCrawlingCardList(@RequestParam("size") Integer size) {
         return new ResponseEntity<>(crawlingService.getUnreflectedCrawlingCardDtoList(size), HttpStatus.OK);

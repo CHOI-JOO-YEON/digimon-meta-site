@@ -16,6 +16,7 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 @Table(name = "CRAWLING_CARDS_TB")
+@Setter
 public class CrawlingCardEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -47,6 +48,9 @@ public class CrawlingCardEntity {
     @Column(unique = true)
     String imgUrl;
 
+    String errorMessage;
+    Boolean isReflect;
+
     public CrawlingCardEntity(CrawlingCardDto dto) {
         this.cardNo = dto.getCardNo();
         this.rarity = dto.getRarity();
@@ -67,6 +71,7 @@ public class CrawlingCardEntity {
         this.color1 = dto.getColor1();
         this.color2 = dto.getColor2();
         this.imgUrl = dto.getImgUrl();
+        this.isReflect = false;
     }
 
     @OneToOne(mappedBy = "crawlingCardEntity")
@@ -74,4 +79,8 @@ public class CrawlingCardEntity {
 
     @OneToOne(mappedBy = "crawlingCardEntity")
     ParallelCardImgEntity parallelCardImgEntity;
+
+    public void updateErrorMessage(String errorMessage) {
+        this.errorMessage = errorMessage;
+    }
 }

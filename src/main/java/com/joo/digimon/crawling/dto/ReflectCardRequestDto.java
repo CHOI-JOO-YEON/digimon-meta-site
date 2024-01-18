@@ -1,5 +1,9 @@
 package com.joo.digimon.crawling.dto;
 
+import com.joo.digimon.crawling.enums.CardType;
+import com.joo.digimon.crawling.enums.Color;
+import com.joo.digimon.crawling.enums.Form;
+import com.joo.digimon.crawling.enums.Rarity;
 import lombok.Data;
 
 import java.util.List;
@@ -7,16 +11,15 @@ import java.util.List;
 @Data
 public class ReflectCardRequestDto {
     Integer id;
-
     String cardNo;
-    String rarity;
-    String cardType;
+    Rarity rarity;
+    CardType cardType;
     Integer lv;
     Boolean isParallel;
     String cardName;
-    String form;
+    Form form;
     String attribute;
-    List<String> type;
+    List<String> types;
     Integer dp;
     Integer playCost;
     Integer digivolveCost1;
@@ -26,8 +29,7 @@ public class ReflectCardRequestDto {
     String effect;
     String sourceEffect;
     String note;
-
-    String color1;
-    String color2;
+    Color color1;
+    Color color2;
     String originUrl;
 }

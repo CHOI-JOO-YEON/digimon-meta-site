@@ -1,19 +1,18 @@
 package com.joo.digimon.crawling.dto;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.joo.digimon.crawling.model.CrawlingCardEntity;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class CrawlingCardDto {
         Integer id;
-
         String cardNo;
         String rarity;
         String cardType;
-
         String lv;
-
         Boolean isParallel;
         String cardName;
         String form;
@@ -26,11 +25,10 @@ public class CrawlingCardDto {
         String effect;
         String sourceEffect;
         String note;
-
         String color1;
         String color2;
-
         String imgUrl;
+        String errorMessage;
 
     public CrawlingCardDto(CrawlingCardEntity crawlingCardEntity) {
         this.id = crawlingCardEntity.getId();
@@ -53,6 +51,7 @@ public class CrawlingCardDto {
         this.color1 = crawlingCardEntity.getColor1();
         this.color2 = crawlingCardEntity.getColor2();
         this.imgUrl = crawlingCardEntity.getImgUrl();
+        this.errorMessage = crawlingCardEntity.getErrorMessage();
     }
 
 }
