@@ -49,6 +49,7 @@ public class CrawlingCardEntity {
     String imgUrl;
 
     String errorMessage;
+    Boolean isReflect;
 
     public CrawlingCardEntity(CrawlingCardDto dto) {
         this.cardNo = dto.getCardNo();
@@ -70,6 +71,7 @@ public class CrawlingCardEntity {
         this.color1 = dto.getColor1();
         this.color2 = dto.getColor2();
         this.imgUrl = dto.getImgUrl();
+        this.isReflect = false;
     }
 
     @OneToOne(mappedBy = "crawlingCardEntity")

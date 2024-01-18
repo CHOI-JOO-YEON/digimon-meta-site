@@ -42,10 +42,20 @@ public class CrawlingServiceImpl implements CrawlingService {
     public CrawlingResultDto updateCrawlingEntityAndSaveCard(List<UpdateCrawlingRequestDto> updateCrawlingRequestDtoList) {
         CrawlingResultDto crawlingResultDto = new CrawlingResultDto();
         for (UpdateCrawlingRequestDto updateCrawlingRequestDto : updateCrawlingRequestDtoList) {
+            CrawlingCardEntity crawlingCard = crawlingCardRepository.findById(updateCrawlingRequestDto.getId()).orElseThrow();
+
+            if(crawlingCardRepository.findById(updateCrawlingRequestDto.getId()).orElseThrow().getIsReflect()){
+                CrawlingCardDto crawlingCardDto = new CrawlingCardDto(crawlingCard);
+                crawlingCardDto.setErrorMessage("IS_REFLECTED");
+                crawlingResultDto.addFailedCrawling(crawlingCardDto);
+                continue;
+            }
+
             CrawlingCardEntity crawlingCardEntity = updateCrawlingEntity(updateCrawlingRequestDto);
             try {
                 saveCardByReflectCardRequest(cardParseService.crawlingCardParse(crawlingCardEntity));
                 crawlingResultDto.successCountIncrease();
+                crawlingCardEntity.setIsReflect(true);
             } catch (CardParseException e) {
                 crawlingCardEntity.updateErrorMessage(e.getMessage());
                 crawlingResultDto.addFailedCrawling(new CrawlingCardDto(crawlingCardEntity));
@@ -208,6 +218,7 @@ public class CrawlingServiceImpl implements CrawlingService {
             try {
                 saveCardByReflectCardRequest(cardParseService.crawlingCardParse(crawlingCardEntity));
                 crawlingResultDto.successCountIncrease();
+                crawlingCardEntity.setIsReflect(true);
             } catch (CardParseException e) {
                 crawlingCardEntity.updateErrorMessage(e.getMessage());
                 crawlingResultDto.addFailedCrawling(new CrawlingCardDto(crawlingCardEntity));
