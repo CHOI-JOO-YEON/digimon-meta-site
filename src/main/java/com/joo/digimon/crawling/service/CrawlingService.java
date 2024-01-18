@@ -1,6 +1,7 @@
 package com.joo.digimon.crawling.service;
 
 import com.joo.digimon.crawling.dto.CrawlingCardDto;
+import com.joo.digimon.crawling.dto.CrawlingResultDto;
 import com.joo.digimon.crawling.dto.ReflectCardRequestDto;
 import com.joo.digimon.crawling.dto.ReflectCardResponseDto;
 import com.joo.digimon.crawling.model.CrawlingCardEntity;
@@ -18,7 +19,7 @@ public interface CrawlingService {
     @Transactional
     List<ReflectCardResponseDto> saveCardByReflectCardRequestList(List<ReflectCardRequestDto> reflectCardRequestDtoList);
 
-    int crawlAndSaveByUrl(String url) throws IOException;
+    CrawlingResultDto crawlAndSaveByUrl(String url) throws IOException;
 
     List<CrawlingCardEntity> crawlUrlAndBuildEntityList(String url) throws IOException;
     List<Document> getDocumentListByFirstPageUrl(String url) throws IOException;
