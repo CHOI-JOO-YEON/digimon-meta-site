@@ -5,7 +5,6 @@ import com.joo.digimon.card.repository.*;
 import com.joo.digimon.crawling.dto.*;
 import com.joo.digimon.crawling.model.CrawlingCardEntity;
 import com.joo.digimon.crawling.repository.CrawlingCardRepository;
-import com.joo.digimon.exception.message.CardParseExceptionMessage;
 import com.joo.digimon.exception.model.CardParseException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -32,7 +31,6 @@ public class CrawlingServiceImpl implements CrawlingService {
     private final CardRepository cardRepository;
     private final CardImgRepository cardImgRepository;
     private final CardCombineTypeRepository cardCombineTypeRepository;
-    private final ParallelCardImgRepository parallelCardImgRepository;
     private final TypeRepository typeRepository;
     private final NoteRepository noteRepository;
     private final CardParseService cardParseService;
@@ -44,7 +42,7 @@ public class CrawlingServiceImpl implements CrawlingService {
         for (UpdateCrawlingRequestDto updateCrawlingRequestDto : updateCrawlingRequestDtoList) {
             CrawlingCardEntity crawlingCard = crawlingCardRepository.findById(updateCrawlingRequestDto.getId()).orElseThrow();
 
-            if(crawlingCardRepository.findById(updateCrawlingRequestDto.getId()).orElseThrow().getIsReflect()){
+            if (crawlingCardRepository.findById(updateCrawlingRequestDto.getId()).orElseThrow().getIsReflect()) {
                 CrawlingCardDto crawlingCardDto = new CrawlingCardDto(crawlingCard);
                 crawlingCardDto.setErrorMessage("IS_REFLECTED");
                 crawlingResultDto.addFailedCrawling(crawlingCardDto);
@@ -64,6 +62,7 @@ public class CrawlingServiceImpl implements CrawlingService {
 
         return crawlingResultDto;
     }
+
     @Transactional
     public CrawlingCardEntity updateCrawlingEntity(UpdateCrawlingRequestDto updateCrawlingRequestDto) {
         CrawlingCardEntity crawlingCardEntity = crawlingCardRepository.findById(updateCrawlingRequestDto.getId()).orElseThrow();
@@ -129,22 +128,23 @@ public class CrawlingServiceImpl implements CrawlingService {
         );
 
 
-        if (reflectCardRequestDto.getIsParallel()) {
-            parallelCardImgRepository.save(
-                    ParallelCardImgEntity.builder()
-                            .noteEntity(noteEntity)
-                            .crawlingCardEntity(crawlingCardEntity)
-                            .cardEntity(cardEntity)
-                            .originUrl(reflectCardRequestDto.getOriginUrl())
-                            .build()
-            );
-            return true;
-        }
-        if (cardImgRepository.findByCardEntity(cardEntity).isPresent()) {
-            throw new CardParseException(CardParseExceptionMessage.DUPLICATE_NORMAL_IMAGE);
-        }
+//        if (reflectCardRequestDto.getIsParallel()) {
+//            parallelCardImgRepository.save(
+//                    ParallelCardImgEntity.builder()
+//                            .noteEntity(noteEntity)
+//                            .crawlingCardEntity(crawlingCardEntity)
+//                            .cardEntity(cardEntity)
+//                            .originUrl(reflectCardRequestDto.getOriginUrl())
+//                            .build()
+//            );
+//            return true;
+//        }
+//        if (cardImgRepository.findByCardEntity(cardEntity).isPresent()) {
+//            throw new CardParseException(CardParseExceptionMessage.DUPLICATE_NORMAL_IMAGE);
+//        }
         cardImgRepository.save(
                 CardImgEntity.builder()
+                        .isParallel(reflectCardRequestDto.getIsParallel())
                         .noteEntity(noteEntity)
                         .crawlingCardEntity(crawlingCardEntity)
                         .cardEntity(cardEntity)
@@ -163,6 +163,7 @@ public class CrawlingServiceImpl implements CrawlingService {
                 () -> {
                     CardEntity save = cardRepository.save(
                             CardEntity.builder()
+                                    .sortString(generateSortString(reflectCardRequestDto.getCardNo()))
                                     .cardNo(reflectCardRequestDto.getCardNo())
                                     .cardName(reflectCardRequestDto.getCardName())
                                     .attribute(reflectCardRequestDto.getAttribute())
@@ -200,6 +201,37 @@ public class CrawlingServiceImpl implements CrawlingService {
                     return save;
                 }
         );
+    }
+
+    private String generateSortString(String cardNo) {
+        StringBuilder stringBuilder = new StringBuilder();
+        if (cardNo.startsWith("BT")) {
+            stringBuilder.append("A");
+        } else if (cardNo.startsWith("ST")) {
+            stringBuilder.append("B");
+        } else if (cardNo.startsWith("EX")) {
+            stringBuilder.append("C");
+        } else if (cardNo.startsWith("RB")) {
+            stringBuilder.append("D");
+        } else if (cardNo.startsWith("P")) {
+            stringBuilder.append("Z");
+        } else {
+            stringBuilder.append("E");
+        }
+// '-'를 기준으로 문자열을 분리
+        String[] parts = cardNo.split("-");
+
+        // 첫 번째 숫자 부분을 처리 (3자리로 맞춤)
+        String firstNumberPart = String.format("%03d", Integer.parseInt(parts[0].replaceAll("\\D", "")));
+        stringBuilder.append(firstNumberPart);
+
+        // 두 번째 숫자 부분을 처리 (3자리로 맞춤)
+        if (parts.length > 1) {
+            String secondNumberPart = String.format("%03d", Integer.parseInt(parts[1]));
+            stringBuilder.append(secondNumberPart);
+        }
+
+        return stringBuilder.toString();
     }
 
     @Override

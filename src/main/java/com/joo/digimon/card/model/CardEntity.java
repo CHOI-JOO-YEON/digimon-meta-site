@@ -53,12 +53,11 @@ public class CardEntity {
     @Enumerated(EnumType.STRING)
     Form form;
 
-    @OneToOne(mappedBy = "cardEntity")
-    CardImgEntity cardImgEntity;
-
     @OneToMany(mappedBy = "cardEntity")
-    Set<ParallelCardImgEntity> parallelCardImgEntities;
+    Set<CardImgEntity> cardImgEntity;
 
     @OneToMany(mappedBy = "cardEntity")
     Set<CardCombineTypeEntity> cardCombineTypeEntities;
+
+    String sortString;
 }
