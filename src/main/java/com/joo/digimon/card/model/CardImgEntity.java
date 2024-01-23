@@ -2,10 +2,7 @@ package com.joo.digimon.card.model;
 
 import com.joo.digimon.crawling.model.CrawlingCardEntity;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Entity
 @NoArgsConstructor
@@ -13,28 +10,48 @@ import lombok.NoArgsConstructor;
 @Builder
 @Getter
 @Table(name = "CARDS_IMG_TB")
-@NamedEntityGraph(name = "CardImgEntity.detail",
-        attributeNodes = {@NamedAttributeNode("cardEntity")}
+@NamedEntityGraph(
+        name = "CardImgEntity.detail",
+        attributeNodes = {
+                @NamedAttributeNode(value = "cardEntity", subgraph = "cardEntitySubgraph")
+        },
+        subgraphs = {
+                @NamedSubgraph(
+                        name = "cardEntitySubgraph",
+                        attributeNodes = {
+                                @NamedAttributeNode(value = "cardCombineTypeEntities",subgraph = "typeSubgraph"),
+                        }
+                ),
+                @NamedSubgraph(
+                        name = "typeSubgraph",
+                        attributeNodes = {
+                                @NamedAttributeNode("typeEntity")
+                        }
+                )
+        }
 )
+@ToString
 public class CardImgEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Integer id;
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "cards_tb_id")
     CardEntity cardEntity;
 
     String originUrl;
     String uploadUrl;
 
-    @OneToOne
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "crawling_cards_tb_id")
     CrawlingCardEntity crawlingCardEntity;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "note_tb_id")
     NoteEntity noteEntity;
+
+    Boolean isParallel;
 
     public void updateUploadUrl(String url) {
         this.uploadUrl = url;
