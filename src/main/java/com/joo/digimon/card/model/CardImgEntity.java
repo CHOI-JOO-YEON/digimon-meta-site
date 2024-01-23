@@ -19,7 +19,6 @@ import lombok.*;
                 @NamedSubgraph(
                         name = "cardEntitySubgraph",
                         attributeNodes = {
-                                @NamedAttributeNode("parallelCardImgEntities"),
                                 @NamedAttributeNode(value = "cardCombineTypeEntities",subgraph = "typeSubgraph"),
                         }
                 ),
