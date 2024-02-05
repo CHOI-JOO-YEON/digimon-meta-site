@@ -119,16 +119,20 @@ public class CardServiceImpl implements CardService {
         }
 
         Pageable pageable;
-        if ("cardNo".equals(cardRequestDto.getOrderOption())) {
-            cardRequestDto.setOrderOption("sortString");
-        }
+        Sort sort = Sort.by(Sort.Order.asc("cardEntity.cardType"));
+
+        Sort.Order orderOptionSort;
         if (cardRequestDto.getIsOrderDesc()) {
-            pageable = PageRequest.of(cardRequestDto.getPage() - 1, cardRequestDto.getSize(), Sort.by("cardEntity."+cardRequestDto.getOrderOption()).descending());
+            orderOptionSort = Sort.Order.desc("cardEntity." + cardRequestDto.getOrderOption());
         } else {
-            pageable = PageRequest.of(cardRequestDto.getPage() - 1, cardRequestDto.getSize(), Sort.by("cardEntity."+cardRequestDto.getOrderOption()).ascending());
+            orderOptionSort = Sort.Order.asc("cardEntity." + cardRequestDto.getOrderOption());
         }
 
+        // 두 정렬 조건 결합
+        sort = sort.and(Sort.by(orderOptionSort));
 
+
+        pageable = PageRequest.of(cardRequestDto.getPage() - 1, cardRequestDto.getSize(), sort);
         Page<CardImgEntity> cardImgEntityPage = cardImgRepository.findAll(builder, pageable);
 
 
