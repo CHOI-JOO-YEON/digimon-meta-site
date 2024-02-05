@@ -40,6 +40,7 @@ public class SecurityConfig {
                                 .requestMatchers("/crawling/**").hasRole("ADMIN")
                                 .requestMatchers("/h2-console/**").permitAll()
                                 .requestMatchers("/api/account/**").permitAll()
+                                .requestMatchers("/card/**").permitAll()
                                 .anyRequest().authenticated())
                 .sessionManagement(session -> session.
                         sessionCreationPolicy(SessionCreationPolicy.STATELESS))
