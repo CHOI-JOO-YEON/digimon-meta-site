@@ -44,24 +44,16 @@ public class CardImageServiceImpl implements CardImageService {
         List<CardImgEntity> cardImgEntityList = cardImgRepository.findByUploadUrlIsNull();
 
         for (CardImgEntity cardImgEntity : cardImgEntityList) {
-            String keyName = UPLOAD_PREFIX + cardImgEntity.getCardEntity().getCardNo();
-
-            try {
-                if (s3Util.uploadImagePng(getImageData(KO_URL_PREFIX + cardImgEntity.getOriginUrl()), keyName)) {
-                    cardImgEntity.updateUploadUrl(keyName);
-                    cnt++;
-                }
-            } catch (IOException ignore) {
+            StringBuilder keyNameBuilder = new StringBuilder();
+            keyNameBuilder.append(UPLOAD_PREFIX).append(cardImgEntity.getCardEntity().getCardNo());
+            if (cardImgEntity.getIsParallel()) {
+                keyNameBuilder.append("P").append(cardImgEntity.getId());
             }
-        }
 
-        List<ParallelCardImgEntity> parallelCardImgEntities = parallelCardImgRepository.findByUploadUrlIsNull();
 
-        for (ParallelCardImgEntity parallelCardImgEntity : parallelCardImgEntities) {
-            String keyName = UPLOAD_PREFIX + parallelCardImgEntity.getCardEntity().getCardNo();
             try {
-                if (s3Util.uploadImagePng(getImageData(KO_URL_PREFIX + parallelCardImgEntity.getOriginUrl()), keyName)) {
-                    parallelCardImgEntity.updateUploadUrl(keyName);
+                if (s3Util.uploadImagePng(getImageData(KO_URL_PREFIX + cardImgEntity.getOriginUrl()), keyNameBuilder.toString())) {
+                    cardImgEntity.updateUploadUrl( keyNameBuilder.toString());
                     cnt++;
                 }
             } catch (IOException ignore) {
