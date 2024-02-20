@@ -2,10 +2,13 @@ package com.joo.digimon.card.service;
 
 import com.joo.digimon.card.dto.CardRequestDto;
 import com.joo.digimon.card.dto.CardResponseDto;
+import com.joo.digimon.card.dto.NoteDto;
 import com.joo.digimon.card.model.CardImgEntity;
+import com.joo.digimon.card.model.NoteEntity;
 import com.joo.digimon.card.model.QCardEntity;
 import com.joo.digimon.card.model.QCardImgEntity;
 import com.joo.digimon.card.repository.CardImgRepository;
+import com.joo.digimon.card.repository.NoteRepository;
 import com.querydsl.core.BooleanBuilder;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -15,10 +18,14 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class CardServiceImpl implements CardService {
     private final CardImgRepository cardImgRepository;
+    private final NoteRepository noteRepository;
 
     @Value("${domain.url}")
     private String prefixUrl;
@@ -117,6 +124,10 @@ public class CardServiceImpl implements CardService {
         } else if (cardRequestDto.getParallelOption() == 2) {
             builder.and(qCardImgEntity.isParallel.eq(true));
         }
+        if (cardRequestDto.getNoteId() != null) {
+            builder.and(qCardImgEntity.noteEntity.id.eq(cardRequestDto.getNoteId()));
+        }
+
 
         Pageable pageable;
         Sort sort = Sort.by(Sort.Order.asc("cardEntity.cardType"));
@@ -137,6 +148,17 @@ public class CardServiceImpl implements CardService {
 
 
         return new CardResponseDto(cardImgEntityPage, prefixUrl);
+    }
+
+    @Override
+    public List<NoteDto> getNotes() {
+        List<NoteDto> noteDtoList = new ArrayList<>();
+        List<NoteEntity> noteEntityList = noteRepository.findAllByOrderByReleaseDate();
+        for (NoteEntity noteEntity : noteEntityList) {
+            noteDtoList.add(new NoteDto(noteEntity));
+        }
+
+        return noteDtoList;
     }
 
 }

@@ -2,15 +2,14 @@ package com.joo.digimon.card.service;
 
 import com.joo.digimon.card.externel.ScalingClient;
 import com.joo.digimon.card.model.CardImgEntity;
-import com.joo.digimon.card.model.ParallelCardImgEntity;
 import com.joo.digimon.card.repository.CardImgRepository;
-import com.joo.digimon.card.repository.ParallelCardImgRepository;
 import com.joo.digimon.util.S3Util;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import net.coobird.thumbnailator.Thumbnails;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
+
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
@@ -24,16 +23,17 @@ import java.util.List;
 public class CardImageServiceImpl implements CardImageService {
     private final S3Util s3Util;
     private final CardImgRepository cardImgRepository;
-    private final ParallelCardImgRepository parallelCardImgRepository;
     private final ScalingClient scalingClient;
     private static final String KO_URL_PREFIX = "https://digimoncard.co.kr/";
 
-    @Value("${img.prefix}")
-    private String UPLOAD_PREFIX;
+    @Value("${img.original}")
+    private String originalUploadPrefix;
+
+    @Value("${img.small}")
+    private String smallUploadPrefix;
 
     private final static Integer MIN_WIDTH = 600;
     private final static Integer MIN_HEIGHT = 900;
-
 
 
     @Override
@@ -44,26 +44,35 @@ public class CardImageServiceImpl implements CardImageService {
         List<CardImgEntity> cardImgEntityList = cardImgRepository.findByUploadUrlIsNull();
 
         for (CardImgEntity cardImgEntity : cardImgEntityList) {
-            StringBuilder keyNameBuilder = new StringBuilder();
-            keyNameBuilder.append(UPLOAD_PREFIX).append(cardImgEntity.getCardEntity().getCardNo());
-            if (cardImgEntity.getIsParallel()) {
-                keyNameBuilder.append("P").append(cardImgEntity.getId());
-            }
-
-
             try {
-                if (s3Util.uploadImagePng(getImageData(KO_URL_PREFIX + cardImgEntity.getOriginUrl()), keyNameBuilder.toString())) {
-                    cardImgEntity.updateUploadUrl( keyNameBuilder.toString());
-                    cnt++;
-                }
+                uploadImage(cardImgEntity);
+                cnt++;
             } catch (IOException ignore) {
+
             }
+
         }
 
         return cnt;
     }
 
-    private byte[] getImageData(String imageUrl) throws IOException {
+    private void uploadImage(CardImgEntity cardImgEntity) throws IOException {
+
+        BufferedImage image = getImageData(KO_URL_PREFIX + cardImgEntity.getOriginUrl());
+        BufferedImage compressedImage = Thumbnails.of(image)
+                .size(200, 280)
+                .asBufferedImage();
+        StringBuilder keyNameBuilder = new StringBuilder();
+        keyNameBuilder.append(cardImgEntity.getCardEntity().getCardNo());
+        if (cardImgEntity.getIsParallel()) {
+            keyNameBuilder.append("P").append(cardImgEntity.getId());
+        }
+        s3Util.uploadImageToS3(originalUploadPrefix + keyNameBuilder, image, "png");
+        s3Util.uploadImageToS3(smallUploadPrefix + keyNameBuilder, compressedImage, "png");
+        cardImgEntity.updateUploadUrl(originalUploadPrefix,smallUploadPrefix,keyNameBuilder.toString());
+    }
+
+    private BufferedImage getImageData(String imageUrl) throws IOException {
         BufferedImage image = ImageIO.read(new URL(imageUrl));
 
         if (image.getWidth() < MIN_WIDTH || image.getHeight() < MIN_HEIGHT) {
@@ -73,9 +82,7 @@ public class CardImageServiceImpl implements CardImageService {
             }
         }
         BufferedImage trimmedImage = trimImageTransparent(image);
-        ByteArrayOutputStream os = new ByteArrayOutputStream();
-        ImageIO.write(trimmedImage, "png", os);
-        return os.toByteArray();
+        return trimmedImage;
     }
 
     public BufferedImage trimImageTransparent(BufferedImage image) {
@@ -136,7 +143,7 @@ public class CardImageServiceImpl implements CardImageService {
         return false;
     }
 
-    private byte[] scaleImageUsingWaifu2x(String imageUrl){
+    private byte[] scaleImageUsingWaifu2x(String imageUrl) {
         return scalingClient.upscaleImage(imageUrl, 2, 3, "art");
 
     }

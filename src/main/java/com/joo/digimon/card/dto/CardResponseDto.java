@@ -57,7 +57,9 @@ public class CardResponseDto {
         String attributes;
         List<String> types;
         String imgUrl;
+        String smallImgUrl;
         Boolean isParallel;
+        String sortString;
 
         public Card(CardImgEntity card, String prefixUrl) {
             this.cardId = card.getCardEntity().getId();
@@ -84,6 +86,8 @@ public class CardResponseDto {
             }
             this.imgUrl = prefixUrl + card.getUploadUrl();
             this.isParallel = card.getIsParallel();
+            this.sortString=card.getCardEntity().getSortString();
+            this.smallImgUrl=prefixUrl+card.getSmallImgUrl();
         }
 
     }

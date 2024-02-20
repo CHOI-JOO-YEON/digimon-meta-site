@@ -207,8 +207,8 @@ public class CardParseServiceImpl implements CardParseService {
         }
         Digivolve digivolve2 = parseDigivolve(crawlingCard.getDigivolveCost2());
         if (digivolve2 != null) {
-            dto.setDigivolveCondition1(digivolve2.digivolveCondition);
-            dto.setDigivolveCost1(digivolve2.digivolveCost);
+            dto.setDigivolveCondition2(digivolve2.digivolveCondition);
+            dto.setDigivolveCost2(digivolve2.digivolveCost);
         }
 
 
