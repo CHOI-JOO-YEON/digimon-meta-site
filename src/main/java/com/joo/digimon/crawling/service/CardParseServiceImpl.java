@@ -146,12 +146,13 @@ public class CardParseServiceImpl implements CardParseService {
             return null;
         }
         try {
-            return Integer.parseInt(dp);
+            double doubleValue = Double.parseDouble(dp);
+            int intValue = (int) doubleValue;
+            return Integer.valueOf(intValue);
         } catch (NumberFormatException e) {
             throw new CardParseException(CardParseExceptionMessage.WRONG_DP);
         }
     }
-
     private Integer parsePlayCost(String playCost) throws CardParseException {
         if (playCost.equals("-")) {
             return null;
@@ -225,7 +226,8 @@ public class CardParseServiceImpl implements CardParseService {
         try {
 
             int digivolveCondition = Integer.parseInt(digivolveStrings[0].replace("Lv.", ""));
-            int digivolveCost = Integer.parseInt(digivolveStrings[1]);
+            double digivolveDoubleCost = Double.parseDouble(digivolveStrings[1]);
+            int digivolveCost = (int) digivolveDoubleCost;
             return new Digivolve(digivolveCost, digivolveCondition);
         } catch (NumberFormatException e) {
             throw new CardParseException(CardParseExceptionMessage.WRONG_DIGIVOLVE);

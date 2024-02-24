@@ -130,7 +130,6 @@ public class CardServiceImpl implements CardService {
 
 
         Pageable pageable;
-        Sort sort = Sort.by(Sort.Order.asc("cardEntity.cardType"));
 
         Sort.Order orderOptionSort;
         if (cardRequestDto.getIsOrderDesc()) {
@@ -139,8 +138,7 @@ public class CardServiceImpl implements CardService {
             orderOptionSort = Sort.Order.asc("cardEntity." + cardRequestDto.getOrderOption());
         }
 
-        // 두 정렬 조건 결합
-        sort = sort.and(Sort.by(orderOptionSort));
+        Sort sort = Sort.by(orderOptionSort);
 
 
         pageable = PageRequest.of(cardRequestDto.getPage() - 1, cardRequestDto.getSize(), sort);

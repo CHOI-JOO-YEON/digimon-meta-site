@@ -33,8 +33,7 @@ public class SecurityConfig {
                         .authenticationEntryPoint(customAuthenticationEntryPoint))
                 .csrf(AbstractHttpConfigurer::disable)
                 .formLogin(AbstractHttpConfigurer::disable)
-                .oauth2Login(oauth2 -> {
-                })
+                .oauth2Login(oauth2 -> {})
                 .authorizeHttpRequests(
                         request -> request
                                 .requestMatchers("/crawling/**").hasRole("ADMIN")

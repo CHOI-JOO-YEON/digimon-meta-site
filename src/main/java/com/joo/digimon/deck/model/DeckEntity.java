@@ -19,9 +19,10 @@ import java.util.Set;
 @Getter
 @Table(name = "DECKS_TB")
 @NamedEntityGraph(
-        name = "deck.detail",
+        name = "Deck.detail",
         attributeNodes = {
-                @NamedAttributeNode(value = "deckCardEntities", subgraph = "deckCardSubgraph")
+                @NamedAttributeNode(value = "deckCardEntities", subgraph = "deckCardSubgraph"),
+                @NamedAttributeNode(value = "user")
         },
         subgraphs = {
                 @NamedSubgraph(
@@ -63,10 +64,17 @@ public class DeckEntity {
     @OneToMany(mappedBy = "deckEntity")
     Set<DeckCardEntity> deckCardEntities;
 
+    String deckName;
+
     @CreationTimestamp
     private Timestamp createdDateTime;
 
-    @ManyToOne
-    @JoinColumn(name = "formats_tb_id")
-    Format format;
+
+//    @ManyToOne
+//    @JoinColumn(name = "formats_tb_id")
+//    Format format;
+
+    public void addDeckCardEntity(DeckCardEntity deckCardEntity) {
+        deckCardEntities.add(deckCardEntity);
+    }
 }

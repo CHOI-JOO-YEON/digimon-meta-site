@@ -14,6 +14,7 @@ import java.sql.Timestamp;
 @Entity
 @Builder
 @Table(name = "USERS_TB")
+@ToString
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
