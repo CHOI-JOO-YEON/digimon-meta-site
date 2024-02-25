@@ -20,18 +20,25 @@ public class AccountController {
 
     @GetMapping("/token/kakao")
     public ResponseEntity<?> getKakaoToken(@RequestParam String code, HttpServletResponse response) throws IOException {
-        LoginResponseDto kakaoToken = userService.getKakaoToken(code);
-        Cookie jwtCookie = new Cookie("JWT_TOKEN", kakaoToken.getAccessToken());
-        jwtCookie.setHttpOnly(true);
-        jwtCookie.setMaxAge(60 * 60 * 24); // 예: 24시간
-        jwtCookie.setPath("/");
-        response.addCookie(jwtCookie);
-        return new ResponseEntity<>(kakaoToken,HttpStatus.OK);
+        LoginResponseDto loginResponseDto = userService.getKakaoToken(code);
+        setTokenCookie(response, loginResponseDto);
+        return new ResponseEntity<>(loginResponseDto,HttpStatus.OK);
     }
 
     @PostMapping("/login/username")
-    public ResponseEntity<?> loginUsername(@RequestBody UsernameLoginRequestDto usernameLoginRequestDto) throws IOException {
-        return new ResponseEntity<>(userService.usernameLogin(usernameLoginRequestDto),HttpStatus.OK);
+    public ResponseEntity<?> loginUsername(@RequestBody UsernameLoginRequestDto usernameLoginRequestDto,HttpServletResponse response) throws IOException {
+        LoginResponseDto loginResponseDto = userService.usernameLogin(usernameLoginRequestDto);
+        setTokenCookie(response, loginResponseDto);
+        return new ResponseEntity<>(loginResponseDto,HttpStatus.OK);
+    }
+
+
+    private static void setTokenCookie(HttpServletResponse response, LoginResponseDto loginResponseDto) {
+        Cookie jwtCookie = new Cookie("JWT_TOKEN", loginResponseDto.getAccessToken());
+        jwtCookie.setHttpOnly(true);
+        jwtCookie.setMaxAge(60 * 60 * 24);
+        jwtCookie.setPath("/");
+        response.addCookie(jwtCookie);
     }
 
 
