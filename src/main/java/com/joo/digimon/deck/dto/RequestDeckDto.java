@@ -9,4 +9,5 @@ public class RequestDeckDto {
     Integer deckId;
     String deckName="My Deck";
     Map<Integer,Integer> cardAndCntMap;
+    Boolean isPublic = true;
 }

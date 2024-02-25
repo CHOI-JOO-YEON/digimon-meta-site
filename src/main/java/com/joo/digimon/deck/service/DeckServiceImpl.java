@@ -2,13 +2,15 @@ package com.joo.digimon.deck.service;
 
 import com.joo.digimon.card.model.CardImgEntity;
 import com.joo.digimon.card.repository.CardImgRepository;
-import com.joo.digimon.deck.dto.DeckSearchParameters;
+import com.joo.digimon.deck.dto.DeckSearchParameter;
+import com.joo.digimon.deck.dto.DeckSummaryResponseDto;
 import com.joo.digimon.deck.dto.RequestDeckDto;
 import com.joo.digimon.deck.dto.ResponseDeckDto;
 import com.joo.digimon.deck.model.DeckCardEntity;
 import com.joo.digimon.deck.model.DeckEntity;
 import com.joo.digimon.deck.repository.DeckCardRepository;
 import com.joo.digimon.deck.repository.DeckRepository;
+import com.joo.digimon.exception.model.ForbiddenAccessException;
 import com.joo.digimon.user.model.User;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -16,6 +18,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
@@ -35,26 +38,69 @@ public class DeckServiceImpl implements DeckService {
                 .flatMap(deckRepository::findById)
                 .orElseGet(() -> deckRepository.save(DeckEntity.builder().user(user).deckCardEntities(new HashSet<>()).build()));
 
-        if (!deck.getDeckCardEntities().isEmpty()) {
-            deckCardRepository.deleteAll(deck.getDeckCardEntities());
-            deck.getDeckCardEntities().clear(); // 컬렉션 비우기
-        }
+        deck.updateDeckMetaData(requestDeckDto);
+        updateDeckCards(requestDeckDto, deck);
+        return new ResponseDeckDto(deck, prefixUrl);
+    }
 
-        List<DeckCardEntity> deckCardEntities = requestDeckDto.getCardAndCntMap().entrySet().stream()
-                .map(entry -> cardImgRepository.findById(entry.getKey())
-                        .map(cardImgEntity -> DeckCardEntity.builder().deckEntity(deck).cardImgEntity(cardImgEntity).cnt(entry.getValue()).build())
-                        .orElse(null))
-                .filter(Objects::nonNull)
-                .collect(Collectors.toList());
+    @Transactional
+    public void updateDeckCards(RequestDeckDto requestDeckDto, DeckEntity deck) {
+        List<Integer> cardIds = new ArrayList<>(requestDeckDto.getCardAndCntMap().keySet());
+        Map<Integer, CardImgEntity> cardImgMap = cardImgRepository.findAllById(cardIds)
+                .stream()
+                .collect(Collectors.toMap(CardImgEntity::getId, Function.identity()));
 
-        deckCardEntities.forEach(deck::addDeckCardEntity); // deck에 DeckCardEntity 추가
-        deckCardRepository.saveAll(deckCardEntities); // DeckCardEntity 저장
+        Map<Integer, DeckCardEntity> currentCards = new HashMap<>();
+        deck.getDeckCardEntities().forEach(card -> currentCards.put(card.getCardImgEntity().getId(), card));
 
-        return new ResponseDeckDto(deck,prefixUrl);
+        requestDeckDto.getCardAndCntMap().forEach((id, cnt) -> {
+            if (currentCards.containsKey(id)) {
+                DeckCardEntity card = currentCards.get(id);
+                card.updateCnt(cnt);
+                currentCards.remove(id);
+            } else {
+                CardImgEntity imgEntity = cardImgMap.get(id);
+                if (imgEntity != null) {
+                    deck.addDeckCardEntity(deckCardRepository.save(DeckCardEntity.builder()
+                            .cardImgEntity(imgEntity)
+                            .deckEntity(deck)
+                            .cnt(cnt)
+                            .build()));
+                }
+            }
+        });
+        deckCardRepository.deleteAll(currentCards.values());
+        currentCards.values().forEach(deck.getDeckCardEntities()::remove);
+
     }
 
     @Override
-    public List<RequestDeckDto> getDecks(DeckSearchParameters deckSearchParameters) {
-        return null;
+    public List<DeckSummaryResponseDto> getDecks(DeckSearchParameter deckSearchParameter, User user) {
+        List<DeckSummaryResponseDto> deckSummaryResponseDtoList = new ArrayList<>();
+        if (deckSearchParameter.getIsMyDeck()) {
+            List<DeckEntity> myDeckList = deckRepository.findByUserOrderByCreatedDateTime(user);
+            for (DeckEntity deck : myDeckList) {
+                deckSummaryResponseDtoList.add(new DeckSummaryResponseDto(deck));
+            }
+            return deckSummaryResponseDtoList;
+        }
+        List<DeckEntity> decks = deckRepository.findByIsPublicIsTrue();
+        for (DeckEntity deck : decks) {
+            deckSummaryResponseDtoList.add(new DeckSummaryResponseDto(deck));
+        }
+
+
+        return deckSummaryResponseDtoList;
     }
+
+    @Override
+    public ResponseDeckDto findDeck(Integer id, User user) {
+        DeckEntity deck = deckRepository.findById(id).orElseThrow();
+        if (!deck.getIsPublic() && !deck.getUser().equals(user)) {
+            throw new ForbiddenAccessException();
+        }
+        return new ResponseDeckDto(deck, prefixUrl);
+    }
+
+
 }

@@ -1,5 +1,6 @@
 package com.joo.digimon.deck.model;
 
+import com.joo.digimon.deck.dto.RequestDeckDto;
 import com.joo.digimon.user.model.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -7,7 +8,6 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
 
 import java.sql.Timestamp;
 import java.util.Set;
@@ -55,19 +55,21 @@ import java.util.Set;
 public class DeckEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Integer id;
+    private Integer id;
 
     @ManyToOne
     @JoinColumn(name = "users_tb_id")
-    User user;
+    private User user;
 
     @OneToMany(mappedBy = "deckEntity")
     Set<DeckCardEntity> deckCardEntities;
 
-    String deckName;
+    private String deckName;
 
     @CreationTimestamp
     private Timestamp createdDateTime;
+
+    private Boolean isPublic;
 
 
 //    @ManyToOne
@@ -76,5 +78,9 @@ public class DeckEntity {
 
     public void addDeckCardEntity(DeckCardEntity deckCardEntity) {
         deckCardEntities.add(deckCardEntity);
+    }
+    public void updateDeckMetaData(RequestDeckDto requestDeckDto) {
+        this.deckName = requestDeckDto.getDeckName();
+        this.isPublic = requestDeckDto.getIsPublic();
     }
 }
