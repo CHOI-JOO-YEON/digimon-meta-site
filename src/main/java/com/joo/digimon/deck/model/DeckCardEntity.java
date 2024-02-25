@@ -29,4 +29,8 @@ public class DeckCardEntity {
 
     Integer cnt;
 
+    public void updateCnt(Integer cnt) {
+        this.cnt=cnt;
+    }
+
 }
