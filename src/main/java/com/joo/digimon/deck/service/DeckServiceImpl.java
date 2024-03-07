@@ -2,10 +2,8 @@ package com.joo.digimon.deck.service;
 
 import com.joo.digimon.card.model.CardImgEntity;
 import com.joo.digimon.card.repository.CardImgRepository;
-import com.joo.digimon.deck.dto.DeckSearchParameter;
-import com.joo.digimon.deck.dto.DeckSummaryResponseDto;
-import com.joo.digimon.deck.dto.RequestDeckDto;
-import com.joo.digimon.deck.dto.ResponseDeckDto;
+import com.joo.digimon.crawling.enums.CardType;
+import com.joo.digimon.deck.dto.*;
 import com.joo.digimon.deck.model.DeckCardEntity;
 import com.joo.digimon.deck.model.DeckEntity;
 import com.joo.digimon.deck.repository.DeckCardRepository;
@@ -30,6 +28,12 @@ public class DeckServiceImpl implements DeckService {
 
     @Value("${domain.url}")
     private String prefixUrl;
+
+    @Value("${back.digimon}")
+    private String backDigimonUrl;
+
+    @Value("${back.digitama}")
+    private String backDigitamaUrl;
 
     @Override
     @Transactional
@@ -102,5 +106,49 @@ public class DeckServiceImpl implements DeckService {
         return new ResponseDeckDto(deck, prefixUrl);
     }
 
+    @Override
+    public ResponseDeckDto importDeck(DeckImportRequestDto deckImportRequestDto) {
+        Map<String, Integer> map = deckImportRequestDto.getDeck();
+
+        ResponseDeckDto responseDeckDto = new ResponseDeckDto();
+        for (Map.Entry<String, Integer> entry : map.entrySet()) {
+            Optional<CardImgEntity> cardImg = cardImgRepository.findByCardEntityCardNoAndIsParallelFalse(entry.getKey());
+            cardImg.ifPresent(cardImgEntity -> responseDeckDto.addCard(cardImgEntity, entry.getValue(), prefixUrl));
+        }
+
+
+        return responseDeckDto;
+    }
+
+    @Override
+    public TTSDeckFileDto exportTTSDeck(RequestDeckDto requestDeckDto){
+        TTSDeckFileDto ttsDeckFileDto = new TTSDeckFileDto();
+
+        int index = 1;
+        List<CardImgEntity> digitamas = new ArrayList<>();
+        for (Map.Entry<Integer, Integer> integerEntry : requestDeckDto.getCardAndCntMap().entrySet()) {
+            try {
+                CardImgEntity cardImgEntity = cardImgRepository.findById(integerEntry.getKey()).orElseThrow();
+                if (cardImgEntity.getCardEntity().getCardType().equals(CardType.DIGITAMA)) {
+                    digitamas.add(cardImgEntity);
+                    continue;
+                }
+                for (int i = 0; i < integerEntry.getValue(); i++) {
+                    ttsDeckFileDto.addCard(index++,prefixUrl+cardImgEntity.getUploadUrl(),backDigimonUrl);
+                }
+            }catch (Exception ignore){
+            }
+        }
+
+        for (CardImgEntity digitama : digitamas) {
+            try {
+                ttsDeckFileDto.addCard(index++,prefixUrl+digitama.getUploadUrl(),backDigitamaUrl);
+            }catch (Exception ignore){
+
+            }
+        }
+
+        return ttsDeckFileDto;
+    }
 
 }

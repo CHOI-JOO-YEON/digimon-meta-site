@@ -1,10 +1,8 @@
 package com.joo.digimon.deck.service;
 
-import com.joo.digimon.deck.dto.DeckSearchParameter;
-import com.joo.digimon.deck.dto.DeckSummaryResponseDto;
-import com.joo.digimon.deck.dto.RequestDeckDto;
-import com.joo.digimon.deck.dto.ResponseDeckDto;
+import com.joo.digimon.deck.dto.*;
 import com.joo.digimon.user.model.User;
+import org.springframework.http.HttpStatusCode;
 
 import java.util.List;
 
@@ -13,4 +11,8 @@ public interface DeckService {
     List<DeckSummaryResponseDto> getDecks(DeckSearchParameter deckSearchParameter, User user);
 
     ResponseDeckDto findDeck(Integer id, User user);
+
+    ResponseDeckDto importDeck(DeckImportRequestDto deckImportRequestDto);
+
+    TTSDeckFileDto exportTTSDeck(RequestDeckDto requestDeckDto);
 }
