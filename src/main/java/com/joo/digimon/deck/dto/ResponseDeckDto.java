@@ -18,7 +18,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Data
-@NoArgsConstructor
 public class ResponseDeckDto {
     Integer authorId;
     String authorName;
@@ -35,6 +34,15 @@ public class ResponseDeckDto {
         for (DeckCardEntity deckCardEntity : deck.getDeckCardEntities()) {
             cards.add(new Card(deckCardEntity,prefixUrl));
         }
+    }
+
+
+    public ResponseDeckDto() {
+        this.cards = new ArrayList<>();
+    }
+
+    public void addCard(CardImgEntity cardImgEntity, Integer cnt, String prefixUrl) {
+        cards.add(new Card(cardImgEntity,cnt,prefixUrl));
     }
 
     @Data
@@ -64,10 +72,12 @@ public class ResponseDeckDto {
         String smallImgUrl;
         Boolean isParallel;
         String sortString;
+        public Card(CardImgEntity card,Integer cnt, String prefixUrl) {
+            this.cnt=cnt;
+            createCard(card, prefixUrl);
+        }
 
-        public Card(DeckCardEntity deckCardEntity, String prefixUrl) {
-            cnt=deckCardEntity.getCnt();
-            CardImgEntity card = deckCardEntity.getCardImgEntity();
+        private void createCard(CardImgEntity card, String prefixUrl) {
             this.cardId = card.getId();
             this.cardNo = card.getCardEntity().getCardNo();
             this.cardName = card.getCardEntity().getCardName();
@@ -92,8 +102,14 @@ public class ResponseDeckDto {
             }
             this.imgUrl = prefixUrl + card.getUploadUrl();
             this.isParallel = card.getIsParallel();
-            this.sortString=card.getCardEntity().getSortString();
-            this.smallImgUrl=prefixUrl+card.getSmallImgUrl();
+            this.sortString= card.getCardEntity().getSortString();
+            this.smallImgUrl= prefixUrl + card.getSmallImgUrl();
+        }
+
+        public Card(DeckCardEntity deckCardEntity, String prefixUrl) {
+            cnt=deckCardEntity.getCnt();
+            CardImgEntity card = deckCardEntity.getCardImgEntity();
+            createCard(card, prefixUrl);
         }
 
     }
