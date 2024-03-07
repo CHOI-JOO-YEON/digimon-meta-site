@@ -1,8 +1,10 @@
 package com.joo.digimon.deck.controller;
 
 import com.joo.digimon.annotation.argument_resolver.CurUser;
+import com.joo.digimon.deck.dto.DeckImportRequestDto;
 import com.joo.digimon.deck.dto.DeckSearchParameter;
 import com.joo.digimon.deck.dto.RequestDeckDto;
+import com.joo.digimon.deck.dto.ResponseDeckDto;
 import com.joo.digimon.deck.service.DeckService;
 import com.joo.digimon.user.model.User;
 import lombok.RequiredArgsConstructor;
@@ -30,4 +32,10 @@ public class DeckController {
     ResponseEntity<?> findDecks(@CurUser User user,@RequestParam("deck-id") Integer deckId) {
         return new ResponseEntity<>(deckService.findDeck(deckId, user), HttpStatus.OK);
     }
+    @PostMapping("/import")
+    ResponseEntity<?> importDecks(@RequestBody DeckImportRequestDto deckImportRequestDto) {
+        ResponseDeckDto responseDeckDto = deckService.importDeck(deckImportRequestDto);
+        return new ResponseEntity<>(responseDeckDto,HttpStatus.OK);
+    }
+
 }
