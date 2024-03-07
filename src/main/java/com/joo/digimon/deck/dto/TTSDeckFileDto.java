@@ -68,8 +68,8 @@ public class TTSDeckFileDto {
     @JsonProperty("ObjectStates")
     private List<TTSDeckObject> objectStates;
 
-    public void addCard(int cardId, String faceUrl, String backUrl, String guid) {
-        this.objectStates.get(0).addCard(cardId, faceUrl, backUrl, guid);
+    public void addCard(Integer cardId, String faceUrl, String backUrl) {
+        this.objectStates.get(0).addCard(cardId, faceUrl, backUrl,"GUID"+cardId);
     }
 
 
