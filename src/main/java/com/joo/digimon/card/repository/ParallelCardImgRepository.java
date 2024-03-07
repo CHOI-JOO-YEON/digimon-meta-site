@@ -8,7 +8,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface ParallelCardImgRepository extends JpaRepository<ParallelCardImgEntity,Integer> {
+public interface ParallelCardImgRepository extends JpaRepository<ParallelCardImgEntity,Integer>{
     @EntityGraph("ParallelCardImgEntity.detail")
     List<ParallelCardImgEntity> findByUploadUrlIsNull();
 }

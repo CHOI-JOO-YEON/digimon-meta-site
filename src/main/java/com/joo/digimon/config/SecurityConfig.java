@@ -33,13 +33,15 @@ public class SecurityConfig {
                         .authenticationEntryPoint(customAuthenticationEntryPoint))
                 .csrf(AbstractHttpConfigurer::disable)
                 .formLogin(AbstractHttpConfigurer::disable)
-                .oauth2Login(oauth2 -> {
-                })
+                .oauth2Login(oauth2 -> {})
                 .authorizeHttpRequests(
                         request -> request
                                 .requestMatchers("/crawling/**").hasRole("ADMIN")
+                                .requestMatchers("/api/manager/**").hasRole("MANAGER")
                                 .requestMatchers("/h2-console/**").permitAll()
                                 .requestMatchers("/api/account/**").permitAll()
+                                .requestMatchers("/api/deck/import/**").permitAll()
+                                .requestMatchers("/card/**").permitAll()
                                 .anyRequest().authenticated())
                 .sessionManagement(session -> session.
                         sessionCreationPolicy(SessionCreationPolicy.STATELESS))

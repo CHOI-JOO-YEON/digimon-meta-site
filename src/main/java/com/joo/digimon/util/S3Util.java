@@ -11,6 +11,9 @@ import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import org.springframework.core.io.Resource;
 
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
 @Component
@@ -26,32 +29,19 @@ public class S3Util {
     private final S3Client s3Client;
 
 
-    public boolean uploadImagePng(byte[] imageData, String keyName) {
-        try {
-            uploadToS3(keyName, imageData, "image/png");
-        } catch (Exception e) {
-            return false;
-        }
-        return true;
-
-    }
-
-    byte[] downloadImage(String imageUrl) throws IOException {
-        Resource resource = restTemplate.getForObject(imageUrl, Resource.class);
-        if (resource == null) {
-            throw new IOException("Resource could not be downloaded from URL: " + imageUrl);
-        }
-        return resource.getInputStream().readAllBytes();
-    }
-
-    void uploadToS3(String keyName, byte[] data, String contentType) {
+    public void uploadImageToS3(String keyName, BufferedImage image, String fileType) throws IOException {
         PutObjectRequest putObjectRequest = PutObjectRequest.builder()
                 .bucket(bucketName)
                 .key(keyName)
-                .contentType(contentType)
+                .contentType("image/"+fileType)
                 .build();
-        s3Client.putObject(putObjectRequest, RequestBody.fromBytes(data));
+        s3Client.putObject(putObjectRequest, RequestBody.fromBytes(convertBufferedImageToByteArray(image, fileType)));
     }
 
-
+    byte[] convertBufferedImageToByteArray(BufferedImage image, String formatName) throws IOException {
+        try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
+            ImageIO.write(image, formatName, baos);
+            return baos.toByteArray();
+        }
+    }
 }

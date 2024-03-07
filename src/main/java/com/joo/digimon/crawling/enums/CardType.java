@@ -4,7 +4,7 @@ import lombok.Getter;
 
 @Getter
 public enum CardType {
-    DIGIMON("디지몬"), TAMER("테이머"), OPTION("옵션"), DIGITAMA("디지타마");
+    DIGITAMA("디지타마"), DIGIMON("디지몬"), TAMER("테이머"), OPTION("옵션"), ;
 
     String kor;
 

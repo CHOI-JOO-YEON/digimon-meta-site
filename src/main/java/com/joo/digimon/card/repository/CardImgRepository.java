@@ -2,6 +2,7 @@ package com.joo.digimon.card.repository;
 
 import com.joo.digimon.card.model.CardEntity;
 import com.joo.digimon.card.model.CardImgEntity;
+import com.joo.digimon.crawling.model.CrawlingCardEntity;
 import com.querydsl.core.types.Predicate;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -21,7 +22,13 @@ public interface CardImgRepository extends JpaRepository<CardImgEntity,Integer>,
     @EntityGraph("CardImgEntity.detail")
     Optional<CardImgEntity> findByCardEntity(CardEntity cardEntity);
 
+    Optional<CardImgEntity> findByCrawlingCardEntity(CrawlingCardEntity crawlingCardEntity);
+
     @Override
     @EntityGraph(value = "CardImgEntity.detail", type = EntityGraph.EntityGraphType.LOAD)
     Page<CardImgEntity> findAll(Predicate predicate, Pageable pageable);
+
+
+    @EntityGraph(value = "CardImgEntity.detail")
+    Optional<CardImgEntity> findByCardEntityCardNoAndIsParallelFalse(String cardNo);
 }
