@@ -36,12 +36,13 @@ public class SecurityConfig {
                 .oauth2Login(oauth2 -> {})
                 .authorizeHttpRequests(
                         request -> request
-                                .requestMatchers("/crawling/**").hasRole("ADMIN")
+                                .requestMatchers("/api/crawling/**").hasRole("ADMIN")
                                 .requestMatchers("/api/manager/**").hasRole("MANAGER")
                                 .requestMatchers("/h2-console/**").permitAll()
                                 .requestMatchers("/api/account/**").permitAll()
                                 .requestMatchers("/api/deck/import/**").permitAll()
-                                .requestMatchers("/card/**").permitAll()
+                                .requestMatchers("/api/card/**").permitAll()
+
                                 .anyRequest().authenticated())
                 .sessionManagement(session -> session.
                         sessionCreationPolicy(SessionCreationPolicy.STATELESS))

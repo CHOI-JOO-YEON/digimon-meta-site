@@ -13,7 +13,7 @@ import java.io.IOException;
 import java.util.List;
 
 @RestController
-@RequestMapping("/crawling")
+@RequestMapping("/api/crawling")
 @RequiredArgsConstructor
 public class CrawlingController {
     private final CrawlingService crawlingService;
