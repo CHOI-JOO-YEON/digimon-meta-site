@@ -42,6 +42,7 @@ public class CardImgEntity {
 
     String originUrl;
     String uploadUrl;
+    String smallImgUrl;
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "crawling_cards_tb_id")
@@ -53,7 +54,8 @@ public class CardImgEntity {
 
     Boolean isParallel;
 
-    public void updateUploadUrl(String url) {
-        this.uploadUrl = url;
+    public void updateUploadUrl(String originalPrefix, String smallPrefix, String url) {
+        this.uploadUrl = originalPrefix+url;
+        this.smallImgUrl= smallPrefix+url;
     }
 }

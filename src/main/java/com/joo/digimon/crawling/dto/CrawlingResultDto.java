@@ -10,8 +10,9 @@ import java.util.List;
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class CrawlingResultDto {
-    int successCount;
-    int failedCount;
+    private int successCount;
+    private int failedCount;
+    private int alreadyReflectCount;
     List<CrawlingCardDto> crawlingCardDtoList;
 
     public CrawlingResultDto() {
@@ -22,6 +23,8 @@ public class CrawlingResultDto {
     public void successCountIncrease(){
         successCount++;
     }
+    public void alreadyReflectCountIncrease() {
+        alreadyReflectCount++;}
 
     public void addFailedCrawling(CrawlingCardDto crawlingCardDto) {
         failedCount++;

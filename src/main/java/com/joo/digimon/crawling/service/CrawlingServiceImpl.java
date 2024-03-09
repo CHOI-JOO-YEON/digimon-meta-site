@@ -142,6 +142,7 @@ public class CrawlingServiceImpl implements CrawlingService {
 //        if (cardImgRepository.findByCardEntity(cardEntity).isPresent()) {
 //            throw new CardParseException(CardParseExceptionMessage.DUPLICATE_NORMAL_IMAGE);
 //        }
+
         cardImgRepository.save(
                 CardImgEntity.builder()
                         .isParallel(reflectCardRequestDto.getIsParallel())
@@ -239,14 +240,12 @@ public class CrawlingServiceImpl implements CrawlingService {
     public CrawlingResultDto crawlAndSaveByUrl(String url) throws IOException {
         List<CrawlingCardEntity> crawlingCardEntities = crawlUrlAndBuildEntityList(url);
         CrawlingResultDto crawlingResultDto = new CrawlingResultDto();
-        for (CrawlingCardEntity crawlingCardEntity : crawlingCardEntities) {
-            if (crawlingCardRepository.findByImgUrl(crawlingCardEntity.getImgUrl()).isEmpty()) {
-                crawlingCardRepository.save(crawlingCardEntity);
 
+        for (CrawlingCardEntity crawlingCardEntity : crawlingCardEntities) {
+            if (cardImgRepository.findByCrawlingCardEntity(crawlingCardEntity).isPresent()) {
+                crawlingResultDto.alreadyReflectCountIncrease();
+                continue;
             }
-        }
-
-        for (CrawlingCardEntity crawlingCardEntity : crawlingCardEntities) {
             try {
                 saveCardByReflectCardRequest(cardParseService.crawlingCardParse(crawlingCardEntity));
                 crawlingResultDto.successCountIncrease();
@@ -277,12 +276,16 @@ public class CrawlingServiceImpl implements CrawlingService {
 
         for (CrawlingCardDto crawlingCardDto : crawlingCardDtoList) {
             crawlingCardEntities.add(
-                    new CrawlingCardEntity(crawlingCardDto)
+                    createOrFindCrawlingCardEntity(crawlingCardDto)
             );
         }
 
 
         return crawlingCardEntities;
+    }
+
+    private CrawlingCardEntity createOrFindCrawlingCardEntity(CrawlingCardDto crawlingCardDto) {
+        return crawlingCardRepository.findByImgUrl(crawlingCardDto.getImgUrl()).orElseGet(() -> crawlingCardRepository.save(new CrawlingCardEntity(crawlingCardDto)));
     }
 
     @Override

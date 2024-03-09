@@ -1,42 +1,54 @@
-package com.joo.digimon.card.dto;
+package com.joo.digimon.deck.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.joo.digimon.card.dto.CardResponseDto;
 import com.joo.digimon.card.model.CardCombineTypeEntity;
+import com.joo.digimon.card.model.CardEntity;
 import com.joo.digimon.card.model.CardImgEntity;
 import com.joo.digimon.crawling.enums.CardType;
 import com.joo.digimon.crawling.enums.Color;
 import com.joo.digimon.crawling.enums.Form;
 import com.joo.digimon.crawling.enums.Rarity;
+import com.joo.digimon.deck.model.DeckCardEntity;
+import com.joo.digimon.deck.model.DeckEntity;
 import lombok.Data;
-import org.springframework.data.domain.Page;
+import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Data
-@JsonInclude(JsonInclude.Include.NON_NULL)
-public class CardResponseDto {
-
-
-    Integer totalPages;
-    Integer currentPage;
-    Integer totalElements;
+public class ResponseDeckDto {
+    Integer authorId;
+    String authorName;
+    Integer deckId;
+    String deckName;
     List<Card> cards;
 
-
-    public CardResponseDto(Page<CardImgEntity> page, String prefixUrl) {
-        this.totalPages = page.getTotalPages();
-        this.totalElements = Math.toIntExact(page.getTotalElements());
-        this.currentPage = page.getNumber();
+    public ResponseDeckDto(DeckEntity deck, String prefixUrl) {
+        this.authorId = deck.getUser().getId();
+        this.authorName = deck.getUser().getNickName();
+        this.deckId = deck.getId();
+        this.deckName=deck.getDeckName();
         cards = new ArrayList<>();
-        for (CardImgEntity cardImgEntity : page) {
-            cards.add(new Card(cardImgEntity, prefixUrl));
+        for (DeckCardEntity deckCardEntity : deck.getDeckCardEntities()) {
+            cards.add(new Card(deckCardEntity,prefixUrl));
         }
+    }
+
+
+    public ResponseDeckDto() {
+        this.cards = new ArrayList<>();
+    }
+
+    public void addCard(CardImgEntity cardImgEntity, Integer cnt, String prefixUrl) {
+        cards.add(new Card(cardImgEntity,cnt,prefixUrl));
     }
 
     @Data
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private class Card {
+        Integer cnt;
         Integer cardId;
         String cardNo;
         String cardName;
@@ -60,8 +72,12 @@ public class CardResponseDto {
         String smallImgUrl;
         Boolean isParallel;
         String sortString;
+        public Card(CardImgEntity card,Integer cnt, String prefixUrl) {
+            this.cnt=cnt;
+            createCard(card, prefixUrl);
+        }
 
-        public Card(CardImgEntity card, String prefixUrl) {
+        private void createCard(CardImgEntity card, String prefixUrl) {
             this.cardId = card.getId();
             this.cardNo = card.getCardEntity().getCardNo();
             this.cardName = card.getCardEntity().getCardName();
@@ -86,8 +102,14 @@ public class CardResponseDto {
             }
             this.imgUrl = prefixUrl + card.getUploadUrl();
             this.isParallel = card.getIsParallel();
-            this.sortString=card.getCardEntity().getSortString();
-            this.smallImgUrl=prefixUrl+card.getSmallImgUrl();
+            this.sortString= card.getCardEntity().getSortString();
+            this.smallImgUrl= prefixUrl + card.getSmallImgUrl();
+        }
+
+        public Card(DeckCardEntity deckCardEntity, String prefixUrl) {
+            cnt=deckCardEntity.getCnt();
+            CardImgEntity card = deckCardEntity.getCardImgEntity();
+            createCard(card, prefixUrl);
         }
 
     }

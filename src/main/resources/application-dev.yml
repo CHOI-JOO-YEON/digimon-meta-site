@@ -2,6 +2,7 @@ spring:
   jpa:
     hibernate:
       ddl-auto: update
+    show-sql: true
   h2:
     console:
       enabled: true
@@ -9,7 +10,7 @@ spring:
     username: sa
     password:
     driver-class-name: org.h2.Driver
-    url: jdbc:h2:mem:testdb
+    url: jdbc:h2:file:/data/demo
   application:
     name: Digimon-Meta-Dev
   cloud:
@@ -42,4 +43,5 @@ jwt:
   secret: kfqwokfpqgfjopjagopjsgopjapg213123jaipgasfasdas
   expiration-ms: 360000000
 img:
-  prefix: "test/images/"
+  original: test/original/images/
+  small: test/small/images/

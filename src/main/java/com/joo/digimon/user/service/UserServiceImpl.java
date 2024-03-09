@@ -58,4 +58,5 @@ public class UserServiceImpl implements UserService {
         return new LoginResponseDto(jwtProvider.generateToken(user), user.getNickName(), user.getRole());
     }
 
+
 }

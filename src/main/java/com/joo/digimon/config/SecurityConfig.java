@@ -42,6 +42,7 @@ public class SecurityConfig {
                                 .requestMatchers("/api/account/**").permitAll()
                                 .requestMatchers("/api/deck/import/**").permitAll()
                                 .requestMatchers("/api/card/**").permitAll()
+
                                 .anyRequest().authenticated())
                 .sessionManagement(session -> session.
                         sessionCreationPolicy(SessionCreationPolicy.STATELESS))
