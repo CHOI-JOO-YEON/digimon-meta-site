@@ -21,9 +21,9 @@ public class Format {
 
     String name;
 
-    @ManyToOne
-    @JoinColumn(name = "languages_tb_id")
-    Language language;
+//    @ManyToOne
+//    @JoinColumn(name = "languages_tb_id")
+//    Language language;
 
     LocalDate startDate;
     LocalDate endDate;
