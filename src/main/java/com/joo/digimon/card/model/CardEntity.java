@@ -10,6 +10,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
 import java.util.Set;
 
 @Entity
@@ -60,4 +61,6 @@ public class CardEntity {
     Set<CardCombineTypeEntity> cardCombineTypeEntities;
 
     String sortString;
+
+    LocalDate releaseDate;
 }

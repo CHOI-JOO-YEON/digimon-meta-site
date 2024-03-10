@@ -22,7 +22,7 @@ import java.util.Set;
         name = "Deck.detail",
         attributeNodes = {
                 @NamedAttributeNode(value = "deckCardEntities", subgraph = "deckCardSubgraph"),
-                @NamedAttributeNode(value = "user")
+                @NamedAttributeNode(value = "user"),@NamedAttributeNode(value = "format")
         },
         subgraphs = {
                 @NamedSubgraph(
@@ -72,15 +72,16 @@ public class DeckEntity {
     private Boolean isPublic;
 
 
-//    @ManyToOne
-//    @JoinColumn(name = "formats_tb_id")
-//    Format format;
+    @ManyToOne
+    @JoinColumn(name = "formats_tb_id")
+    Format format;
 
     public void addDeckCardEntity(DeckCardEntity deckCardEntity) {
         deckCardEntities.add(deckCardEntity);
     }
-    public void updateDeckMetaData(RequestDeckDto requestDeckDto) {
+    public void updateDeckMetaData(RequestDeckDto requestDeckDto, Format format) {
         this.deckName = requestDeckDto.getDeckName();
         this.isPublic = requestDeckDto.getIsPublic();
+        this.format = format;
     }
 }

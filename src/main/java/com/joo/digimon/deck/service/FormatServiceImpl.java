@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,11 +32,11 @@ public class FormatServiceImpl implements FormatService{
     }
 
     @Override
-    public List<FormatResponseDto> getFormatList() {
+    public List<FormatResponseDto> getFormatList(LocalDate latestReleaseCardDate) {
         List<FormatResponseDto> result = new ArrayList<>();
 
         Sort sort = Sort.by("startDate").descending();
-        List<Format> formats= formatRepository.findAll(sort);
+        List<Format> formats= formatRepository.findByEndDateIsAfter(latestReleaseCardDate,sort);
 
         for (Format format : formats) {
             result.add(new FormatResponseDto(format));

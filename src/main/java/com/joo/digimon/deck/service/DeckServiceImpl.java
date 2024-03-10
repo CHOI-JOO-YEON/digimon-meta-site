@@ -6,8 +6,10 @@ import com.joo.digimon.crawling.enums.CardType;
 import com.joo.digimon.deck.dto.*;
 import com.joo.digimon.deck.model.DeckCardEntity;
 import com.joo.digimon.deck.model.DeckEntity;
+import com.joo.digimon.deck.model.Format;
 import com.joo.digimon.deck.repository.DeckCardRepository;
 import com.joo.digimon.deck.repository.DeckRepository;
+import com.joo.digimon.deck.repository.FormatRepository;
 import com.joo.digimon.exception.model.ForbiddenAccessException;
 import com.joo.digimon.user.model.User;
 import jakarta.transaction.Transactional;
@@ -15,6 +17,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -25,6 +28,7 @@ public class DeckServiceImpl implements DeckService {
     private final DeckRepository deckRepository;
     private final DeckCardRepository deckCardRepository;
     private final CardImgRepository cardImgRepository;
+    private final FormatRepository formatRepository;
 
     @Value("${domain.url}")
     private String prefixUrl;
@@ -38,21 +42,34 @@ public class DeckServiceImpl implements DeckService {
     @Override
     @Transactional
     public ResponseDeckDto postDeck(RequestDeckDto requestDeckDto, User user) {
+        Format format = formatRepository.findById(requestDeckDto.getFormatId()).orElseThrow();
         DeckEntity deck = Optional.ofNullable(requestDeckDto.getDeckId())
                 .flatMap(deckRepository::findById)
-                .orElseGet(() -> deckRepository.save(DeckEntity.builder().user(user).deckCardEntities(new HashSet<>()).build()));
+                .orElseGet(() -> deckRepository.save(DeckEntity.builder()
+                        .user(user).deckCardEntities(new HashSet<>()).build()));
 
-        deck.updateDeckMetaData(requestDeckDto);
-        updateDeckCards(requestDeckDto, deck);
+        deck.updateDeckMetaData(requestDeckDto, format);
+        updateDeckCards(requestDeckDto, deck, format);
         return new ResponseDeckDto(deck, prefixUrl);
     }
 
     @Transactional
-    public void updateDeckCards(RequestDeckDto requestDeckDto, DeckEntity deck) {
+    public void updateDeckCards(RequestDeckDto requestDeckDto, DeckEntity deck, Format format) {
         List<Integer> cardIds = new ArrayList<>(requestDeckDto.getCardAndCntMap().keySet());
         Map<Integer, CardImgEntity> cardImgMap = cardImgRepository.findAllById(cardIds)
                 .stream()
                 .collect(Collectors.toMap(CardImgEntity::getId, Function.identity()));
+        Optional<CardImgEntity> latestReleaseCard = cardImgMap.values()
+                .stream()
+                .max(Comparator.comparing(cardImg -> cardImg.getCardEntity().getReleaseDate()));
+
+        if (latestReleaseCard.isPresent()) {
+            LocalDate cardReleaseDate = latestReleaseCard.get().getCardEntity().getReleaseDate();
+            if (cardReleaseDate.isAfter(format.getEndDate())) {
+                throw new IllegalArgumentException();
+            }
+        }
+
 
         Map<Integer, DeckCardEntity> currentCards = new HashMap<>();
         deck.getDeckCardEntities().forEach(card -> currentCards.put(card.getCardImgEntity().getId(), card));
@@ -121,7 +138,7 @@ public class DeckServiceImpl implements DeckService {
     }
 
     @Override
-    public TTSDeckFileDto exportTTSDeck(RequestDeckDto requestDeckDto){
+    public TTSDeckFileDto exportTTSDeck(RequestDeckDto requestDeckDto) {
         TTSDeckFileDto ttsDeckFileDto = new TTSDeckFileDto();
 
         int index = 1;
@@ -134,16 +151,16 @@ public class DeckServiceImpl implements DeckService {
                     continue;
                 }
                 for (int i = 0; i < integerEntry.getValue(); i++) {
-                    ttsDeckFileDto.addCard(index++,prefixUrl+cardImgEntity.getUploadUrl(),backDigimonUrl);
+                    ttsDeckFileDto.addCard(index++, prefixUrl + cardImgEntity.getUploadUrl(), backDigimonUrl);
                 }
-            }catch (Exception ignore){
+            } catch (Exception ignore) {
             }
         }
 
         for (CardImgEntity digitama : digitamas) {
             try {
-                ttsDeckFileDto.addCard(index++,prefixUrl+digitama.getUploadUrl(),backDigitamaUrl);
-            }catch (Exception ignore){
+                ttsDeckFileDto.addCard(index++, prefixUrl + digitama.getUploadUrl(), backDigitamaUrl);
+            } catch (Exception ignore) {
 
             }
         }
