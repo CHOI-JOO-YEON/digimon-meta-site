@@ -17,6 +17,7 @@ import lombok.*;
 @Builder
 @Table(name = "CRAWLING_CARDS_TB")
 @Setter
+@ToString
 public class CrawlingCardEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
