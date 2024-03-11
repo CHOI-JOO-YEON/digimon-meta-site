@@ -8,6 +8,7 @@ import com.joo.digimon.crawling.repository.CrawlingCardRepository;
 import com.joo.digimon.exception.model.CardParseException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -25,6 +26,7 @@ import java.util.regex.Pattern;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class CrawlingServiceImpl implements CrawlingService {
 
     private final CrawlingCardRepository crawlingCardRepository;
@@ -253,6 +255,8 @@ public class CrawlingServiceImpl implements CrawlingService {
             } catch (CardParseException e) {
                 crawlingCardEntity.updateErrorMessage(e.getMessage());
                 crawlingResultDto.addFailedCrawling(new CrawlingCardDto(crawlingCardEntity));
+            } catch (Exception e) {
+                log.error("{} 에서 {} 발생 ",crawlingCardEntity,e.getMessage());
             }
         }
 
