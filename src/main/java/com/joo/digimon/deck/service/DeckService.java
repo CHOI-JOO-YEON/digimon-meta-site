@@ -20,4 +20,6 @@ public interface DeckService {
 
     PagedResponseDeckDto findDecks(DeckSearchParameter deckSearchParameter);
 
+    void deleteDeck(Integer deckId, User user);
+
 }

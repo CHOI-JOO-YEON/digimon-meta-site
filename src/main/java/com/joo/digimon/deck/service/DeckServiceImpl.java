@@ -239,6 +239,18 @@ public class DeckServiceImpl implements DeckService {
         return new PagedResponseDeckDto(deckEntityPage, prefixUrl);
     }
 
+    @Override
+    @Transactional
+    public void deleteDeck(Integer deckId, User user) {
+        DeckEntity deck = deckRepository.findById(deckId).orElseThrow();
+        if (!deck.getUser().equals(user)) {
+            throw new ForbiddenAccessException();
+        }
+        deckCardRepository.deleteAll(deck.getDeckCardEntities());
+        deckColorRepository.deleteAll(deck.getDeckColors());
+        deckRepository.delete(deck);
+    }
+
     private BooleanBuilder getBuilderByDeckSearchParameter(DeckSearchParameter deckSearchParameter) {
         QDeckEntity qDeckEntity = QDeckEntity.deckEntity;
         BooleanBuilder builder = new BooleanBuilder();

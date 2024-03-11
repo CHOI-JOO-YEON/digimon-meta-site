@@ -49,5 +49,11 @@ public class DeckController {
         ResponseDeckDto responseDeckDto = deckService.importDeck(deckImportRequestDto);
         return new ResponseEntity<>(responseDeckDto,HttpStatus.OK);
     }
+    @PostMapping("/delete")
+    ResponseEntity<?> importDecks(@RequestParam("deck-id") Integer deckId, @CurUser User user) {
+        deckService.deleteDeck(deckId,user);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
 
 }
