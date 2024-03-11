@@ -6,6 +6,7 @@ import com.joo.digimon.security.handler.CustomAccessDeniedHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 
@@ -36,6 +37,9 @@ public class SecurityConfig {
                 .oauth2Login(oauth2 -> {})
                 .authorizeHttpRequests(
                         request -> request
+                                .requestMatchers("/api/crawling/**").hasRole("ADMIN")
+                                .requestMatchers(HttpMethod.POST, "/api/format/**").hasRole("ADMIN")
+                                .requestMatchers(HttpMethod.GET, "/api/format/**").permitAll()
                                 .requestMatchers("/api/crawling/**").hasRole("ADMIN")
                                 .requestMatchers("/api/manager/**").hasRole("MANAGER")
                                 .requestMatchers("/h2-console/**").permitAll()

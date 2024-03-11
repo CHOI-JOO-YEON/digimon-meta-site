@@ -10,6 +10,7 @@ import com.joo.digimon.crawling.enums.Rarity;
 import lombok.Data;
 import org.springframework.data.domain.Page;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -60,6 +61,7 @@ public class CardResponseDto {
         String smallImgUrl;
         Boolean isParallel;
         String sortString;
+        LocalDate releaseDate;
 
         public Card(CardImgEntity card, String prefixUrl) {
             this.cardId = card.getId();
@@ -88,6 +90,7 @@ public class CardResponseDto {
             this.isParallel = card.getIsParallel();
             this.sortString=card.getCardEntity().getSortString();
             this.smallImgUrl=prefixUrl+card.getSmallImgUrl();
+            this.releaseDate=card.getCardEntity().getReleaseDate();
         }
 
     }

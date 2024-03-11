@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.sql.Timestamp;
+import java.util.HashSet;
 import java.util.Set;
 
 @Entity
@@ -22,7 +23,7 @@ import java.util.Set;
         name = "Deck.detail",
         attributeNodes = {
                 @NamedAttributeNode(value = "deckCardEntities", subgraph = "deckCardSubgraph"),
-                @NamedAttributeNode(value = "user")
+                @NamedAttributeNode(value = "user"),@NamedAttributeNode(value = "format"), @NamedAttributeNode(value = "deckColors")
         },
         subgraphs = {
                 @NamedSubgraph(
@@ -64,6 +65,10 @@ public class DeckEntity {
     @OneToMany(mappedBy = "deckEntity")
     Set<DeckCardEntity> deckCardEntities;
 
+
+    @OneToMany(mappedBy = "deckEntity")
+    Set<DeckColor> deckColors;
+
     private String deckName;
 
     @CreationTimestamp
@@ -72,15 +77,23 @@ public class DeckEntity {
     private Boolean isPublic;
 
 
-//    @ManyToOne
-//    @JoinColumn(name = "formats_tb_id")
-//    Format format;
+    @ManyToOne
+    @JoinColumn(name = "formats_tb_id")
+    Format format;
 
     public void addDeckCardEntity(DeckCardEntity deckCardEntity) {
         deckCardEntities.add(deckCardEntity);
     }
-    public void updateDeckMetaData(RequestDeckDto requestDeckDto) {
+    public void updateDeckMetaData(RequestDeckDto requestDeckDto, Format format) {
         this.deckName = requestDeckDto.getDeckName();
         this.isPublic = requestDeckDto.getIsPublic();
+        this.format = format;
+    }
+
+    public void addDeckColor(DeckColor deckColor){
+        if(this.deckColors == null){
+            this.deckColors = new HashSet<>();
+        }
+        deckColors.add(deckColor);
     }
 }

@@ -1,30 +1,27 @@
 package com.joo.digimon.deck.model;
 
+import com.joo.digimon.crawling.enums.Color;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDate;
-
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 @Getter
-@Table(name = "FORMATS_TB")
-public class Format {
+@Table(name = "DECK_COLORS_TB")
+public class DeckColor {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Integer id;
+    private Long id;
 
-    String name;
+    @ManyToOne
+    @JoinColumn(name = "decks_tb_id")
+    private DeckEntity deckEntity;
 
-//    @ManyToOne
-//    @JoinColumn(name = "languages_tb_id")
-//    Language language;
-
-    LocalDate startDate;
-    LocalDate endDate;
+    @Enumerated(EnumType.STRING)
+    private Color color;
 }

@@ -15,4 +15,9 @@ public interface DeckService {
     ResponseDeckDto importDeck(DeckImportRequestDto deckImportRequestDto);
 
     TTSDeckFileDto exportTTSDeck(RequestDeckDto requestDeckDto);
+
+    PagedResponseDeckDto finMyDecks(User user, DeckSearchParameter deckSearchParameter);
+
+    PagedResponseDeckDto findDecks(DeckSearchParameter deckSearchParameter);
+
 }
