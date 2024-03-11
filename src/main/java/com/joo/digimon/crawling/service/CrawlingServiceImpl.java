@@ -59,6 +59,8 @@ public class CrawlingServiceImpl implements CrawlingService {
             } catch (CardParseException e) {
                 crawlingCardEntity.updateErrorMessage(e.getMessage());
                 crawlingResultDto.addFailedCrawling(new CrawlingCardDto(crawlingCardEntity));
+            } catch (Exception e) {
+                log.error("{} 에서 {} 발생 {}",crawlingCardEntity,e.getMessage() ,e);
             }
         }
 
