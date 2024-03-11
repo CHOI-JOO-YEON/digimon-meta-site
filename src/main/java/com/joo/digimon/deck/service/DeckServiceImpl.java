@@ -230,7 +230,7 @@ public class DeckServiceImpl implements DeckService {
     public PagedResponseDeckDto findDecks(DeckSearchParameter deckSearchParameter) {
         BooleanBuilder builder = getBuilderByDeckSearchParameter(deckSearchParameter);
         QDeckEntity qDeckEntity = QDeckEntity.deckEntity;
-        builder.and(qDeckEntity.isPublic.eq(false));
+        builder.and(qDeckEntity.isPublic.eq(true));
         Pageable pageable = generatePageableByDeckSearchParameter(deckSearchParameter);
 
         Page<DeckEntity> deckEntityPage = deckRepository.findAll(builder, pageable);
