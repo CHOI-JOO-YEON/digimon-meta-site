@@ -218,6 +218,10 @@ public class CrawlingServiceImpl implements CrawlingService {
             stringBuilder.append("D");
         } else if (cardNo.startsWith("P")) {
             stringBuilder.append("Z");
+            String[] parts = cardNo.split("-");
+            String firstNumberPart = String.format("%03d", Integer.parseInt(parts[1].replaceAll("\\D", "")));
+            stringBuilder.append(firstNumberPart);
+            return stringBuilder.toString();
         } else {
             stringBuilder.append("E");
         }
