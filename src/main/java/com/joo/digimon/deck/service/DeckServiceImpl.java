@@ -1,20 +1,27 @@
 package com.joo.digimon.deck.service;
 
 import com.joo.digimon.card.model.CardImgEntity;
+import com.joo.digimon.card.model.QCardEntity;
+import com.joo.digimon.card.model.QCardImgEntity;
 import com.joo.digimon.card.repository.CardImgRepository;
 import com.joo.digimon.crawling.enums.CardType;
+import com.joo.digimon.crawling.enums.Color;
 import com.joo.digimon.deck.dto.*;
-import com.joo.digimon.deck.model.DeckCardEntity;
-import com.joo.digimon.deck.model.DeckEntity;
-import com.joo.digimon.deck.model.Format;
+import com.joo.digimon.deck.model.*;
 import com.joo.digimon.deck.repository.DeckCardRepository;
+import com.joo.digimon.deck.repository.DeckColorRepository;
 import com.joo.digimon.deck.repository.DeckRepository;
 import com.joo.digimon.deck.repository.FormatRepository;
 import com.joo.digimon.exception.model.ForbiddenAccessException;
 import com.joo.digimon.user.model.User;
+import com.querydsl.core.BooleanBuilder;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -29,6 +36,7 @@ public class DeckServiceImpl implements DeckService {
     private final DeckCardRepository deckCardRepository;
     private final CardImgRepository cardImgRepository;
     private final FormatRepository formatRepository;
+    private final DeckColorRepository deckColorRepository;
 
     @Value("${domain.url}")
     private String prefixUrl;
@@ -50,7 +58,42 @@ public class DeckServiceImpl implements DeckService {
 
         deck.updateDeckMetaData(requestDeckDto, format);
         updateDeckCards(requestDeckDto, deck, format);
+        updateDeckColors(requestDeckDto.getColors(), deck);
         return new ResponseDeckDto(deck, prefixUrl);
+    }
+
+    private void updateDeckColors(List<Color> colors, DeckEntity deck) {
+
+        List<DeckColor> addColorList = new ArrayList<>();
+        List<DeckColor> removeColorList = new ArrayList<>();
+        if (deck.getDeckColors() == null) {
+            for (Color color : colors) {
+                deck.addDeckColor(DeckColor.builder()
+                        .color(color)
+                        .deckEntity(deck)
+                        .build());
+            }
+            deckColorRepository.saveAll(deck.getDeckColors());
+            return;
+        }
+
+        Set<Color> alreadyReflectColors = deck.getDeckColors().stream().map(DeckColor::getColor).collect(Collectors.toSet());
+        for (DeckColor deckColor : deck.getDeckColors()) {
+            if (!colors.contains(deckColor.getColor())) {
+                removeColorList.add(deckColor);
+            }
+        }
+        for (Color color : colors) {
+            if (!alreadyReflectColors.contains(color)) {
+                addColorList.add(DeckColor.builder()
+                        .color(color)
+                        .deckEntity(deck)
+                        .build());
+            }
+        }
+
+        deckColorRepository.deleteAll(removeColorList);
+        deckColorRepository.saveAll(addColorList);
     }
 
     @Transactional
@@ -61,11 +104,12 @@ public class DeckServiceImpl implements DeckService {
                 .collect(Collectors.toMap(CardImgEntity::getId, Function.identity()));
         Optional<CardImgEntity> latestReleaseCard = cardImgMap.values()
                 .stream()
-                .max(Comparator.comparing(cardImg -> cardImg.getCardEntity().getReleaseDate()));
+                .max(Comparator.comparing(cardImg -> cardImg.getCardEntity().getReleaseDate(), Comparator.nullsLast(Comparator.naturalOrder())));
 
         if (latestReleaseCard.isPresent()) {
             LocalDate cardReleaseDate = latestReleaseCard.get().getCardEntity().getReleaseDate();
-            if (cardReleaseDate.isAfter(format.getEndDate())) {
+
+            if (cardReleaseDate != null && cardReleaseDate.isAfter(format.getEndDate())) {
                 throw new IllegalArgumentException();
             }
         }
@@ -166,6 +210,68 @@ public class DeckServiceImpl implements DeckService {
         }
 
         return ttsDeckFileDto;
+    }
+
+    @Override
+    public PagedResponseDeckDto finMyDecks(User user, DeckSearchParameter deckSearchParameter) {
+        BooleanBuilder builder = getBuilderByDeckSearchParameter(deckSearchParameter);
+        QDeckEntity qDeckEntity = QDeckEntity.deckEntity;
+        builder.and(qDeckEntity.user.eq(user));
+
+        Pageable pageable = generatePageableByDeckSearchParameter(deckSearchParameter);
+
+        Page<DeckEntity> deckEntityPage = deckRepository.findAll(builder, pageable);
+
+
+        return new PagedResponseDeckDto(deckEntityPage, prefixUrl);
+    }
+
+    @Override
+    public PagedResponseDeckDto findDecks(DeckSearchParameter deckSearchParameter) {
+        BooleanBuilder builder = getBuilderByDeckSearchParameter(deckSearchParameter);
+        QDeckEntity qDeckEntity = QDeckEntity.deckEntity;
+        builder.and(qDeckEntity.isPublic.eq(false));
+        Pageable pageable = generatePageableByDeckSearchParameter(deckSearchParameter);
+
+        Page<DeckEntity> deckEntityPage = deckRepository.findAll(builder, pageable);
+
+
+        return new PagedResponseDeckDto(deckEntityPage, prefixUrl);
+    }
+
+    private BooleanBuilder getBuilderByDeckSearchParameter(DeckSearchParameter deckSearchParameter) {
+        QDeckEntity qDeckEntity = QDeckEntity.deckEntity;
+        BooleanBuilder builder = new BooleanBuilder();
+
+        //검색어
+        if (deckSearchParameter.getSearchString() != null && !deckSearchParameter.getSearchString().isEmpty()) {
+            builder.and(
+                    qDeckEntity.deckName.containsIgnoreCase(deckSearchParameter.getSearchString())
+            );
+        }
+
+        //색상
+        if (deckSearchParameter.getColorOperation() == 1) {
+            builder.and(qDeckEntity.deckColors.size().eq(deckSearchParameter.getColors().size()));
+            for (Color color : deckSearchParameter.getColors()) {
+                builder.and(qDeckEntity.deckColors.any().color.eq(color));
+            }
+        } else {
+            builder.and(qDeckEntity.deckColors.any().color.in(deckSearchParameter.getColors()));
+        }
+
+        //포맷
+        if (deckSearchParameter.getFormatId() != null) {
+            builder.and(qDeckEntity.format.id.eq(deckSearchParameter.getFormatId()));
+        }
+
+
+        return builder;
+
+    }
+
+    private Pageable generatePageableByDeckSearchParameter(DeckSearchParameter deckSearchParameter) {
+        return PageRequest.of(deckSearchParameter.getPage() - 1, deckSearchParameter.getSize());
     }
 
 }

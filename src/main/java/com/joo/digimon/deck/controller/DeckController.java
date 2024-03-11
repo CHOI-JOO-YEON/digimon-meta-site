@@ -12,6 +12,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.net.http.HttpResponse;
+import java.util.ArrayList;
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/deck")
 @RequiredArgsConstructor
@@ -23,11 +27,19 @@ public class DeckController {
         return new ResponseEntity<>(deckService.postDeck(requestDeckDto, user),HttpStatus.OK);
     }
 
-    @GetMapping()
-    ResponseEntity<?> findDecks(@CurUser User user, @RequestBody DeckSearchParameter deckSearchParameter) {
-        return new ResponseEntity<>(deckService.getDecks(deckSearchParameter, user), HttpStatus.OK);
-    }
+//    @GetMapping()
+//    ResponseEntity<?> findDecks(@CurUser User user, @RequestBody DeckSearchParameter deckSearchParameter) {
+//        return new ResponseEntity<>(deckService.getDecks(deckSearchParameter, user), HttpStatus.OK);
+//    }
 
+    @GetMapping()
+    ResponseEntity<?> findDecks(@CurUser User user, @ModelAttribute DeckSearchParameter deckSearchParameter) {
+        if (deckSearchParameter.getIsMyDeck()) {
+            return new ResponseEntity<>(deckService.finMyDecks(user, deckSearchParameter), HttpStatus.OK);
+        }
+        return new ResponseEntity<>(deckService.findDecks(deckSearchParameter), HttpStatus.OK);
+
+    }
     @GetMapping("/detail")
     ResponseEntity<?> findDecks(@CurUser User user,@RequestParam("deck-id") Integer deckId) {
         return new ResponseEntity<>(deckService.findDeck(deckId, user), HttpStatus.OK);

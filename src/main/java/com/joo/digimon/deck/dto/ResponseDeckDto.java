@@ -10,12 +10,15 @@ import com.joo.digimon.crawling.enums.Color;
 import com.joo.digimon.crawling.enums.Form;
 import com.joo.digimon.crawling.enums.Rarity;
 import com.joo.digimon.deck.model.DeckCardEntity;
+import com.joo.digimon.deck.model.DeckColor;
 import com.joo.digimon.deck.model.DeckEntity;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Data
 public class ResponseDeckDto {
@@ -24,6 +27,7 @@ public class ResponseDeckDto {
     Integer deckId;
     String deckName;
     List<Card> cards;
+    Set<Color> colors;
 
     public ResponseDeckDto(DeckEntity deck, String prefixUrl) {
         this.authorId = deck.getUser().getId();
@@ -33,6 +37,10 @@ public class ResponseDeckDto {
         cards = new ArrayList<>();
         for (DeckCardEntity deckCardEntity : deck.getDeckCardEntities()) {
             cards.add(new Card(deckCardEntity,prefixUrl));
+        }
+        colors = new HashSet<>();
+        for (DeckColor deckColor : deck.getDeckColors()) {
+            colors.add(deckColor.getColor());
         }
     }
 

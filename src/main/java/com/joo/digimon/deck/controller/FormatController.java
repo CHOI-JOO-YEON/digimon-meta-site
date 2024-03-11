@@ -18,7 +18,7 @@ public class FormatController {
     private final FormatService formatService;
 
     @GetMapping
-    ResponseEntity<?> getAllFormat(@RequestParam LocalDate latestReleaseCardDate){
+    ResponseEntity<?> getAllFormat(@RequestParam("date") LocalDate latestReleaseCardDate){
         return new ResponseEntity<>(formatService.getFormatList(latestReleaseCardDate), HttpStatus.OK);
     }
 

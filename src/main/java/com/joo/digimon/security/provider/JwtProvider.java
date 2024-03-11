@@ -54,7 +54,7 @@ public class JwtProvider {
     }
 
     public User getUserFromToken(String token) {
-        System.out.println(token);
+//        System.out.println(token);
         Jws<Claims> claimsJws = Jwts.parser().verifyWith(key).build().parseSignedClaims(token);
 
 
