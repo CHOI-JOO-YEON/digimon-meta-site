@@ -256,7 +256,7 @@ public class CrawlingServiceImpl implements CrawlingService {
                 crawlingCardEntity.updateErrorMessage(e.getMessage());
                 crawlingResultDto.addFailedCrawling(new CrawlingCardDto(crawlingCardEntity));
             } catch (Exception e) {
-                log.error("{} 에서 {} 발생 ",crawlingCardEntity,e.getMessage());
+                log.error("{} 에서 {} 발생 {}",crawlingCardEntity,e.getMessage() ,e);
             }
         }
 
