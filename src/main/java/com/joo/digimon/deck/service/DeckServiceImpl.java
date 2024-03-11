@@ -191,7 +191,9 @@ public class DeckServiceImpl implements DeckService {
             try {
                 CardImgEntity cardImgEntity = cardImgRepository.findById(integerEntry.getKey()).orElseThrow();
                 if (cardImgEntity.getCardEntity().getCardType().equals(CardType.DIGITAMA)) {
-                    digitamas.add(cardImgEntity);
+                    for (int i = 0; i < integerEntry.getValue(); i++) {
+                        digitamas.add(cardImgEntity);
+                    }
                     continue;
                 }
                 for (int i = 0; i < integerEntry.getValue(); i++) {
