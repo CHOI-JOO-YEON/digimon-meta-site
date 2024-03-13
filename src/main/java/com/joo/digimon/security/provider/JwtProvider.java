@@ -61,9 +61,9 @@ public class JwtProvider {
         Claims claims = claimsJws.getPayload();
         String auth = claims.get("auth-supplier", String.class);
         if (auth.equals("USERNAME")) {
-            return userRepository.findByUsername(claims.getSubject()).orElseThrow();
+            return userRepository.findByUsername(claims.getSubject()).orElse(null);
         }
-        return userRepository.findByOauthId(claims.getSubject()).orElseThrow();
+        return userRepository.findByOauthId(claims.getSubject()).orElse(null);
     }
 
     public String getJwtFromCookie(HttpServletRequest request) {
