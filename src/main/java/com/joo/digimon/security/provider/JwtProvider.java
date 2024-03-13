@@ -54,16 +54,15 @@ public class JwtProvider {
     }
 
     public User getUserFromToken(String token) {
-//        System.out.println(token);
         Jws<Claims> claimsJws = Jwts.parser().verifyWith(key).build().parseSignedClaims(token);
 
 
         Claims claims = claimsJws.getPayload();
         String auth = claims.get("auth-supplier", String.class);
         if (auth.equals("USERNAME")) {
-            return userRepository.findByUsername(claims.getSubject()).orElse(null);
+            return userRepository.findByUsername(claims.getSubject()).orElseThrow();
         }
-        return userRepository.findByOauthId(claims.getSubject()).orElse(null);
+        return userRepository.findByOauthId(claims.getSubject()).orElseThrow();
     }
 
     public String getJwtFromCookie(HttpServletRequest request) {

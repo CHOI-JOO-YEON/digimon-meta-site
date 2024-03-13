@@ -26,7 +26,10 @@ public class UserArgumentResolver implements HandlerMethodArgumentResolver {
     public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer, NativeWebRequest webRequest, WebDataBinderFactory binderFactory) throws Exception {
         HttpServletRequest request = (HttpServletRequest) webRequest.getNativeRequest();
         String token = jwtProvider.getJwtFromCookie(request);
-        return jwtProvider.getUserFromToken(token);
+        if (token != null) {
+            return jwtProvider.getUserFromToken(token);
+        }
+        return null;
     }
 
 }
