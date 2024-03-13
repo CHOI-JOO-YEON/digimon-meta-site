@@ -11,7 +11,7 @@ public enum Form {
     ULTIMATE("Ultimate","완전체"),
     MEGA("Mega","궁극체"),
     ARMOR("Armor Form","아머체"),
-    D_REAPER("D-Reaper","데리퍼"),
+    D_REAPER("D-Reaper","디・리퍼"),
     UNKNOWN("Unknown","불명"),
     HYBRID("Hybrid","하이브리드체");
 
