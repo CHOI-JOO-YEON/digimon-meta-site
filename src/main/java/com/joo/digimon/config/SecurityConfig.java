@@ -48,6 +48,7 @@ public class SecurityConfig {
                                 .requestMatchers("/h2-console/**").permitAll()
                                 .requestMatchers("/api/account/**").permitAll()
                                 .requestMatchers("/api/deck/import/**").permitAll()
+                                .requestMatchers(HttpMethod.GET,"/api/deck/**").permitAll()
                                 .requestMatchers("/api/card/**").permitAll()
 
                                 .anyRequest().authenticated())
