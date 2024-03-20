@@ -41,7 +41,7 @@ public class DeckController {
 
     }
     @GetMapping("/detail")
-    ResponseEntity<?> findDecks(@CurUser(required = false) User user,@RequestParam("deck-id") Integer deckId) {
+    ResponseEntity<?> findDeck(@CurUser(required = false) User user,@RequestParam("deck-id") Integer deckId) {
         return new ResponseEntity<>(deckService.findDeck(deckId, user), HttpStatus.OK);
     }
     @PostMapping("/import")
