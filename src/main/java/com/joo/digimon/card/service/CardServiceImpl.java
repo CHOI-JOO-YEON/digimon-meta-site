@@ -7,6 +7,9 @@ import com.joo.digimon.card.model.*;
 import com.joo.digimon.card.repository.CardImgRepository;
 import com.joo.digimon.card.repository.NoteRepository;
 import com.querydsl.core.BooleanBuilder;
+import com.querydsl.core.types.Order;
+import com.querydsl.core.types.OrderSpecifier;
+import com.querydsl.core.types.dsl.PathBuilder;
 import com.querydsl.jpa.impl.JPAQuery;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
@@ -147,22 +150,36 @@ public class CardServiceImpl implements CardService {
                 .from(qCardImgEntity)
                 .where(builder)
                 .fetch().size();
-
         List<Integer> cardIds = query.select(qCardImgEntity.id)
                 .from(qCardImgEntity)
                 .where(builder)
+                .orderBy(getOrderSpecifiers(sort))
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .fetch();
 
 
 
-        List<CardImgEntity> cardImgEntities = cardImgRepository.findByIdIn(cardIds);
+        List<CardImgEntity> cardImgEntities = cardImgRepository.findByIdIn(cardIds,sort);
         int totalPages = (int) Math.ceil((double) totalCount / cardRequestDto.getSize());
 
         return new CardResponseDto(cardImgEntities, prefixUrl, cardRequestDto.getPage() - 1, totalCount, totalPages);
     }
+    private OrderSpecifier<?>[] getOrderSpecifiers(Sort sort) {
+        return sort.stream()
+                .map(this::toOrderSpecifier)
+                .toArray(OrderSpecifier[]::new);
+    }
 
+    private OrderSpecifier<?> toOrderSpecifier(Sort.Order order) {
+        PathBuilder<CardImgEntity> entityPath = new PathBuilder<>(CardImgEntity.class, "cardImgEntity");
+
+        if (order.isAscending()) {
+            return new OrderSpecifier(Order.ASC, entityPath.get(order.getProperty()));
+        } else {
+            return new OrderSpecifier(Order.DESC, entityPath.get(order.getProperty()));
+        }
+    }
     @Override
     public List<NoteDto> getNotes() {
         List<NoteDto> noteDtoList = new ArrayList<>();

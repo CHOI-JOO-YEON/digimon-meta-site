@@ -6,6 +6,7 @@ import com.joo.digimon.crawling.model.CrawlingCardEntity;
 import com.querydsl.core.types.Predicate;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.querydsl.QuerydslPredicateExecutor;
@@ -15,7 +16,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface CardImgRepository extends JpaRepository<CardImgEntity,Integer>, QuerydslPredicateExecutor<CardImgEntity> {
+public interface CardImgRepository extends JpaRepository<CardImgEntity, Integer>, QuerydslPredicateExecutor<CardImgEntity> {
     @EntityGraph("CardImgEntity.detail")
     List<CardImgEntity> findByUploadUrlIsNull();
 
@@ -23,7 +24,7 @@ public interface CardImgRepository extends JpaRepository<CardImgEntity,Integer>,
     Optional<CardImgEntity> findByCardEntity(CardEntity cardEntity);
 
     @EntityGraph("CardImgEntity.detail")
-    List<CardImgEntity> findByIdIn(List<Integer> ids);
+    List<CardImgEntity> findByIdIn(List<Integer> ids, Sort sort);
 
     Optional<CardImgEntity> findByCrawlingCardEntity(CrawlingCardEntity crawlingCardEntity);
 
