@@ -35,6 +35,16 @@ public class CardResponseDto {
         }
     }
 
+    public CardResponseDto(List<CardImgEntity> entities, String prefixUrl, int currentPage, int totalElements, int totalPages) {
+        this.totalPages = totalPages;
+        this.totalElements = totalElements;
+        this.currentPage = currentPage;
+        cards = new ArrayList<>();
+        for (CardImgEntity cardImgEntity : entities) {
+            cards.add(new Card(cardImgEntity, prefixUrl));
+        }
+    }
+
     @Data
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private class Card {

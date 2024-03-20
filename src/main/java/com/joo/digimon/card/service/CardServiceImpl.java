@@ -3,19 +3,15 @@ package com.joo.digimon.card.service;
 import com.joo.digimon.card.dto.CardRequestDto;
 import com.joo.digimon.card.dto.CardResponseDto;
 import com.joo.digimon.card.dto.NoteDto;
-import com.joo.digimon.card.model.CardImgEntity;
-import com.joo.digimon.card.model.NoteEntity;
-import com.joo.digimon.card.model.QCardEntity;
-import com.joo.digimon.card.model.QCardImgEntity;
+import com.joo.digimon.card.model.*;
 import com.joo.digimon.card.repository.CardImgRepository;
 import com.joo.digimon.card.repository.NoteRepository;
 import com.querydsl.core.BooleanBuilder;
+import com.querydsl.jpa.impl.JPAQuery;
+import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -26,14 +22,17 @@ import java.util.List;
 public class CardServiceImpl implements CardService {
     private final CardImgRepository cardImgRepository;
     private final NoteRepository noteRepository;
+    private final EntityManager entityManager;
 
     @Value("${domain.url}")
     private String prefixUrl;
 
     @Override
     public CardResponseDto searchCards(CardRequestDto cardRequestDto) {
-        QCardEntity qCardEntity = QCardEntity.cardEntity;
         QCardImgEntity qCardImgEntity = QCardImgEntity.cardImgEntity;
+        QCardEntity qCardEntity = QCardEntity.cardEntity;
+        QCardCombineTypeEntity qCardCombineTypeEntity = QCardCombineTypeEntity.cardCombineTypeEntity;
+        QTypeEntity qTypeEntity = QTypeEntity.typeEntity;
         BooleanBuilder builder = new BooleanBuilder();
 
         //검색어
@@ -142,10 +141,26 @@ public class CardServiceImpl implements CardService {
 
 
         pageable = PageRequest.of(cardRequestDto.getPage() - 1, cardRequestDto.getSize(), sort);
-        Page<CardImgEntity> cardImgEntityPage = cardImgRepository.findAll(builder, pageable);
+
+        JPAQuery<Long> query = new JPAQuery<>(entityManager);
+        int totalCount = query.select(qCardImgEntity.id)
+                .from(qCardImgEntity)
+                .where(builder)
+                .fetch().size();
+
+        List<Integer> cardIds = query.select(qCardImgEntity.id)
+                .from(qCardImgEntity)
+                .where(builder)
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
+                .fetch();
 
 
-        return new CardResponseDto(cardImgEntityPage, prefixUrl);
+
+        List<CardImgEntity> cardImgEntities = cardImgRepository.findByIdIn(cardIds);
+        int totalPages = (int) Math.ceil((double) totalCount / cardRequestDto.getSize());
+
+        return new CardResponseDto(cardImgEntities, prefixUrl, cardRequestDto.getPage() - 1, totalCount, totalPages);
     }
 
     @Override
