@@ -1,5 +1,6 @@
 package com.joo.digimon.card.model;
 
+import com.joo.digimon.crawling.dto.ReflectCardRequestDto;
 import com.joo.digimon.crawling.enums.CardType;
 import com.joo.digimon.crawling.enums.Color;
 import com.joo.digimon.crawling.enums.Form;
@@ -63,4 +64,7 @@ public class CardEntity {
     String sortString;
 
     LocalDate releaseDate;
+
+    Boolean isOnlyEnCard;
+
 }

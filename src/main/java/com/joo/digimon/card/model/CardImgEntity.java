@@ -53,6 +53,7 @@ public class CardImgEntity {
     NoteEntity noteEntity;
 
     Boolean isParallel;
+    Boolean isEnCard;
 
     public void updateUploadUrl(String originalPrefix, String smallPrefix, String url) {
         this.uploadUrl = originalPrefix+url;

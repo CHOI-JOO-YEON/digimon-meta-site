@@ -44,6 +44,29 @@ public class CardParseServiceImpl implements CardParseService {
         return dto;
     }
 
+    @Override
+    public ReflectCardRequestDto crawlingCardParseEn(CrawlingCardEntity crawlingCard) throws CardParseException {
+        ReflectCardRequestDto dto = new ReflectCardRequestDto();
+        dto.setId(crawlingCard.getId());
+        dto.setCardNo(parseCardNo(crawlingCard.getCardNo()));
+        dto.setRarity(parseCardRarity(crawlingCard.getRarity()));
+        dto.setCardType(parseCardType(crawlingCard.getCardType()));
+        dto.setLv(parseLv(crawlingCard.getLv(), dto.getCardType()));
+        dto.setIsParallel(crawlingCard.getIsParallel());
+        dto.setCardName(parseCardName(crawlingCard.getCardName()));
+        dto.setDp(parseDp(crawlingCard.getDP()));
+        dto.setPlayCost(parsePlayCost(crawlingCard.getPlayCost()));
+        dto.setEffect(parseEffect(crawlingCard.getEffect()));
+        dto.setSourceEffect(parseSourceEffect(crawlingCard.getSourceEffect()));
+        dto.setNote(parseNote(crawlingCard.getNote()));
+
+        dto.setColor1(parseColor(crawlingCard.getColor1()));
+        dto.setColor2(parseColor(crawlingCard.getColor2()));
+        dto.setOriginUrl(parseUrl(crawlingCard.getImgUrl()));
+
+        return dto;
+    }
+
     private String parseCardNo(String cardNo) throws CardParseException {
         if (cardNo == null) {
             throw new CardParseException(CardParseExceptionMessage.NO_CARD_NO);
