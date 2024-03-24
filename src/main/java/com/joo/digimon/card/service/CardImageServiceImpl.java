@@ -12,8 +12,6 @@ import org.springframework.stereotype.Service;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.URL;
 import java.util.List;
@@ -25,6 +23,7 @@ public class CardImageServiceImpl implements CardImageService {
     private final CardImgRepository cardImgRepository;
     private final ScalingClient scalingClient;
     private static final String KO_URL_PREFIX = "https://digimoncard.co.kr/";
+    private static final String EN_URL_PREFIX = "https://world.digimoncard.com/";
 
     @Value("${img.original}")
     private String originalUploadPrefix;
@@ -35,17 +34,16 @@ public class CardImageServiceImpl implements CardImageService {
     private final static Integer MIN_WIDTH = 600;
     private final static Integer MIN_HEIGHT = 900;
 
-
     @Override
     @Transactional
-    public int uploadNotUploadYetCardImages() {
+    public int uploadNotUploadYetKorCardImages() {
         int cnt = 0;
 
-        List<CardImgEntity> cardImgEntityList = cardImgRepository.findByUploadUrlIsNull();
+        List<CardImgEntity> cardImgEntityList = cardImgRepository.findByUploadUrlIsNullAndIsEnCardIsNull();
 
         for (CardImgEntity cardImgEntity : cardImgEntityList) {
             try {
-                uploadImage(cardImgEntity);
+                uploadImage(cardImgEntity, KO_URL_PREFIX);
                 cnt++;
             } catch (IOException ignore) {
 
@@ -56,9 +54,29 @@ public class CardImageServiceImpl implements CardImageService {
         return cnt;
     }
 
-    private void uploadImage(CardImgEntity cardImgEntity) throws IOException {
+    @Override
+    @Transactional
+    public int uploadNotUploadYetEnCardImages() {
+        int cnt = 0;
 
-        BufferedImage image = getImageData(KO_URL_PREFIX + cardImgEntity.getOriginUrl());
+        List<CardImgEntity> cardImgEntityList = cardImgRepository.findByUploadUrlIsNullAndIsEnCardTrue();
+
+        for (CardImgEntity cardImgEntity : cardImgEntityList) {
+            try {
+                uploadImageEn(cardImgEntity, EN_URL_PREFIX);
+                cnt++;
+            } catch (IOException ignore) {
+
+            }
+
+        }
+
+        return cnt;
+    }
+
+    private void uploadImage(CardImgEntity cardImgEntity, String urlPrefix) throws IOException {
+
+        BufferedImage image = getImageData(urlPrefix + cardImgEntity.getOriginUrl());
         BufferedImage compressedImage = Thumbnails.of(image)
                 .size(200, 280)
                 .asBufferedImage();
@@ -72,15 +90,29 @@ public class CardImageServiceImpl implements CardImageService {
         cardImgEntity.updateUploadUrl(originalUploadPrefix,smallUploadPrefix,keyNameBuilder.toString());
     }
 
+    private void uploadImageEn(CardImgEntity cardImgEntity, String urlPrefix) throws IOException {
+
+        BufferedImage image = getImageData(urlPrefix + cardImgEntity.getOriginUrl());
+
+        StringBuilder keyNameBuilder = new StringBuilder();
+        keyNameBuilder.append(cardImgEntity.getCardEntity().getCardNo());
+        if (cardImgEntity.getIsParallel()) {
+            keyNameBuilder.append("P").append(cardImgEntity.getId());
+        }
+        String uploadPrefix = originalUploadPrefix+"en/";
+        s3Util.uploadImageToS3(uploadPrefix + keyNameBuilder, image, "png");
+        cardImgEntity.updateUploadUrl(uploadPrefix,uploadPrefix,keyNameBuilder.toString());
+    }
+
     private BufferedImage getImageData(String imageUrl) throws IOException {
         BufferedImage image = ImageIO.read(new URL(imageUrl));
 
-        if (image.getWidth() < MIN_WIDTH || image.getHeight() < MIN_HEIGHT) {
-            byte[] scaledImageData = scaleImageUsingWaifu2x(imageUrl);
-            if (scaledImageData != null) {
-                image = ImageIO.read(new ByteArrayInputStream(scaledImageData));
-            }
-        }
+//        if (image.getWidth() < MIN_WIDTH || image.getHeight() < MIN_HEIGHT) {
+//            byte[] scaledImageData = scaleImageUsingWaifu2x(imageUrl);
+//            if (scaledImageData != null) {
+//                image = ImageIO.read(new ByteArrayInputStream(scaledImageData));
+//            }
+//        }
         BufferedImage trimmedImage = trimImageTransparent(image);
         return trimmedImage;
     }

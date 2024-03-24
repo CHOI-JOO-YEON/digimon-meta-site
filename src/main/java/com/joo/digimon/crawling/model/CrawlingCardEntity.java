@@ -51,6 +51,7 @@ public class CrawlingCardEntity {
 
     String errorMessage;
     Boolean isReflect;
+    Boolean isEnCard;
 
     public CrawlingCardEntity(CrawlingCardDto dto) {
         this.cardNo = dto.getCardNo();
@@ -80,6 +81,30 @@ public class CrawlingCardEntity {
 
     @OneToOne(mappedBy = "crawlingCardEntity")
     ParallelCardImgEntity parallelCardImgEntity;
+
+    public CrawlingCardEntity(CrawlingCardDto dto, boolean isEnCard) {
+        this.cardNo = dto.getCardNo();
+        this.rarity = dto.getRarity();
+        this.cardType = dto.getCardType();
+        this.lv = dto.getLv();
+        this.isParallel = dto.getIsParallel();
+        this.cardName = dto.getCardName();
+        this.form = dto.getForm();
+        this.attribute = dto.getAttribute();
+        this.type = dto.getType();
+        this.dP = dto.getDP();
+        this.playCost = dto.getPlayCost();
+        this.digivolveCost1 = dto.getDigivolveCost1();
+        this.digivolveCost2 = dto.getDigivolveCost2();
+        this.effect = dto.getEffect();
+        this.sourceEffect = dto.getSourceEffect();
+        this.note = dto.getNote();
+        this.color1 = dto.getColor1();
+        this.color2 = dto.getColor2();
+        this.imgUrl = dto.getImgUrl();
+        this.isReflect = false;
+        this.isEnCard =isEnCard;
+    }
 
     public void updateErrorMessage(String errorMessage) {
         this.errorMessage = errorMessage;

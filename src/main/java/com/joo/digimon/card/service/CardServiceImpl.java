@@ -9,6 +9,7 @@ import com.joo.digimon.card.repository.NoteRepository;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
+import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.PathBuilder;
 import com.querydsl.jpa.impl.JPAQuery;
 import jakarta.persistence.EntityManager;
@@ -37,6 +38,20 @@ public class CardServiceImpl implements CardService {
         QCardCombineTypeEntity qCardCombineTypeEntity = QCardCombineTypeEntity.cardCombineTypeEntity;
         QTypeEntity qTypeEntity = QTypeEntity.typeEntity;
         BooleanBuilder builder = new BooleanBuilder();
+
+        //영문
+        if (!cardRequestDto.getIsEnglishCardInclude()) {
+//            builder.and(qCardEntity.isOnlyEnCard.isNull().or(qCardEntity.isOnlyEnCard.isFalse()));
+            builder.and(qCardImgEntity.isEnCard.isNull()).or(qCardImgEntity.isEnCard.isFalse());
+        }
+        else {
+            BooleanExpression isOnlyEnCardNullOrFalse = qCardEntity.isOnlyEnCard.isNull().or(qCardEntity.isOnlyEnCard.isFalse());
+            BooleanExpression isEnCardFalse = qCardImgEntity.isEnCard.isFalse().or(qCardImgEntity.isEnCard.isNull());
+            builder.and(isOnlyEnCardNullOrFalse.and(isEnCardFalse));
+
+            BooleanExpression isOnlyEnCardTrue = qCardEntity.isOnlyEnCard.isTrue();
+            builder.or(isOnlyEnCardTrue);
+        }
 
         //검색어
         if (cardRequestDto.getSearchString() != null && !cardRequestDto.getSearchString().isEmpty()) {
@@ -183,7 +198,7 @@ public class CardServiceImpl implements CardService {
     @Override
     public List<NoteDto> getNotes() {
         List<NoteDto> noteDtoList = new ArrayList<>();
-        List<NoteEntity> noteEntityList = noteRepository.findAllByOrderByReleaseDate();
+        List<NoteEntity> noteEntityList = noteRepository.findByIsDisableFalseOrIsDisableNullOrderByReleaseDate();
         for (NoteEntity noteEntity : noteEntityList) {
             noteDtoList.add(new NoteDto(noteEntity));
         }

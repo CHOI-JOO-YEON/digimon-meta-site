@@ -60,7 +60,7 @@ public class CrawlingServiceImpl implements CrawlingService {
                 crawlingCardEntity.updateErrorMessage(e.getMessage());
                 crawlingResultDto.addFailedCrawling(new CrawlingCardDto(crawlingCardEntity));
             } catch (Exception e) {
-                log.error("{} 에서 {} 발생 {}",crawlingCardEntity,e.getMessage() ,e);
+                log.error("{} 에서 {} 발생 {}", crawlingCardEntity, e.getMessage(), e);
             }
         }
 
@@ -132,21 +132,6 @@ public class CrawlingServiceImpl implements CrawlingService {
         );
 
 
-//        if (reflectCardRequestDto.getIsParallel()) {
-//            parallelCardImgRepository.save(
-//                    ParallelCardImgEntity.builder()
-//                            .noteEntity(noteEntity)
-//                            .crawlingCardEntity(crawlingCardEntity)
-//                            .cardEntity(cardEntity)
-//                            .originUrl(reflectCardRequestDto.getOriginUrl())
-//                            .build()
-//            );
-//            return true;
-//        }
-//        if (cardImgRepository.findByCardEntity(cardEntity).isPresent()) {
-//            throw new CardParseException(CardParseExceptionMessage.DUPLICATE_NORMAL_IMAGE);
-//        }
-
         cardImgRepository.save(
                 CardImgEntity.builder()
                         .isParallel(reflectCardRequestDto.getIsParallel())
@@ -164,48 +149,95 @@ public class CrawlingServiceImpl implements CrawlingService {
     }
 
     private CardEntity getCardEntityOrInsert(ReflectCardRequestDto reflectCardRequestDto) {
-        return cardRepository.findByCardNo(reflectCardRequestDto.getCardNo()).orElseGet(
-                () -> {
-                    CardEntity save = cardRepository.save(
-                            CardEntity.builder()
-                                    .sortString(generateSortString(reflectCardRequestDto.getCardNo()))
-                                    .cardNo(reflectCardRequestDto.getCardNo())
-                                    .cardName(reflectCardRequestDto.getCardName())
-                                    .attribute(reflectCardRequestDto.getAttribute())
-                                    .dp(reflectCardRequestDto.getDp())
-                                    .playCost(reflectCardRequestDto.getPlayCost())
-                                    .digivolveCondition1(reflectCardRequestDto.getDigivolveCondition1())
-                                    .digivolveCondition2(reflectCardRequestDto.getDigivolveCondition2())
-                                    .digivolveCost1(reflectCardRequestDto.getDigivolveCost1())
-                                    .digivolveCost2(reflectCardRequestDto.getDigivolveCost2())
-                                    .lv(reflectCardRequestDto.getLv())
-                                    .effect(reflectCardRequestDto.getEffect())
-                                    .sourceEffect(reflectCardRequestDto.getSourceEffect())
-                                    .cardType(reflectCardRequestDto.getCardType())
-                                    .form(reflectCardRequestDto.getForm())
-                                    .rarity(reflectCardRequestDto.getRarity())
-                                    .color1(reflectCardRequestDto.getColor1())
-                                    .color2(reflectCardRequestDto.getColor2())
-                                    .build());
+        Optional<CardEntity> cardEntity = cardRepository.findByCardNo(reflectCardRequestDto.getCardNo());
+        if (cardEntity.isPresent()) {
+            CardEntity card = cardEntity.get();
+            if (Boolean.TRUE.equals(card.getIsOnlyEnCard())) {
+                CardEntity save = cardRepository.save(
+                        CardEntity.builder()
+                                .id(card.getId())
+                                .sortString(generateSortString(reflectCardRequestDto.getCardNo()))
+                                .cardNo(reflectCardRequestDto.getCardNo())
+                                .cardName(reflectCardRequestDto.getCardName())
+                                .attribute(reflectCardRequestDto.getAttribute())
+                                .dp(reflectCardRequestDto.getDp())
+                                .playCost(reflectCardRequestDto.getPlayCost())
+                                .digivolveCondition1(reflectCardRequestDto.getDigivolveCondition1())
+                                .digivolveCondition2(reflectCardRequestDto.getDigivolveCondition2())
+                                .digivolveCost1(reflectCardRequestDto.getDigivolveCost1())
+                                .digivolveCost2(reflectCardRequestDto.getDigivolveCost2())
+                                .lv(reflectCardRequestDto.getLv())
+                                .effect(reflectCardRequestDto.getEffect())
+                                .sourceEffect(reflectCardRequestDto.getSourceEffect())
+                                .cardType(reflectCardRequestDto.getCardType())
+                                .form(reflectCardRequestDto.getForm())
+                                .rarity(reflectCardRequestDto.getRarity())
+                                .color1(reflectCardRequestDto.getColor1())
+                                .color2(reflectCardRequestDto.getColor2())
+                                .isOnlyEnCard(false)
+                                .build());
 
 
-                    for (String type : reflectCardRequestDto.getTypes()) {
-                        TypeEntity typeEntity = typeRepository.findByName(type)
-                                .orElseGet(() ->
-                                        typeRepository.save(TypeEntity.builder()
-                                                .name(type)
-                                                .build())
-                                );
-                        cardCombineTypeRepository.save(
-                                CardCombineTypeEntity.builder()
-                                        .cardEntity(save)
-                                        .typeEntity(typeEntity)
-                                        .build()
-                        );
-                    }
-                    return save;
+                for (String type : reflectCardRequestDto.getTypes()) {
+                    TypeEntity typeEntity = typeRepository.findByName(type)
+                            .orElseGet(() ->
+                                    typeRepository.save(TypeEntity.builder()
+                                            .name(type)
+                                            .build())
+                            );
+                    cardCombineTypeRepository.save(
+                            CardCombineTypeEntity.builder()
+                                    .cardEntity(save)
+                                    .typeEntity(typeEntity)
+                                    .build()
+                    );
                 }
-        );
+                return save;
+
+            }
+            return cardEntity.get();
+        }
+
+
+        CardEntity save = cardRepository.save(
+                CardEntity.builder()
+                        .sortString(generateSortString(reflectCardRequestDto.getCardNo()))
+                        .cardNo(reflectCardRequestDto.getCardNo())
+                        .cardName(reflectCardRequestDto.getCardName())
+                        .attribute(reflectCardRequestDto.getAttribute())
+                        .dp(reflectCardRequestDto.getDp())
+                        .playCost(reflectCardRequestDto.getPlayCost())
+                        .digivolveCondition1(reflectCardRequestDto.getDigivolveCondition1())
+                        .digivolveCondition2(reflectCardRequestDto.getDigivolveCondition2())
+                        .digivolveCost1(reflectCardRequestDto.getDigivolveCost1())
+                        .digivolveCost2(reflectCardRequestDto.getDigivolveCost2())
+                        .lv(reflectCardRequestDto.getLv())
+                        .effect(reflectCardRequestDto.getEffect())
+                        .sourceEffect(reflectCardRequestDto.getSourceEffect())
+                        .cardType(reflectCardRequestDto.getCardType())
+                        .form(reflectCardRequestDto.getForm())
+                        .rarity(reflectCardRequestDto.getRarity())
+                        .color1(reflectCardRequestDto.getColor1())
+                        .color2(reflectCardRequestDto.getColor2())
+                        .build());
+
+
+        for (String type : reflectCardRequestDto.getTypes()) {
+            TypeEntity typeEntity = typeRepository.findByName(type)
+                    .orElseGet(() ->
+                            typeRepository.save(TypeEntity.builder()
+                                    .name(type)
+                                    .build())
+                    );
+            cardCombineTypeRepository.save(
+                    CardCombineTypeEntity.builder()
+                            .cardEntity(save)
+                            .typeEntity(typeEntity)
+                            .build()
+            );
+        }
+        return save;
+
     }
 
     private String generateSortString(String cardNo) {
@@ -262,7 +294,7 @@ public class CrawlingServiceImpl implements CrawlingService {
                 crawlingCardEntity.updateErrorMessage(e.getMessage());
                 crawlingResultDto.addFailedCrawling(new CrawlingCardDto(crawlingCardEntity));
             } catch (Exception e) {
-                log.error("{} 에서 {} 발생 {}",crawlingCardEntity,e.getMessage() ,e);
+                log.error("{} 에서 {} 발생 {}", crawlingCardEntity, e.getMessage(), e);
             }
         }
 

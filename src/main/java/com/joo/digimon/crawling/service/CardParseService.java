@@ -6,4 +6,6 @@ import com.joo.digimon.exception.model.CardParseException;
 
 public interface CardParseService {
     ReflectCardRequestDto crawlingCardParse(CrawlingCardEntity crawlingCardEntity) throws CardParseException;
+
+    ReflectCardRequestDto crawlingCardParseEn(CrawlingCardEntity crawlingCardEntity) throws CardParseException;
 }

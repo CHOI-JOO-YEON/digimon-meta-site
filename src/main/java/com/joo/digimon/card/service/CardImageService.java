@@ -1,7 +1,10 @@
 package com.joo.digimon.card.service;
 
-import java.io.IOException;
+import jakarta.transaction.Transactional;
 
 public interface CardImageService {
-    int uploadNotUploadYetCardImages();
+    int uploadNotUploadYetKorCardImages();
+
+    @Transactional
+    int uploadNotUploadYetEnCardImages();
 }
