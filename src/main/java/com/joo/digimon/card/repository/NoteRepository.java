@@ -11,5 +11,5 @@ import java.util.Optional;
 public interface NoteRepository extends JpaRepository<NoteEntity,Integer> {
     Optional<NoteEntity> findByName(String name);
 
-    List<NoteEntity> findAllByOrderByReleaseDate();
+    List<NoteEntity> findByIsDisableFalseOrIsDisableNullOrderByReleaseDate();
 }

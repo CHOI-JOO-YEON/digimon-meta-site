@@ -31,9 +31,13 @@ public class CardRequestDto {
 
     Integer parallelOption = 0; // 0= all, 1= onlyNormal, 2=onlyParallel
 
+    Boolean isEnglishCardInclude = false;
+
     @OrderValid
     String orderOption = "cardNo";
     Boolean isOrderDesc = false;
+
+
 
 
 }

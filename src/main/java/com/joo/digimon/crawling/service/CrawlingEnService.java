@@ -6,4 +6,5 @@ import java.io.IOException;
 
 public interface CrawlingEnService {
     CrawlingResultDto crawlAndSaveByUrl(String url) throws IOException;
+    CrawlingResultDto crawlAndSaveByUrl(String url, String note) throws IOException;
 }

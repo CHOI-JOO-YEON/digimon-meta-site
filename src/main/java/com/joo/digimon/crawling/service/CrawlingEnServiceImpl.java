@@ -8,6 +8,7 @@ import com.joo.digimon.card.repository.NoteRepository;
 import com.joo.digimon.crawling.dto.CrawlingCardDto;
 import com.joo.digimon.crawling.dto.CrawlingResultDto;
 import com.joo.digimon.crawling.dto.ReflectCardRequestDto;
+import com.joo.digimon.crawling.enums.CardOrigin;
 import com.joo.digimon.crawling.model.CrawlingCardEntity;
 import com.joo.digimon.crawling.repository.CrawlingCardRepository;
 import com.joo.digimon.exception.model.CardParseException;
@@ -21,6 +22,7 @@ import org.jsoup.select.Elements;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -29,13 +31,13 @@ import java.util.regex.Pattern;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class CrawlingEnServiceImpl implements CrawlingEnService{
+public class CrawlingEnServiceImpl implements CrawlingEnService {
     private final CardImgRepository cardImgRepository;
     private final CrawlingCardRepository crawlingCardRepository;
     private final CardRepository cardRepository;
-    private final CardCombineTypeRepository cardCombineTypeRepository;
     private final NoteRepository noteRepository;
     private final CardParseService cardParseService;
+
     @Override
     public CrawlingResultDto crawlAndSaveByUrl(String url) throws IOException {
         List<CrawlingCardEntity> crawlingCardEntities = crawlUrlAndBuildEntityList(url);
@@ -50,21 +52,46 @@ public class CrawlingEnServiceImpl implements CrawlingEnService{
                 saveCardByReflectCardRequest(cardParseService.crawlingCardParseEn(crawlingCardEntity));
                 crawlingResultDto.successCountIncrease();
                 crawlingCardEntity.setIsReflect(true);
-            }
-            catch (CardParseException e) {
+            } catch (CardParseException e) {
                 crawlingCardEntity.updateErrorMessage(e.getMessage());
                 crawlingResultDto.addFailedCrawling(new CrawlingCardDto(crawlingCardEntity));
-            }
-            catch (Exception e) {
-                log.error("{} 에서 {} 발생 {}",crawlingCardEntity,e.getMessage() ,e);
+            } catch (Exception e) {
+                log.error("{} 에서 {} 발생 {}", crawlingCardEntity, e.getMessage(), e);
             }
         }
 
         return crawlingResultDto;
     }
+
+    @Override
+    public CrawlingResultDto crawlAndSaveByUrl(String url, String note) throws IOException {
+        List<CrawlingCardEntity> crawlingCardEntities = crawlUrlAndBuildEntityList(url, note);
+        CrawlingResultDto crawlingResultDto = new CrawlingResultDto();
+
+        for (CrawlingCardEntity crawlingCardEntity : crawlingCardEntities) {
+            if (cardImgRepository.findByCrawlingCardEntity(crawlingCardEntity).isPresent()) {
+                crawlingResultDto.alreadyReflectCountIncrease();
+                continue;
+            }
+            try {
+                saveCardByReflectCardRequest(cardParseService.crawlingCardParseEn(crawlingCardEntity));
+                crawlingResultDto.successCountIncrease();
+                crawlingCardEntity.setIsReflect(true);
+            } catch (CardParseException e) {
+                crawlingCardEntity.updateErrorMessage(e.getMessage());
+                crawlingResultDto.addFailedCrawling(new CrawlingCardDto(crawlingCardEntity));
+            } catch (Exception e) {
+                log.error("{} 에서 {} 발생 {}", crawlingCardEntity, e.getMessage(), e);
+            }
+        }
+
+        return crawlingResultDto;
+    }
+
     public List<Element> getCardElementsByDocument(Document document) {
         return document.select(".cardlistCol .popup");
     }
+
     public List<CrawlingCardEntity> crawlUrlAndBuildEntityList(String url) throws IOException {
         List<Document> documentListByFirstPageUrl = getDocumentListByFirstPageUrl(url);
 
@@ -74,7 +101,38 @@ public class CrawlingEnServiceImpl implements CrawlingEnService{
         }
         List<CrawlingCardDto> crawlingCardDtoList = new ArrayList<>();
         for (Element element : cardElement) {
-            crawlingCardDtoList.add(crawlingCardByElement(element));
+            CrawlingCardDto crawlingCardDto = crawlingCardByElement(element);
+            if (!crawlingCardDto.getIsParallel()) {
+                crawlingCardDtoList.add(crawlingCardDto);
+            }
+
+        }
+        List<CrawlingCardEntity> crawlingCardEntities = new ArrayList<>();
+
+        for (CrawlingCardDto crawlingCardDto : crawlingCardDtoList) {
+            crawlingCardEntities.add(
+                    createOrFindCrawlingCardEntity(crawlingCardDto)
+            );
+        }
+
+
+        return crawlingCardEntities;
+    }
+
+    public List<CrawlingCardEntity> crawlUrlAndBuildEntityList(String url, String note) throws IOException {
+        List<Document> documentListByFirstPageUrl = getDocumentListByFirstPageUrl(url);
+
+        List<Element> cardElement = new ArrayList<>();
+        for (Document document : documentListByFirstPageUrl) {
+            cardElement.addAll(getCardElementsByDocument(document));
+        }
+        List<CrawlingCardDto> crawlingCardDtoList = new ArrayList<>();
+        for (Element element : cardElement) {
+            CrawlingCardDto crawlingCardDto = crawlingCardByElement(element);
+            if (!crawlingCardDto.getIsParallel()&&crawlingCardDto.getNote().equals(note)) {
+                crawlingCardDtoList.add(crawlingCardDto);
+            }
+
         }
         List<CrawlingCardEntity> crawlingCardEntities = new ArrayList<>();
 
@@ -89,8 +147,9 @@ public class CrawlingEnServiceImpl implements CrawlingEnService{
     }
 
     private CrawlingCardEntity createOrFindCrawlingCardEntity(CrawlingCardDto crawlingCardDto) {
-        return crawlingCardRepository.findByImgUrl(crawlingCardDto.getImgUrl()).orElseGet(() -> crawlingCardRepository.save(new CrawlingCardEntity(crawlingCardDto,true)));
+        return crawlingCardRepository.findByImgUrl(crawlingCardDto.getImgUrl()).orElseGet(() -> crawlingCardRepository.save(new CrawlingCardEntity(crawlingCardDto, true)));
     }
+
     @Transactional
     public boolean saveCardByReflectCardRequest(ReflectCardRequestDto reflectCardRequestDto) throws CardParseException {
         CrawlingCardEntity crawlingCardEntity = crawlingCardRepository.findById(reflectCardRequestDto.getId()).orElseThrow();
@@ -100,6 +159,7 @@ public class CrawlingEnServiceImpl implements CrawlingEnService{
         NoteEntity noteEntity = noteRepository.findByName(reflectCardRequestDto.getNote()).orElseGet(
                 () -> noteRepository.save(NoteEntity.builder()
                         .name(reflectCardRequestDto.getNote())
+                        .cardOrigin(CardOrigin.ENGLISH)
                         .build())
         );
 
@@ -139,6 +199,7 @@ public class CrawlingEnServiceImpl implements CrawlingEnService{
 
         return documentList;
     }
+
     public CrawlingCardDto crawlingCardByElement(Element element) {
         CrawlingCardDto crawlingCardDto = new CrawlingCardDto();
 
@@ -150,6 +211,7 @@ public class CrawlingEnServiceImpl implements CrawlingEnService{
 
         return crawlingCardDto;
     }
+
     private void extractCardInfoHead(Element element, CrawlingCardDto crawlingCardDto) {
         Element lvElement = element.selectFirst(".cardlv");
         if (lvElement != null) {
@@ -160,14 +222,17 @@ public class CrawlingEnServiceImpl implements CrawlingEnService{
         crawlingCardDto.setRarity(element.select(".cardinfo_head>li").get(1).text());
         crawlingCardDto.setCardType(element.selectFirst(".cardtype").text());
     }
+
     private void extractCardInfoBottom(Element element, CrawlingCardDto crawlingCardDto) {
-        crawlingCardDto.setEffect(parseElementToPlainText(element.select(".cardinfo_bottom dl:contains(Effect) dd")));
+        crawlingCardDto.setEffect(parseElementToPlainText(element.select(".cardinfo_bottom dl dt:matchesOwn(^Effect$) + dd")));
         crawlingCardDto.setSourceEffect(parseElementToPlainText(element.select(".cardinfo_bottom dl:contains(Inherited Effect) dd")));
         crawlingCardDto.setNote(element.select(".cardinfo_bottom dl:contains(Notes) dd").text());
     }
+
     private String parseElementToPlainText(Elements select) {
         return select.html().replace("<br>\n", "");
     }
+
     private void extractCardInfoTop(Element element, CrawlingCardDto crawlingCardDto) {
 
 
@@ -220,6 +285,8 @@ public class CrawlingEnServiceImpl implements CrawlingEnService{
                                     .rarity(reflectCardRequestDto.getRarity())
                                     .color1(reflectCardRequestDto.getColor1())
                                     .color2(reflectCardRequestDto.getColor2())
+                                    .isOnlyEnCard(true)
+                                    .releaseDate(LocalDate.of(9999, 12, 31))
                                     .build());
 
                     return save;

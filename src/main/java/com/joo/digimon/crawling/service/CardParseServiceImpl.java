@@ -50,10 +50,10 @@ public class CardParseServiceImpl implements CardParseService {
         dto.setId(crawlingCard.getId());
         dto.setCardNo(parseCardNo(crawlingCard.getCardNo()));
         dto.setRarity(parseCardRarity(crawlingCard.getRarity()));
-        dto.setCardType(parseCardType(crawlingCard.getCardType()));
+        dto.setCardType(parseCardTypeEn(crawlingCard.getCardType()));
         dto.setLv(parseLv(crawlingCard.getLv(), dto.getCardType()));
         dto.setIsParallel(crawlingCard.getIsParallel());
-        dto.setCardName(parseCardName(crawlingCard.getCardName()));
+        dto.setCardName(crawlingCard.getCardName());
         dto.setDp(parseDp(crawlingCard.getDP()));
         dto.setPlayCost(parsePlayCost(crawlingCard.getPlayCost()));
         dto.setEffect(parseEffect(crawlingCard.getEffect()));
@@ -62,7 +62,7 @@ public class CardParseServiceImpl implements CardParseService {
 
         dto.setColor1(parseColor(crawlingCard.getColor1()));
         dto.setColor2(parseColor(crawlingCard.getColor2()));
-        dto.setOriginUrl(parseUrl(crawlingCard.getImgUrl()));
+        dto.setOriginUrl(parseEnUrl(crawlingCard.getImgUrl()));
 
         return dto;
     }
@@ -92,7 +92,18 @@ public class CardParseServiceImpl implements CardParseService {
         try {
             return CardType.findByKor(cardType);
         } catch (IllegalArgumentException e) {
-            throw new CardParseException(CardParseExceptionMessage.WRONG_RARITY);
+            throw new CardParseException(CardParseExceptionMessage.WRONG_CARD_TYPE);
+        }
+    }
+
+    private CardType parseCardTypeEn(String cardType) throws CardParseException {
+        if (cardType == null) {
+            throw new CardParseException(CardParseExceptionMessage.WRONG_CARD_TYPE);
+        }
+        try {
+            return CardType.findByEng(cardType);
+        } catch (IllegalArgumentException e) {
+            throw new CardParseException(CardParseExceptionMessage.WRONG_CARD_TYPE);
         }
     }
 
@@ -219,6 +230,16 @@ public class CardParseServiceImpl implements CardParseService {
     private String parseUrl(String imgUrl) throws CardParseException {
         if (imgUrl == null) {
             throw new CardParseException(CardParseExceptionMessage.NO_IMG_URL);
+        }
+        return imgUrl;
+    }
+
+    private String parseEnUrl(String imgUrl) throws CardParseException {
+        if (imgUrl == null) {
+            throw new CardParseException(CardParseExceptionMessage.NO_IMG_URL);
+        }
+        if (imgUrl.startsWith("..")) {
+            imgUrl = imgUrl.substring(2);
         }
         return imgUrl;
     }

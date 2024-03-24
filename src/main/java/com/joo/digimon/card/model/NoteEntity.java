@@ -32,4 +32,6 @@ public class NoteEntity {
 
     @OneToMany(mappedBy = "noteEntity")
     Set<ParallelCardImgEntity> parallelCardImgEntities;
+
+    Boolean isDisable;
 }
