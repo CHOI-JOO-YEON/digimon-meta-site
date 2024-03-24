@@ -13,8 +13,8 @@ import com.joo.digimon.deck.model.DeckCardEntity;
 import com.joo.digimon.deck.model.DeckColor;
 import com.joo.digimon.deck.model.DeckEntity;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -80,6 +80,7 @@ public class ResponseDeckDto {
         String smallImgUrl;
         Boolean isParallel;
         String sortString;
+        LocalDate releaseDate;
         public Card(CardImgEntity card,Integer cnt, String prefixUrl) {
             this.cnt=cnt;
             createCard(card, prefixUrl);
@@ -112,6 +113,7 @@ public class ResponseDeckDto {
             this.isParallel = card.getIsParallel();
             this.sortString= card.getCardEntity().getSortString();
             this.smallImgUrl= prefixUrl + card.getSmallImgUrl();
+            this.releaseDate=card.getCardEntity().getReleaseDate();
         }
 
         public Card(DeckCardEntity deckCardEntity, String prefixUrl) {
