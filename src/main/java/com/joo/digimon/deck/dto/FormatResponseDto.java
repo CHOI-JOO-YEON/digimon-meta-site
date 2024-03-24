@@ -11,11 +11,13 @@ public class FormatResponseDto {
     String formatName;
     LocalDate startDate;
     LocalDate endDate;
+    Boolean isOnlyEn;
 
     public FormatResponseDto(Format format) {
         this.id = format.getId();
         this.formatName = format.getName();
         this.startDate = format.getStartDate();
         this.endDate = format.getEndDate();
+        this.isOnlyEn=format.getIsOnlyEn();
     }
 }

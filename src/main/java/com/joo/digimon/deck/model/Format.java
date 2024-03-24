@@ -25,6 +25,7 @@ public class Format {
 //    @JoinColumn(name = "languages_tb_id")
 //    Language language;
 
+    Boolean isOnlyEn;
     LocalDate startDate;
     LocalDate endDate;
 }
