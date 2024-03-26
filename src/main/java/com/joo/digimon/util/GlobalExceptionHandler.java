@@ -1,6 +1,7 @@
 package com.joo.digimon.util;
 
 import com.joo.digimon.exception.model.ForbiddenAccessException;
+import com.joo.digimon.exception.model.UnAuthorizationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,6 +19,10 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public void handleNoSuchElementException() {}
 
+
+    @ExceptionHandler(UnAuthorizationException.class)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    public void handleUnAuthorizationException() {}
     @ExceptionHandler(ForbiddenAccessException.class)
     @ResponseStatus(HttpStatus.FORBIDDEN)
     public void handleForbiddenAccessException() {}

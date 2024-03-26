@@ -4,6 +4,7 @@ import com.joo.digimon.card.model.CardEntity;
 import com.joo.digimon.crawling.enums.CardType;
 import com.joo.digimon.deck.dto.RequestDeckDto;
 import com.joo.digimon.user.model.User;
+import com.joo.digimon.util.SpecialLimitCard;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -12,7 +13,9 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.sql.Timestamp;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 @Entity
@@ -106,17 +109,36 @@ public class DeckEntity {
     }
 
     public void updateDeckValid() {
+        Map<CardEntity, Integer> cardCountMap = new HashMap<>();
         int deckCount = 0;
         int tamaCount = 0;
 
         for (DeckCardEntity deckCardEntity : deckCardEntities) {
             CardEntity card = deckCardEntity.getCardImgEntity().getCardEntity();
+            cardCountMap.put(card, cardCountMap.getOrDefault(card, 0) + deckCardEntity.cnt);
             if (card.getCardType().equals(CardType.DIGITAMA)) {
+
                 tamaCount+=deckCardEntity.cnt;
                 continue;
             }
             deckCount+=deckCardEntity.cnt;
         }
-        isValid = deckCount==50&&tamaCount<=5;
+        if (deckCount != 50) {
+            isValid = false;
+            return;
+        }
+
+        if (tamaCount > 5) {
+            isValid = false;
+            return;
+        }
+
+        for (Map.Entry<CardEntity, Integer> cardEntry : cardCountMap.entrySet()) {
+            if (cardEntry.getValue() > SpecialLimitCard.getCardLimit(cardEntry.getKey().getCardNo())) {
+                isValid = false;
+                return;
+            }
+        }
+        isValid=true;
     }
 }

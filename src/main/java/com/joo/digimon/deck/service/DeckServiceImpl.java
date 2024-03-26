@@ -12,14 +12,14 @@ import com.joo.digimon.deck.repository.DeckColorRepository;
 import com.joo.digimon.deck.repository.DeckRepository;
 import com.joo.digimon.deck.repository.FormatRepository;
 import com.joo.digimon.exception.model.ForbiddenAccessException;
+import com.joo.digimon.exception.model.UnAuthorizationException;
 import com.joo.digimon.limit.model.LimitCardEntity;
 import com.joo.digimon.limit.model.LimitEntity;
 import com.joo.digimon.limit.repository.LimitRepository;
 import com.joo.digimon.user.model.User;
 import com.querydsl.core.BooleanBuilder;
-import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.JPAExpressions;
-import com.querydsl.jpa.impl.JPAQuery;
+import com.querydsl.jpa.JPQLQuery;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -204,6 +204,9 @@ public class DeckServiceImpl implements DeckService {
 
     @Override
     public PagedResponseDeckDto finMyDecks(User user, DeckSearchParameter deckSearchParameter) {
+        if (user == null) {
+         throw new UnAuthorizationException("");
+        }
         BooleanBuilder builder = getBuilderByDeckSearchParameter(deckSearchParameter);
         QDeckEntity qDeckEntity = QDeckEntity.deckEntity;
         builder.and(qDeckEntity.user.eq(user));
@@ -261,15 +264,25 @@ public class DeckServiceImpl implements DeckService {
                     Integer allowedQuantity = limitCardEntity.getAllowedQuantity();
 
 
-                    BooleanExpression countExceeded = qDeckCardEntity.deckEntity.eq(qDeckEntity)
-                            .and(qDeckCardEntity.cardImgEntity.cardEntity.eq(card))
-                            .and(qDeckCardEntity.cnt.gt(allowedQuantity));
+//                    BooleanExpression countExceeded = qDeckCardEntity.deckEntity.eq(qDeckEntity)
+//                            .and(qDeckCardEntity.cardImgEntity.cardEntity.eq(card))
+//                            .and(qDeckCardEntity.cnt.gt(allowedQuantity));
+//
+//                    builder.and(JPAExpressions
+//                            .select(qDeckCardEntity.count())
+//                            .from(qDeckCardEntity)
+//                            .where(countExceeded)
+//                            .eq(0L));
 
-                    builder.and(JPAExpressions
-                            .select(qDeckCardEntity.count())
+
+                    JPQLQuery<Integer> totalCardCountQuery = JPAExpressions
+                            .select(qDeckCardEntity.cnt.sum().coalesce(0))
                             .from(qDeckCardEntity)
-                            .where(countExceeded)
-                            .eq(0L));
+                            .where(qDeckCardEntity.deckEntity.eq(qDeckEntity)
+                                    .and(qDeckCardEntity.cardImgEntity.cardEntity.eq(card)));
+
+                    builder.and(totalCardCountQuery.loe(allowedQuantity));
+
                 }
             }
         }

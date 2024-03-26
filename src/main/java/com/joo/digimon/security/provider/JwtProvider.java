@@ -1,10 +1,9 @@
 package com.joo.digimon.security.provider;
 
+import com.joo.digimon.exception.model.UnAuthorizationException;
 import com.joo.digimon.user.model.User;
 import com.joo.digimon.user.repository.UserRepository;
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jws;
-import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
@@ -54,15 +53,22 @@ public class JwtProvider {
     }
 
     public User getUserFromToken(String token) {
-        Jws<Claims> claimsJws = Jwts.parser().verifyWith(key).build().parseSignedClaims(token);
+        try {
+            Jws<Claims> claimsJws = Jwts.parser().verifyWith(key).build().parseSignedClaims(token);
 
-
-        Claims claims = claimsJws.getPayload();
-        String auth = claims.get("auth-supplier", String.class);
-        if (auth.equals("USERNAME")) {
-            return userRepository.findByUsername(claims.getSubject()).orElseThrow();
+            Claims claims = claimsJws.getPayload();
+            String auth = claims.get("auth-supplier", String.class);
+            if (auth.equals("USERNAME")) {
+                return userRepository.findByUsername(claims.getSubject()).orElseThrow();
+            }
+            return userRepository.findByOauthId(claims.getSubject()).orElseThrow();
+        } catch (ExpiredJwtException e) {
+            throw new UnAuthorizationException("Token has expired");
+        } catch (JwtException e) {
+            throw new UnAuthorizationException("Invalid token");
         }
-        return userRepository.findByOauthId(claims.getSubject()).orElseThrow();
+
+
     }
 
     public String getJwtFromCookie(HttpServletRequest request) {
