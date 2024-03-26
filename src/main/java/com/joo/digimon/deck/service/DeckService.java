@@ -8,7 +8,6 @@ import java.util.List;
 
 public interface DeckService {
     ResponseDeckDto postDeck(RequestDeckDto requestDeckDto, User user);
-    List<DeckSummaryResponseDto> getDecks(DeckSearchParameter deckSearchParameter, User user);
 
     ResponseDeckDto findDeck(Integer id, User user);
 

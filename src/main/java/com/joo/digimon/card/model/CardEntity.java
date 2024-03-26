@@ -6,10 +6,7 @@ import com.joo.digimon.crawling.enums.Color;
 import com.joo.digimon.crawling.enums.Form;
 import com.joo.digimon.crawling.enums.Rarity;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDate;
 import java.util.Set;

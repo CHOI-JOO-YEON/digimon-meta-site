@@ -1,5 +1,7 @@
 package com.joo.digimon.deck.model;
 
+import com.joo.digimon.card.model.CardEntity;
+import com.joo.digimon.crawling.enums.CardType;
 import com.joo.digimon.deck.dto.RequestDeckDto;
 import com.joo.digimon.user.model.User;
 import jakarta.persistence.*;
@@ -77,9 +79,15 @@ public class DeckEntity {
     private Boolean isPublic;
 
 
+    private Boolean isValid;
+
+
+
+
     @ManyToOne
     @JoinColumn(name = "formats_tb_id")
     Format format;
+
 
     public void addDeckCardEntity(DeckCardEntity deckCardEntity) {
         deckCardEntities.add(deckCardEntity);
@@ -95,5 +103,20 @@ public class DeckEntity {
             this.deckColors = new HashSet<>();
         }
         deckColors.add(deckColor);
+    }
+
+    public void updateDeckValid() {
+        int deckCount = 0;
+        int tamaCount = 0;
+
+        for (DeckCardEntity deckCardEntity : deckCardEntities) {
+            CardEntity card = deckCardEntity.getCardImgEntity().getCardEntity();
+            if (card.getCardType().equals(CardType.DIGITAMA)) {
+                tamaCount+=deckCardEntity.cnt;
+                continue;
+            }
+            deckCount+=deckCardEntity.cnt;
+        }
+        isValid = deckCount==50&&tamaCount<=5;
     }
 }

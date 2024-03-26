@@ -27,11 +27,6 @@ public class DeckController {
         return new ResponseEntity<>(deckService.postDeck(requestDeckDto, user),HttpStatus.OK);
     }
 
-//    @GetMapping()
-//    ResponseEntity<?> findDecks(@CurUser User user, @RequestBody DeckSearchParameter deckSearchParameter) {
-//        return new ResponseEntity<>(deckService.getDecks(deckSearchParameter, user), HttpStatus.OK);
-//    }
-
     @GetMapping()
     ResponseEntity<?> findDecks(@CurUser(required = false) User user, @ModelAttribute DeckSearchParameter deckSearchParameter) {
         if (deckSearchParameter.getIsMyDeck()) {
