@@ -1,8 +1,7 @@
 package com.joo.digimon.deck.service;
 
+import com.joo.digimon.card.model.CardEntity;
 import com.joo.digimon.card.model.CardImgEntity;
-import com.joo.digimon.card.model.QCardEntity;
-import com.joo.digimon.card.model.QCardImgEntity;
 import com.joo.digimon.card.repository.CardImgRepository;
 import com.joo.digimon.crawling.enums.CardType;
 import com.joo.digimon.crawling.enums.Color;
@@ -13,15 +12,20 @@ import com.joo.digimon.deck.repository.DeckColorRepository;
 import com.joo.digimon.deck.repository.DeckRepository;
 import com.joo.digimon.deck.repository.FormatRepository;
 import com.joo.digimon.exception.model.ForbiddenAccessException;
+import com.joo.digimon.limit.model.LimitCardEntity;
+import com.joo.digimon.limit.model.LimitEntity;
+import com.joo.digimon.limit.repository.LimitRepository;
 import com.joo.digimon.user.model.User;
 import com.querydsl.core.BooleanBuilder;
+import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.jpa.JPAExpressions;
+import com.querydsl.jpa.impl.JPAQuery;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -37,6 +41,7 @@ public class DeckServiceImpl implements DeckService {
     private final CardImgRepository cardImgRepository;
     private final FormatRepository formatRepository;
     private final DeckColorRepository deckColorRepository;
+    private final LimitRepository limitRepository;
 
     @Value("${domain.url}")
     private String prefixUrl;
@@ -59,6 +64,7 @@ public class DeckServiceImpl implements DeckService {
         deck.updateDeckMetaData(requestDeckDto, format);
         updateDeckCards(requestDeckDto, deck, format);
         updateDeckColors(requestDeckDto.getColors(), deck);
+        deck.updateDeckValid();
         return new ResponseDeckDto(deck, prefixUrl);
     }
 
@@ -139,24 +145,6 @@ public class DeckServiceImpl implements DeckService {
 
     }
 
-    @Override
-    public List<DeckSummaryResponseDto> getDecks(DeckSearchParameter deckSearchParameter, User user) {
-        List<DeckSummaryResponseDto> deckSummaryResponseDtoList = new ArrayList<>();
-        if (deckSearchParameter.getIsMyDeck()) {
-            List<DeckEntity> myDeckList = deckRepository.findByUserOrderByCreatedDateTime(user);
-            for (DeckEntity deck : myDeckList) {
-                deckSummaryResponseDtoList.add(new DeckSummaryResponseDto(deck));
-            }
-            return deckSummaryResponseDtoList;
-        }
-        List<DeckEntity> decks = deckRepository.findByIsPublicIsTrue();
-        for (DeckEntity deck : decks) {
-            deckSummaryResponseDtoList.add(new DeckSummaryResponseDto(deck));
-        }
-
-
-        return deckSummaryResponseDtoList;
-    }
 
     @Override
     public ResponseDeckDto findDeck(Integer id, User user) {
@@ -255,7 +243,37 @@ public class DeckServiceImpl implements DeckService {
 
     private BooleanBuilder getBuilderByDeckSearchParameter(DeckSearchParameter deckSearchParameter) {
         QDeckEntity qDeckEntity = QDeckEntity.deckEntity;
+        QDeckCardEntity qDeckCardEntity = QDeckCardEntity.deckCardEntity;
         BooleanBuilder builder = new BooleanBuilder();
+
+        if (Boolean.TRUE.equals(deckSearchParameter.getIsOnlyValidDeck())) {
+            builder.and(qDeckEntity.isValid.isTrue());
+        }
+
+        if (deckSearchParameter.getLimitId() != null) {
+            Optional<LimitEntity> limitEntity = limitRepository.findById(deckSearchParameter.getLimitId());
+            if (limitEntity.isPresent()) {
+                Set<LimitCardEntity> limitCardEntities = limitEntity.get().getLimitCardEntities();
+
+
+                for (LimitCardEntity limitCardEntity : limitCardEntities) {
+                    CardEntity card = limitCardEntity.getCardEntity();
+                    Integer allowedQuantity = limitCardEntity.getAllowedQuantity();
+
+
+                    BooleanExpression countExceeded = qDeckCardEntity.deckEntity.eq(qDeckEntity)
+                            .and(qDeckCardEntity.cardImgEntity.cardEntity.eq(card))
+                            .and(qDeckCardEntity.cnt.gt(allowedQuantity));
+
+                    builder.and(JPAExpressions
+                            .select(qDeckCardEntity.count())
+                            .from(qDeckCardEntity)
+                            .where(countExceeded)
+                            .eq(0L));
+                }
+            }
+        }
+
 
         //검색어
         if (deckSearchParameter.getSearchString() != null && !deckSearchParameter.getSearchString().isEmpty()) {
