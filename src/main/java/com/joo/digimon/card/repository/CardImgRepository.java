@@ -23,8 +23,8 @@ public interface CardImgRepository extends JpaRepository<CardImgEntity, Integer>
     @EntityGraph("CardImgEntity.detail")
     List<CardImgEntity> findByUploadUrlIsNullAndIsEnCardTrue();
 
-    @EntityGraph("CardImgEntity.detail")
-    Optional<CardImgEntity> findByCardEntity(CardEntity cardEntity);
+//    @EntityGraph("CardImgEntity.detail")
+    List<CardImgEntity> findByCardEntity(CardEntity cardEntity);
 
     @EntityGraph("CardImgEntity.detail")
     List<CardImgEntity> findByIdIn(List<Integer> ids, Sort sort);

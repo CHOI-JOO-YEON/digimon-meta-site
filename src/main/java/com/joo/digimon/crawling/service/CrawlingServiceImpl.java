@@ -4,7 +4,10 @@ import com.joo.digimon.card.model.*;
 import com.joo.digimon.card.repository.*;
 import com.joo.digimon.crawling.dto.*;
 import com.joo.digimon.crawling.model.CrawlingCardEntity;
+import com.joo.digimon.crawling.model.DeletedEnCardImg;
 import com.joo.digimon.crawling.repository.CrawlingCardRepository;
+import com.joo.digimon.crawling.repository.DeletedEnCardImgRepository;
+import com.joo.digimon.exception.model.CardImageException;
 import com.joo.digimon.exception.model.CardParseException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -36,6 +39,7 @@ public class CrawlingServiceImpl implements CrawlingService {
     private final TypeRepository typeRepository;
     private final NoteRepository noteRepository;
     private final CardParseService cardParseService;
+    private final DeletedEnCardImgRepository deletedEnCardImgRepository;
 
     @Transactional
     @Override
@@ -56,7 +60,7 @@ public class CrawlingServiceImpl implements CrawlingService {
                 saveCardByReflectCardRequest(cardParseService.crawlingCardParse(crawlingCardEntity));
                 crawlingResultDto.successCountIncrease();
                 crawlingCardEntity.setIsReflect(true);
-            } catch (CardParseException e) {
+            } catch (CardParseException | CardImageException e) {
                 crawlingCardEntity.updateErrorMessage(e.getMessage());
                 crawlingResultDto.addFailedCrawling(new CrawlingCardDto(crawlingCardEntity));
             } catch (Exception e) {
@@ -109,7 +113,8 @@ public class CrawlingServiceImpl implements CrawlingService {
         List<ReflectCardResponseDto> reflectCardResponseDtoList = new ArrayList<>();
         for (ReflectCardRequestDto reflectCardRequestDto : reflectCardRequestDtoList) {
             try {
-                reflectCardResponseDtoList.add(new ReflectCardResponseDto(reflectCardRequestDto.getId(), saveCardByReflectCardRequest(reflectCardRequestDto)));
+                saveCardByReflectCardRequest(reflectCardRequestDto);
+                reflectCardResponseDtoList.add(new ReflectCardResponseDto(reflectCardRequestDto.getId(), true));
             } catch (Exception e) {
                 reflectCardResponseDtoList.add(new ReflectCardResponseDto(reflectCardRequestDto.getId(), false));
             }
@@ -120,32 +125,29 @@ public class CrawlingServiceImpl implements CrawlingService {
 
 
     @Transactional
-    public boolean saveCardByReflectCardRequest(ReflectCardRequestDto reflectCardRequestDto) throws CardParseException {
+    public void saveCardByReflectCardRequest(ReflectCardRequestDto reflectCardRequestDto) throws CardParseException, CardImageException {
         CrawlingCardEntity crawlingCardEntity = crawlingCardRepository.findById(reflectCardRequestDto.getId()).orElseThrow();
 
-
         CardEntity cardEntity = getCardEntityOrInsert(reflectCardRequestDto);
-        NoteEntity noteEntity = noteRepository.findByName(reflectCardRequestDto.getNote()).orElseGet(
-                () -> noteRepository.save(NoteEntity.builder()
-                        .name(reflectCardRequestDto.getNote())
-                        .build())
-        );
+        NoteEntity noteEntity = noteRepository.findByName(reflectCardRequestDto.getNote()).orElseGet(() -> noteRepository.save(NoteEntity.builder().name(reflectCardRequestDto.getNote()).build()));
 
+        if (Boolean.FALSE.equals(reflectCardRequestDto.getIsParallel())) {
+            List<CardImgEntity> cardImgEntityList = cardImgRepository.findByCardEntity(cardEntity);
+            if (cardImgEntityList.size() > 1) {
+                throw new CardImageException("Duplicate non-parallel card image");
+            }
+            if (cardImgEntityList.size() == 1) {
+                CardImgEntity cardImgEntity = cardImgEntityList.getFirst();
 
-        cardImgRepository.save(
-                CardImgEntity.builder()
-                        .isParallel(reflectCardRequestDto.getIsParallel())
-                        .noteEntity(noteEntity)
-                        .crawlingCardEntity(crawlingCardEntity)
-                        .cardEntity(cardEntity)
-                        .originUrl(reflectCardRequestDto.getOriginUrl())
-                        .build()
-        );
-
-
-        return true;
-
-
+                if (!Boolean.TRUE.equals(cardImgEntity.getIsEnCard())) {
+                    throw new CardImageException("Non-parallel cards already reflected");
+                }
+                deletedEnCardImgRepository.save(DeletedEnCardImg.builder().cardEntity(cardEntity).crawlingCardEntity(cardImgEntity.getCrawlingCardEntity()).uploadUrl(cardImgEntity.getUploadUrl()).smallImgUrl(cardImgEntity.getSmallImgUrl()).originUrl(cardImgEntity.getOriginUrl()).noteEntity(cardImgEntity.getNoteEntity()).build());
+                cardImgRepository.save(CardImgEntity.builder().id(cardImgEntity.getId()).isParallel(reflectCardRequestDto.getIsParallel()).noteEntity(noteEntity).crawlingCardEntity(crawlingCardEntity).cardEntity(cardEntity).originUrl(reflectCardRequestDto.getOriginUrl()).build());
+                return;
+            }
+        }
+        cardImgRepository.save(CardImgEntity.builder().isParallel(reflectCardRequestDto.getIsParallel()).noteEntity(noteEntity).crawlingCardEntity(crawlingCardEntity).cardEntity(cardEntity).originUrl(reflectCardRequestDto.getOriginUrl()).build());
     }
 
     private CardEntity getCardEntityOrInsert(ReflectCardRequestDto reflectCardRequestDto) {
@@ -153,44 +155,12 @@ public class CrawlingServiceImpl implements CrawlingService {
         if (cardEntity.isPresent()) {
             CardEntity card = cardEntity.get();
             if (Boolean.TRUE.equals(card.getIsOnlyEnCard())) {
-                CardEntity save = cardRepository.save(
-                        CardEntity.builder()
-                                .id(card.getId())
-                                .sortString(generateSortString(reflectCardRequestDto.getCardNo()))
-                                .cardNo(reflectCardRequestDto.getCardNo())
-                                .cardName(reflectCardRequestDto.getCardName())
-                                .attribute(reflectCardRequestDto.getAttribute())
-                                .dp(reflectCardRequestDto.getDp())
-                                .playCost(reflectCardRequestDto.getPlayCost())
-                                .digivolveCondition1(reflectCardRequestDto.getDigivolveCondition1())
-                                .digivolveCondition2(reflectCardRequestDto.getDigivolveCondition2())
-                                .digivolveCost1(reflectCardRequestDto.getDigivolveCost1())
-                                .digivolveCost2(reflectCardRequestDto.getDigivolveCost2())
-                                .lv(reflectCardRequestDto.getLv())
-                                .effect(reflectCardRequestDto.getEffect())
-                                .sourceEffect(reflectCardRequestDto.getSourceEffect())
-                                .cardType(reflectCardRequestDto.getCardType())
-                                .form(reflectCardRequestDto.getForm())
-                                .rarity(reflectCardRequestDto.getRarity())
-                                .color1(reflectCardRequestDto.getColor1())
-                                .color2(reflectCardRequestDto.getColor2())
-                                .isOnlyEnCard(false)
-                                .build());
+                CardEntity save = cardRepository.save(CardEntity.builder().id(card.getId()).sortString(generateSortString(reflectCardRequestDto.getCardNo())).cardNo(reflectCardRequestDto.getCardNo()).cardName(reflectCardRequestDto.getCardName()).attribute(reflectCardRequestDto.getAttribute()).dp(reflectCardRequestDto.getDp()).playCost(reflectCardRequestDto.getPlayCost()).digivolveCondition1(reflectCardRequestDto.getDigivolveCondition1()).digivolveCondition2(reflectCardRequestDto.getDigivolveCondition2()).digivolveCost1(reflectCardRequestDto.getDigivolveCost1()).digivolveCost2(reflectCardRequestDto.getDigivolveCost2()).lv(reflectCardRequestDto.getLv()).effect(reflectCardRequestDto.getEffect()).sourceEffect(reflectCardRequestDto.getSourceEffect()).cardType(reflectCardRequestDto.getCardType()).form(reflectCardRequestDto.getForm()).rarity(reflectCardRequestDto.getRarity()).color1(reflectCardRequestDto.getColor1()).color2(reflectCardRequestDto.getColor2()).isOnlyEnCard(false).build());
 
 
                 for (String type : reflectCardRequestDto.getTypes()) {
-                    TypeEntity typeEntity = typeRepository.findByName(type)
-                            .orElseGet(() ->
-                                    typeRepository.save(TypeEntity.builder()
-                                            .name(type)
-                                            .build())
-                            );
-                    cardCombineTypeRepository.save(
-                            CardCombineTypeEntity.builder()
-                                    .cardEntity(save)
-                                    .typeEntity(typeEntity)
-                                    .build()
-                    );
+                    TypeEntity typeEntity = typeRepository.findByName(type).orElseGet(() -> typeRepository.save(TypeEntity.builder().name(type).build()));
+                    cardCombineTypeRepository.save(CardCombineTypeEntity.builder().cardEntity(save).typeEntity(typeEntity).build());
                 }
                 return save;
 
@@ -199,42 +169,12 @@ public class CrawlingServiceImpl implements CrawlingService {
         }
 
 
-        CardEntity save = cardRepository.save(
-                CardEntity.builder()
-                        .sortString(generateSortString(reflectCardRequestDto.getCardNo()))
-                        .cardNo(reflectCardRequestDto.getCardNo())
-                        .cardName(reflectCardRequestDto.getCardName())
-                        .attribute(reflectCardRequestDto.getAttribute())
-                        .dp(reflectCardRequestDto.getDp())
-                        .playCost(reflectCardRequestDto.getPlayCost())
-                        .digivolveCondition1(reflectCardRequestDto.getDigivolveCondition1())
-                        .digivolveCondition2(reflectCardRequestDto.getDigivolveCondition2())
-                        .digivolveCost1(reflectCardRequestDto.getDigivolveCost1())
-                        .digivolveCost2(reflectCardRequestDto.getDigivolveCost2())
-                        .lv(reflectCardRequestDto.getLv())
-                        .effect(reflectCardRequestDto.getEffect())
-                        .sourceEffect(reflectCardRequestDto.getSourceEffect())
-                        .cardType(reflectCardRequestDto.getCardType())
-                        .form(reflectCardRequestDto.getForm())
-                        .rarity(reflectCardRequestDto.getRarity())
-                        .color1(reflectCardRequestDto.getColor1())
-                        .color2(reflectCardRequestDto.getColor2())
-                        .build());
+        CardEntity save = cardRepository.save(CardEntity.builder().sortString(generateSortString(reflectCardRequestDto.getCardNo())).cardNo(reflectCardRequestDto.getCardNo()).cardName(reflectCardRequestDto.getCardName()).attribute(reflectCardRequestDto.getAttribute()).dp(reflectCardRequestDto.getDp()).playCost(reflectCardRequestDto.getPlayCost()).digivolveCondition1(reflectCardRequestDto.getDigivolveCondition1()).digivolveCondition2(reflectCardRequestDto.getDigivolveCondition2()).digivolveCost1(reflectCardRequestDto.getDigivolveCost1()).digivolveCost2(reflectCardRequestDto.getDigivolveCost2()).lv(reflectCardRequestDto.getLv()).effect(reflectCardRequestDto.getEffect()).sourceEffect(reflectCardRequestDto.getSourceEffect()).cardType(reflectCardRequestDto.getCardType()).form(reflectCardRequestDto.getForm()).rarity(reflectCardRequestDto.getRarity()).color1(reflectCardRequestDto.getColor1()).color2(reflectCardRequestDto.getColor2()).build());
 
 
         for (String type : reflectCardRequestDto.getTypes()) {
-            TypeEntity typeEntity = typeRepository.findByName(type)
-                    .orElseGet(() ->
-                            typeRepository.save(TypeEntity.builder()
-                                    .name(type)
-                                    .build())
-                    );
-            cardCombineTypeRepository.save(
-                    CardCombineTypeEntity.builder()
-                            .cardEntity(save)
-                            .typeEntity(typeEntity)
-                            .build()
-            );
+            TypeEntity typeEntity = typeRepository.findByName(type).orElseGet(() -> typeRepository.save(TypeEntity.builder().name(type).build()));
+            cardCombineTypeRepository.save(CardCombineTypeEntity.builder().cardEntity(save).typeEntity(typeEntity).build());
         }
         return save;
 
@@ -290,7 +230,7 @@ public class CrawlingServiceImpl implements CrawlingService {
                 saveCardByReflectCardRequest(cardParseService.crawlingCardParse(crawlingCardEntity));
                 crawlingResultDto.successCountIncrease();
                 crawlingCardEntity.setIsReflect(true);
-            } catch (CardParseException e) {
+            } catch (CardParseException | CardImageException e) {
                 crawlingCardEntity.updateErrorMessage(e.getMessage());
                 crawlingResultDto.addFailedCrawling(new CrawlingCardDto(crawlingCardEntity));
             } catch (Exception e) {
@@ -317,9 +257,7 @@ public class CrawlingServiceImpl implements CrawlingService {
         List<CrawlingCardEntity> crawlingCardEntities = new ArrayList<>();
 
         for (CrawlingCardDto crawlingCardDto : crawlingCardDtoList) {
-            crawlingCardEntities.add(
-                    createOrFindCrawlingCardEntity(crawlingCardDto)
-            );
+            crawlingCardEntities.add(createOrFindCrawlingCardEntity(crawlingCardDto));
         }
 
 
@@ -338,8 +276,7 @@ public class CrawlingServiceImpl implements CrawlingService {
         try {
             Elements pages = doc.selectFirst(".paging").select("ul>li>a");
             for (Element page : pages) {
-                if (page.text().equals("Next"))
-                    break;
+                if (page.text().equals("Next")) break;
                 documentList.add(Jsoup.connect(page.attr("href")).get());
             }
         } catch (NullPointerException e) {
