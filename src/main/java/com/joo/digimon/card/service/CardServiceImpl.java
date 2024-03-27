@@ -41,7 +41,6 @@ public class CardServiceImpl implements CardService {
 
         //영문
         if (!cardRequestDto.getIsEnglishCardInclude()) {
-//            builder.and(qCardEntity.isOnlyEnCard.isNull().or(qCardEntity.isOnlyEnCard.isFalse()));
             builder.and(qCardImgEntity.isEnCard.isNull()).or(qCardImgEntity.isEnCard.isFalse());
         }
         else {
