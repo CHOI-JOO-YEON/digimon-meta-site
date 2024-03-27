@@ -16,7 +16,7 @@ public class NicknameServiceImpl implements NicknameService {
 
     @Override
     public String generateNickname() {
-        List<CardEntity> allEntities = cardRepository.findByCardType(CardType.DIGIMON);
+        List<CardEntity> allEntities = cardRepository.findByCardTypeAndIsOnlyEnCardIsNullOrIsOnlyEnCardIsFalse(CardType.DIGIMON);
         if (allEntities.isEmpty()) {
             return "이그드라실";
         }
