@@ -244,6 +244,18 @@ public class DeckServiceImpl implements DeckService {
         deckRepository.delete(deck);
     }
 
+    @Override
+    public List<ResponseDeckDto> findAllMyDeck(User user) {
+        List<DeckEntity> decks = deckRepository.findByUser(user);
+        List<ResponseDeckDto> responseDeckDtoList = new ArrayList<>();
+
+        for (DeckEntity deck : decks) {
+            responseDeckDtoList.add(new ResponseDeckDto(deck,prefixUrl));
+        }
+
+        return responseDeckDtoList;
+    }
+
     private BooleanBuilder getBuilderByDeckSearchParameter(DeckSearchParameter deckSearchParameter) {
         QDeckEntity qDeckEntity = QDeckEntity.deckEntity;
         QDeckCardEntity qDeckCardEntity = QDeckCardEntity.deckCardEntity;
@@ -262,17 +274,6 @@ public class DeckServiceImpl implements DeckService {
                 for (LimitCardEntity limitCardEntity : limitCardEntities) {
                     CardEntity card = limitCardEntity.getCardEntity();
                     Integer allowedQuantity = limitCardEntity.getAllowedQuantity();
-
-
-//                    BooleanExpression countExceeded = qDeckCardEntity.deckEntity.eq(qDeckEntity)
-//                            .and(qDeckCardEntity.cardImgEntity.cardEntity.eq(card))
-//                            .and(qDeckCardEntity.cnt.gt(allowedQuantity));
-//
-//                    builder.and(JPAExpressions
-//                            .select(qDeckCardEntity.count())
-//                            .from(qDeckCardEntity)
-//                            .where(countExceeded)
-//                            .eq(0L));
 
 
                     JPQLQuery<Integer> totalCardCountQuery = JPAExpressions

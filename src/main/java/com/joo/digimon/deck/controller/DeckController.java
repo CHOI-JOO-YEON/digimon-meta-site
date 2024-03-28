@@ -12,9 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.net.http.HttpResponse;
-import java.util.ArrayList;
-import java.util.List;
+
 
 @RestController
 @RequestMapping("/api/deck")
@@ -43,6 +41,12 @@ public class DeckController {
     ResponseEntity<?> importDecks(@RequestBody DeckImportRequestDto deckImportRequestDto) {
         ResponseDeckDto responseDeckDto = deckService.importDeck(deckImportRequestDto);
         return new ResponseEntity<>(responseDeckDto,HttpStatus.OK);
+    }
+
+    @GetMapping("/all")
+    ResponseEntity<?> findAllMyDecks(@CurUser User user) {
+        return new ResponseEntity<>(deckService.findAllMyDeck(user), HttpStatus.OK);
+
     }
     @PostMapping("/delete")
     ResponseEntity<?> importDecks(@RequestParam("deck-id") Integer deckId, @CurUser User user) {
