@@ -28,6 +28,7 @@ public class ResponseDeckDto {
     String deckName;
     List<Card> cards;
     Set<Color> colors;
+    Integer formatId;
 
     public ResponseDeckDto(DeckEntity deck, String prefixUrl) {
         this.authorId = deck.getUser().getId();
@@ -42,6 +43,7 @@ public class ResponseDeckDto {
         for (DeckColor deckColor : deck.getDeckColors()) {
             colors.add(deckColor.getColor());
         }
+        formatId=deck.getFormat().getId();
     }
 
 
@@ -81,6 +83,7 @@ public class ResponseDeckDto {
         Boolean isParallel;
         String sortString;
         LocalDate releaseDate;
+        Boolean isEn;
         public Card(CardImgEntity card,Integer cnt, String prefixUrl) {
             this.cnt=cnt;
             createCard(card, prefixUrl);
@@ -114,6 +117,7 @@ public class ResponseDeckDto {
             this.sortString= card.getCardEntity().getSortString();
             this.smallImgUrl= prefixUrl + card.getSmallImgUrl();
             this.releaseDate=card.getCardEntity().getReleaseDate();
+            this.isEn=Boolean.TRUE.equals( card.getIsEnCard());
         }
 
         public Card(DeckCardEntity deckCardEntity, String prefixUrl) {

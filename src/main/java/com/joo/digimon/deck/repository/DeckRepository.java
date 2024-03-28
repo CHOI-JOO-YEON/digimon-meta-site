@@ -24,6 +24,9 @@ public interface DeckRepository extends JpaRepository<DeckEntity,Integer> , Quer
     Page<DeckEntity> findAll(Predicate predicate, Pageable pageable);
 
     @EntityGraph("Deck.detail")
+    List<DeckEntity> findByUser(User user);
+
+    @EntityGraph("Deck.detail")
     List<DeckEntity> findByUserOrderByCreatedDateTime(User user);
 
     List<DeckEntity> findByIsPublicIsTrue();

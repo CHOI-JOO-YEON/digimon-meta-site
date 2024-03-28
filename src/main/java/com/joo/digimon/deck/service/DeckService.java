@@ -21,4 +21,5 @@ public interface DeckService {
 
     void deleteDeck(Integer deckId, User user);
 
+    List<ResponseDeckDto> findAllMyDeck(User user);
 }
