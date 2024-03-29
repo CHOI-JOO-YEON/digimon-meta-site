@@ -1,13 +1,13 @@
 package com.joo.digimon.crawling.service;
 
 import com.joo.digimon.card.model.*;
-import com.joo.digimon.card.repository.CardCombineTypeRepository;
 import com.joo.digimon.card.repository.CardImgRepository;
 import com.joo.digimon.card.repository.CardRepository;
 import com.joo.digimon.card.repository.NoteRepository;
 import com.joo.digimon.crawling.dto.CrawlingCardDto;
 import com.joo.digimon.crawling.dto.CrawlingResultDto;
 import com.joo.digimon.crawling.dto.ReflectCardRequestDto;
+import com.joo.digimon.crawling.dto.UpdateCrawlingRequestDto;
 import com.joo.digimon.crawling.enums.CardOrigin;
 import com.joo.digimon.crawling.model.CrawlingCardEntity;
 import com.joo.digimon.crawling.repository.CrawlingCardRepository;
@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -37,6 +38,59 @@ public class CrawlingEnServiceImpl implements CrawlingEnService {
     private final CardRepository cardRepository;
     private final NoteRepository noteRepository;
     private final CardParseService cardParseService;
+    @Transactional
+    @Override
+    public CrawlingResultDto updateCrawlingEntityAndSaveCard(List<UpdateCrawlingRequestDto> updateCrawlingRequestDtoList) {
+        CrawlingResultDto crawlingResultDto = new CrawlingResultDto();
+        for (UpdateCrawlingRequestDto updateCrawlingRequestDto : updateCrawlingRequestDtoList) {
+            CrawlingCardEntity crawlingCard = crawlingCardRepository.findById(updateCrawlingRequestDto.getId()).orElseThrow();
+
+            if (crawlingCardRepository.findById(updateCrawlingRequestDto.getId()).orElseThrow().getIsReflect()) {
+                CrawlingCardDto crawlingCardDto = new CrawlingCardDto(crawlingCard);
+                crawlingCardDto.setErrorMessage("IS_REFLECTED");
+                crawlingResultDto.addFailedCrawling(crawlingCardDto);
+                continue;
+            }
+
+            CrawlingCardEntity crawlingCardEntity = updateCrawlingEntity(updateCrawlingRequestDto);
+            try {
+                saveCardByReflectCardRequest(cardParseService.crawlingCardParseEn(crawlingCardEntity));
+                crawlingResultDto.successCountIncrease();
+                crawlingCardEntity.setIsReflect(true);
+            } catch (CardParseException e) {
+                crawlingCardEntity.updateErrorMessage(e.getMessage());
+                crawlingResultDto.addFailedCrawling(new CrawlingCardDto(crawlingCardEntity));
+            } catch (Exception e) {
+                log.error("{} 에서 {} 발생 {}", crawlingCardEntity, e.getMessage(), e);
+            }
+        }
+
+        return crawlingResultDto;
+    }
+    @Transactional
+    public CrawlingCardEntity updateCrawlingEntity(UpdateCrawlingRequestDto updateCrawlingRequestDto) {
+        CrawlingCardEntity crawlingCardEntity = crawlingCardRepository.findById(updateCrawlingRequestDto.getId()).orElseThrow();
+        Optional.ofNullable(updateCrawlingRequestDto.getCardNo()).ifPresent(crawlingCardEntity::setCardNo);
+        Optional.ofNullable(updateCrawlingRequestDto.getRarity()).ifPresent(crawlingCardEntity::setRarity);
+        Optional.ofNullable(updateCrawlingRequestDto.getCardType()).ifPresent(crawlingCardEntity::setCardType);
+        Optional.ofNullable(updateCrawlingRequestDto.getLv()).ifPresent(crawlingCardEntity::setLv);
+        Optional.ofNullable(updateCrawlingRequestDto.getIsParallel()).ifPresent(crawlingCardEntity::setIsParallel);
+        Optional.ofNullable(updateCrawlingRequestDto.getCardName()).ifPresent(crawlingCardEntity::setCardName);
+        Optional.ofNullable(updateCrawlingRequestDto.getForm()).ifPresent(crawlingCardEntity::setForm);
+        Optional.ofNullable(updateCrawlingRequestDto.getAttribute()).ifPresent(crawlingCardEntity::setAttribute);
+        Optional.ofNullable(updateCrawlingRequestDto.getType()).ifPresent(crawlingCardEntity::setType);
+        Optional.ofNullable(updateCrawlingRequestDto.getDP()).ifPresent(crawlingCardEntity::setDP);
+        Optional.ofNullable(updateCrawlingRequestDto.getPlayCost()).ifPresent(crawlingCardEntity::setPlayCost);
+        Optional.ofNullable(updateCrawlingRequestDto.getDigivolveCost1()).ifPresent(crawlingCardEntity::setDigivolveCost1);
+        Optional.ofNullable(updateCrawlingRequestDto.getDigivolveCost2()).ifPresent(crawlingCardEntity::setDigivolveCost2);
+        Optional.ofNullable(updateCrawlingRequestDto.getEffect()).ifPresent(crawlingCardEntity::setEffect);
+        Optional.ofNullable(updateCrawlingRequestDto.getSourceEffect()).ifPresent(crawlingCardEntity::setSourceEffect);
+        Optional.ofNullable(updateCrawlingRequestDto.getNote()).ifPresent(crawlingCardEntity::setNote);
+        Optional.ofNullable(updateCrawlingRequestDto.getColor1()).ifPresent(crawlingCardEntity::setColor1);
+        Optional.ofNullable(updateCrawlingRequestDto.getColor2()).ifPresent(crawlingCardEntity::setColor2);
+        Optional.ofNullable(updateCrawlingRequestDto.getImgUrl()).ifPresent(crawlingCardEntity::setImgUrl);
+        return crawlingCardEntity;
+    }
 
     @Override
     public CrawlingResultDto crawlAndSaveByUrl(String url) throws IOException {
