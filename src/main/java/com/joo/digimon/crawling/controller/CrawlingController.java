@@ -44,6 +44,11 @@ public class CrawlingController {
     public ResponseEntity<?> crawlingCard(@RequestBody List<UpdateCrawlingRequestDto> updateCrawlingRequestDtoList) {
         return new ResponseEntity<>(crawlingService.updateCrawlingEntityAndSaveCard(updateCrawlingRequestDtoList), HttpStatus.OK);
     }
+
+    @PostMapping("/update/en")
+    public ResponseEntity<?> crawlingCardEn(@RequestBody List<UpdateCrawlingRequestDto> updateCrawlingRequestDtoList) {
+        return new ResponseEntity<>(crawlingEnService.updateCrawlingEntityAndSaveCard(updateCrawlingRequestDtoList), HttpStatus.OK);
+    }
     @GetMapping("/list")
     public ResponseEntity<?> getUnReflectCrawlingCardList(@RequestParam("size") Integer size) {
         return new ResponseEntity<>(crawlingService.getUnreflectedCrawlingCardDtoList(size), HttpStatus.OK);
