@@ -19,8 +19,17 @@ import java.util.Objects;
 @IdClass(UserCardId.class)
 @NamedEntityGraph(
         name = "UserCard.detail", attributeNodes = {
-        @NamedAttributeNode(value = "cardImgEntity")
-}
+        @NamedAttributeNode(value = "cardImgEntity", subgraph = "cardImgEntitySubGraph")
+},
+        subgraphs = {
+                @NamedSubgraph(
+                        name = "cardImgEntitySubGraph",
+                        attributeNodes = {
+                                @NamedAttributeNode(value = "cardEntity"),
+                        }
+                ),
+
+        }
 )
 public class UserCard {
     @Id
