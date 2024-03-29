@@ -7,9 +7,10 @@ import lombok.Data;
 public class CardCollectDto {
     Integer cardImgId;
     Integer quantity;
-
+    String cardNo;
     public CardCollectDto(UserCard userCard) {
         this.cardImgId = userCard.getCardImgEntity().getId();
         this.quantity = userCard.getQuantity();
+        this.cardNo=userCard.getCardImgEntity().getCardEntity().getCardNo();
     }
 }
