@@ -1,6 +1,5 @@
 package com.joo.digimon.deck.repository;
 
-import com.joo.digimon.card.model.CardImgEntity;
 import com.joo.digimon.deck.model.DeckEntity;
 import com.joo.digimon.user.model.User;
 import org.springframework.data.domain.Page;
@@ -30,4 +29,7 @@ public interface DeckRepository extends JpaRepository<DeckEntity,Integer> , Quer
     List<DeckEntity> findByUserOrderByCreatedDateTime(User user);
 
     List<DeckEntity> findByIsPublicIsTrue();
+
+    @EntityGraph("Deck.detail")
+    List<DeckEntity> findByIdIn(List<Integer> ids);
 }
