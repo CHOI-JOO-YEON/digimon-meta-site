@@ -20,10 +20,14 @@ import com.joo.digimon.user.model.User;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.JPQLQuery;
+import com.querydsl.jpa.impl.JPAQuery;
+import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -35,6 +39,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@RefreshScope
 public class DeckServiceImpl implements DeckService {
     private final DeckRepository deckRepository;
     private final DeckCardRepository deckCardRepository;
@@ -42,6 +47,7 @@ public class DeckServiceImpl implements DeckService {
     private final FormatRepository formatRepository;
     private final DeckColorRepository deckColorRepository;
     private final LimitRepository limitRepository;
+    private final EntityManager entityManager;
 
     @Value("${domain.url}")
     private String prefixUrl;
@@ -203,35 +209,51 @@ public class DeckServiceImpl implements DeckService {
     }
 
     @Override
+    @Transactional
     public PagedResponseDeckDto finMyDecks(User user, DeckSearchParameter deckSearchParameter) {
         if (user == null) {
-         throw new UnAuthorizationException("");
+            throw new UnAuthorizationException("");
         }
         BooleanBuilder builder = getBuilderByDeckSearchParameter(deckSearchParameter);
         QDeckEntity qDeckEntity = QDeckEntity.deckEntity;
         builder.and(qDeckEntity.user.eq(user));
 
-        Pageable pageable = generatePageableByDeckSearchParameter(deckSearchParameter);
 
-        Page<DeckEntity> deckEntityPage = deckRepository.findAll(builder, pageable);
-
-
-        return new PagedResponseDeckDto(deckEntityPage, prefixUrl);
+        return new PagedResponseDeckDto(getDeckPage(builder, deckSearchParameter), prefixUrl);
     }
+
+
 
     @Override
     public PagedResponseDeckDto findDecks(DeckSearchParameter deckSearchParameter) {
         BooleanBuilder builder = getBuilderByDeckSearchParameter(deckSearchParameter);
         QDeckEntity qDeckEntity = QDeckEntity.deckEntity;
         builder.and(qDeckEntity.isPublic.eq(true));
-        Pageable pageable = generatePageableByDeckSearchParameter(deckSearchParameter);
-
-        Page<DeckEntity> deckEntityPage = deckRepository.findAll(builder, pageable);
 
 
-        return new PagedResponseDeckDto(deckEntityPage, prefixUrl);
+        return new PagedResponseDeckDto(getDeckPage(builder, deckSearchParameter), prefixUrl);
     }
 
+    private Page<DeckEntity> getDeckPage(BooleanBuilder builder, DeckSearchParameter deckSearchParameter) {
+        QDeckEntity qDeckEntity = QDeckEntity.deckEntity;
+        Pageable pageable = generatePageableByDeckSearchParameter(deckSearchParameter);
+
+        JPAQuery<Integer> query = new JPAQuery<>(entityManager);
+        int totalCount = query.select(qDeckEntity.id)
+                .from(qDeckEntity)
+                .where(builder)
+                .fetch().size();
+
+        List<Integer> deckIds = query.select(qDeckEntity.id)
+                .from(qDeckEntity)
+                .where(builder)
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
+                .fetch();
+
+        List<DeckEntity> deckEntities = deckRepository.findByIdIn(deckIds);
+        return new PageImpl<>(deckEntities, pageable, totalCount);
+    }
     @Override
     @Transactional
     public void deleteDeck(Integer deckId, User user) {
@@ -250,7 +272,7 @@ public class DeckServiceImpl implements DeckService {
         List<ResponseDeckDto> responseDeckDtoList = new ArrayList<>();
 
         for (DeckEntity deck : decks) {
-            responseDeckDtoList.add(new ResponseDeckDto(deck,prefixUrl));
+            responseDeckDtoList.add(new ResponseDeckDto(deck, prefixUrl));
         }
 
         return responseDeckDtoList;
