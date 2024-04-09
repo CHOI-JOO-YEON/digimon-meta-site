@@ -14,6 +14,7 @@ public class SpecialLimitCard {
         cardMap = new HashMap<>();
         cardMap.put("BT6-085", 50);
         cardMap.put("EX2-046", 50);
+        cardMap.put("BT11-061", 50);
     }
     public static int getCardLimit(String cardNo){
         if (cardMap.containsKey(cardNo)) {
