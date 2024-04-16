@@ -12,6 +12,7 @@ public interface DeckService {
     ResponseDeckDto findDeck(Integer id, User user);
 
     ResponseDeckDto importDeck(DeckImportRequestDto deckImportRequestDto);
+    ResponseDeckDto importDeck(DeckImportThisSiteRequestDto deckImportThisSiteRequestDto);
 
     TTSDeckFileDto exportTTSDeck(RequestDeckDto requestDeckDto);
 
