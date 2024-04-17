@@ -14,4 +14,5 @@ public class LoginResponseDto {
     String accessToken;
     String nickname;
     Role role;
+    Integer userNo;
 }
