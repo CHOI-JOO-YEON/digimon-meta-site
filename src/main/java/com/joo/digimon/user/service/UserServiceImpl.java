@@ -45,7 +45,7 @@ public class UserServiceImpl implements UserService {
 
 
 
-        return new LoginResponseDto(jwtProvider.generateToken(user), user.getNickName(), user.getRole());
+        return new LoginResponseDto(jwtProvider.generateToken(user), user.getNickName(), user.getRole(),user.getId());
     }
 
     @Override
@@ -55,7 +55,7 @@ public class UserServiceImpl implements UserService {
         {
             return null;
         }
-        return new LoginResponseDto(jwtProvider.generateToken(user), user.getNickName(), user.getRole());
+        return new LoginResponseDto(jwtProvider.generateToken(user), user.getNickName(), user.getRole(), user.getId());
     }
 
 

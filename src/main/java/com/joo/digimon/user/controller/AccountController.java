@@ -12,15 +12,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/account")
 @RequiredArgsConstructor
 public class AccountController {
     private final UserService userService;
-    private final NicknameService nicknameService;
 
     @GetMapping("/token/kakao")
     public ResponseEntity<?> getKakaoToken(@RequestParam String code, HttpServletResponse response) throws IOException {
