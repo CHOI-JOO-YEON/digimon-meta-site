@@ -13,7 +13,8 @@ import lombok.*;
 @NamedEntityGraph(
         name = "CardImgEntity.detail",
         attributeNodes = {
-                @NamedAttributeNode(value = "cardEntity", subgraph = "cardEntitySubgraph")
+                @NamedAttributeNode(value = "cardEntity", subgraph = "cardEntitySubgraph"),
+                @NamedAttributeNode(value = "noteEntity")
         },
         subgraphs = {
                 @NamedSubgraph(
