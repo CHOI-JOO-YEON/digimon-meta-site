@@ -150,6 +150,7 @@ public class CardServiceImpl implements CardService {
         if (cardRequestDto.getParallelOption() == 0) {
             orders.add(new Sort.Order(Sort.Direction.ASC, "isParallel"));
         }
+        orders.add(new Sort.Order(Sort.Direction.ASC,"cardEntity.releaseDate"));
 
         Sort sort = Sort.by(orders);
 
