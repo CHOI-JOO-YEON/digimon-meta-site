@@ -42,8 +42,7 @@ public class CardServiceImpl implements CardService {
         //영문
         if (!cardRequestDto.getIsEnglishCardInclude()) {
             builder.and(qCardImgEntity.isEnCard.isNull()).or(qCardImgEntity.isEnCard.isFalse());
-        }
-        else {
+        } else {
             BooleanExpression isOnlyEnCardNullOrFalse = qCardEntity.isOnlyEnCard.isNull().or(qCardEntity.isOnlyEnCard.isFalse());
             BooleanExpression isEnCardFalse = qCardImgEntity.isEnCard.isFalse().or(qCardImgEntity.isEnCard.isNull());
             builder.and(isOnlyEnCardNullOrFalse.and(isEnCardFalse));
@@ -145,19 +144,16 @@ public class CardServiceImpl implements CardService {
         }
 
 
-        Pageable pageable;
+        List<Sort.Order> orders = new ArrayList<>();
+        orders.add(new Sort.Order(cardRequestDto.getIsOrderDesc() ? Sort.Direction.DESC : Sort.Direction.ASC, "cardEntity." + cardRequestDto.getOrderOption()));
 
-        Sort.Order orderOptionSort;
-        if (cardRequestDto.getIsOrderDesc()) {
-            orderOptionSort = Sort.Order.desc("cardEntity." + cardRequestDto.getOrderOption());
-        } else {
-            orderOptionSort = Sort.Order.asc("cardEntity." + cardRequestDto.getOrderOption());
+        if (cardRequestDto.getParallelOption() == 0) {
+            orders.add(new Sort.Order(Sort.Direction.ASC, "isParallel"));
         }
 
-        Sort sort = Sort.by(orderOptionSort);
+        Sort sort = Sort.by(orders);
 
-
-        pageable = PageRequest.of(cardRequestDto.getPage() - 1, cardRequestDto.getSize(), sort);
+        Pageable pageable = PageRequest.of(cardRequestDto.getPage() - 1, cardRequestDto.getSize(), sort);
 
         JPAQuery<Long> query = new JPAQuery<>(entityManager);
         int totalCount = query.select(qCardImgEntity.id)
@@ -173,12 +169,12 @@ public class CardServiceImpl implements CardService {
                 .fetch();
 
 
-
-        List<CardImgEntity> cardImgEntities = cardImgRepository.findByIdIn(cardIds,sort);
+        List<CardImgEntity> cardImgEntities = cardImgRepository.findByIdIn(cardIds, sort);
         int totalPages = (int) Math.ceil((double) totalCount / cardRequestDto.getSize());
 
         return new CardResponseDto(cardImgEntities, prefixUrl, cardRequestDto.getPage() - 1, totalCount, totalPages);
     }
+
     private OrderSpecifier<?>[] getOrderSpecifiers(Sort sort) {
         return sort.stream()
                 .map(this::toOrderSpecifier)
@@ -194,6 +190,7 @@ public class CardServiceImpl implements CardService {
             return new OrderSpecifier(Order.DESC, entityPath.get(order.getProperty()));
         }
     }
+
     @Override
     public List<NoteDto> getNotes() {
         List<NoteDto> noteDtoList = new ArrayList<>();
