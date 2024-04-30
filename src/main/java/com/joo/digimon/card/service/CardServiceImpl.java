@@ -139,20 +139,27 @@ public class CardServiceImpl implements CardService {
     }
 
     private void addDigivolveCostCondition(CardRequestDto cardRequestDto, BooleanBuilder builder, QCardEntity card) {
-        builder.and(card.digivolveCost1.between(
-                cardRequestDto.getMinDigivolutionCost(),
-                cardRequestDto.getMaxDigivolutionCost()).or(card.digivolveCost2.between(
-                cardRequestDto.getMinDigivolutionCost(),
-                cardRequestDto.getMaxDigivolutionCost())
-        ));
+        if(cardRequestDto.getMinDp() != 1000&&cardRequestDto.getMaxDp() != 16000){
+            builder.and(card.digivolveCost1.between(
+                    cardRequestDto.getMinDigivolutionCost(),
+                    cardRequestDto.getMaxDigivolutionCost()).or(card.digivolveCost2.between(
+                    cardRequestDto.getMinDigivolutionCost(),
+                    cardRequestDto.getMaxDigivolutionCost())
+            ));
+        }
     }
 
     private void addDpCondition(CardRequestDto cardRequestDto, BooleanBuilder builder, QCardEntity card) {
-        builder.and(card.dp.between(cardRequestDto.getMinDp(), cardRequestDto.getMaxDp()));
+        if (cardRequestDto.getMinDigivolutionCost() != 0&&cardRequestDto.getMaxDigivolutionCost() != 8) {
+            builder.and(card.dp.between(cardRequestDto.getMinDp(), cardRequestDto.getMaxDp()));
+        }
     }
 
     private void addPlayCostCondition(CardRequestDto cardRequestDto, BooleanBuilder builder, QCardEntity card) {
-        builder.and(card.playCost.between(cardRequestDto.getMinPlayCost(), cardRequestDto.getMaxPlayCost()));
+        if (cardRequestDto.getMinPlayCost() != 0&&cardRequestDto.getMaxPlayCost() != 20) {
+            builder.and(card.playCost.between(cardRequestDto.getMinPlayCost(), cardRequestDto.getMaxPlayCost()));
+        }
+
     }
 
     private void addCardTypeCondition(Set<CardType> cardTypes, BooleanBuilder builder, QCardEntity card) {
