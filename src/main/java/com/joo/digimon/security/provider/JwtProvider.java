@@ -1,6 +1,6 @@
 package com.joo.digimon.security.provider;
 
-import com.joo.digimon.exception.model.UnAuthorizationException;
+import com.joo.digimon.global.exception.model.UnAuthorizationException;
 import com.joo.digimon.user.model.User;
 import com.joo.digimon.user.repository.UserRepository;
 import io.jsonwebtoken.*;

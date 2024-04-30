@@ -1,4 +1,4 @@
-package com.joo.digimon.annotation.valid;
+package com.joo.digimon.global.annotation.valid;
 
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;

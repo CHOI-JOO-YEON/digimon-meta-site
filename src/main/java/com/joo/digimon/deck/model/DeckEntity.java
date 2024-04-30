@@ -1,7 +1,7 @@
 package com.joo.digimon.deck.model;
 
 import com.joo.digimon.card.model.CardEntity;
-import com.joo.digimon.crawling.enums.CardType;
+import com.joo.digimon.global.enums.CardType;
 import com.joo.digimon.deck.dto.RequestDeckDto;
 import com.joo.digimon.user.model.User;
 import com.joo.digimon.util.SpecialLimitCard;

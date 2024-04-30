@@ -1,6 +1,6 @@
-package com.joo.digimon.exception.model;
+package com.joo.digimon.global.exception.model;
 
-import com.joo.digimon.exception.message.CardParseExceptionMessage;
+import com.joo.digimon.global.exception.message.CardParseExceptionMessage;
 
 public class CardParseException extends Exception{
     public CardParseException(CardParseExceptionMessage cardParseExceptionMessage) {

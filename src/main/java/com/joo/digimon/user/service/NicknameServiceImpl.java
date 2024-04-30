@@ -2,7 +2,7 @@ package com.joo.digimon.user.service;
 
 import com.joo.digimon.card.model.CardEntity;
 import com.joo.digimon.card.repository.CardRepository;
-import com.joo.digimon.crawling.enums.CardType;
+import com.joo.digimon.global.enums.CardType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

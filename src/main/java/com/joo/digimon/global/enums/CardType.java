@@ -1,4 +1,4 @@
-package com.joo.digimon.crawling.enums;
+package com.joo.digimon.global.enums;
 
 import lombok.Getter;
 

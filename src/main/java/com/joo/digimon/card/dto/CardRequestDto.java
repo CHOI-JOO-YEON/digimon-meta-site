@@ -1,9 +1,9 @@
 package com.joo.digimon.card.dto;
 
-import com.joo.digimon.annotation.valid.OrderValid;
-import com.joo.digimon.crawling.enums.CardType;
-import com.joo.digimon.crawling.enums.Color;
-import com.joo.digimon.crawling.enums.Rarity;
+import com.joo.digimon.global.annotation.valid.OrderValid;
+import com.joo.digimon.global.enums.CardType;
+import com.joo.digimon.global.enums.Color;
+import com.joo.digimon.global.enums.Rarity;
 import lombok.Data;
 
 import java.util.Set;
@@ -38,6 +38,8 @@ public class CardRequestDto {
     Boolean isOrderDesc = false;
 
 
+    Set<Integer> typeIds;
+    Integer typeOperation=1; //0 = and, 1 = or
 
 
 }

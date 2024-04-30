@@ -1,4 +1,4 @@
-package com.joo.digimon.exception.message;
+package com.joo.digimon.global.exception.message;
 
 public enum CardParseExceptionMessage {
     NO_CARD_NO,

@@ -1,6 +1,6 @@
 package com.joo.digimon.card.model;
 
-import com.joo.digimon.crawling.enums.CardOrigin;
+import com.joo.digimon.global.enums.CardOrigin;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

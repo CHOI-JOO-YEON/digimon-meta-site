@@ -31,4 +31,10 @@ public class CardController {
     public ResponseEntity<List<NoteDto>> getNotes() {
         return new ResponseEntity<>(cardService.getNotes(), HttpStatus.OK);
     }
+
+    @GetMapping("/types")
+    public ResponseEntity<?> getTypes(){
+        return new ResponseEntity<>(cardService.getTypes(), HttpStatus.OK);
+    }
+
 }

@@ -1,10 +1,9 @@
 package com.joo.digimon.collect.controller;
 
-import com.joo.digimon.annotation.argument_resolver.CurUser;
+import com.joo.digimon.global.annotation.argument_resolver.CurUser;
 import com.joo.digimon.collect.dto.UpdateCardCollectRequestDto;
 import com.joo.digimon.collect.service.CardCollectService;
 import com.joo.digimon.user.model.User;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

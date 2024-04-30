@@ -1,4 +1,4 @@
-package com.joo.digimon.annotation.argument_resolver;
+package com.joo.digimon.global.annotation.argument_resolver;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
