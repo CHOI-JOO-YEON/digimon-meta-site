@@ -38,6 +38,8 @@ public class CardRequestDto {
     Boolean isOrderDesc = false;
 
 
+    Set<Integer> typeIds;
+    Integer typeOperation=1; //0 = and, 1 = or
 
 
 }

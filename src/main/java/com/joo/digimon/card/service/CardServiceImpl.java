@@ -7,11 +7,14 @@ import com.joo.digimon.card.dto.NoteDto;
 import com.joo.digimon.card.model.*;
 import com.joo.digimon.card.repository.CardImgRepository;
 import com.joo.digimon.card.repository.NoteRepository;
+import com.joo.digimon.card.repository.TypeRepository;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.PathBuilder;
+import com.querydsl.jpa.JPAExpressions;
+import com.querydsl.jpa.JPQLQuery;
 import com.querydsl.jpa.impl.JPAQuery;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
@@ -144,7 +147,24 @@ public class CardServiceImpl implements CardService {
         if (cardRequestDto.getNoteId() != null) {
             builder.and(qCardImgEntity.noteEntity.id.eq(cardRequestDto.getNoteId()));
         }
+        //타입
+        if (cardRequestDto.getTypeIds() != null && !cardRequestDto.getTypeIds().isEmpty()) {
+            JPQLQuery<Integer> jpqlQuery = null;
+            if (cardRequestDto.getTypeOperation() == 0) {
+                jpqlQuery = JPAExpressions.select(qCardCombineTypeEntity.cardEntity.id)
+                        .from(qCardCombineTypeEntity)
+                        .where(qCardCombineTypeEntity.typeEntity.id.in(cardRequestDto.getTypeIds()))
+                        .groupBy(qCardCombineTypeEntity.cardEntity.id)
+                        .having(qCardCombineTypeEntity.typeEntity.id.countDistinct().eq(Long.valueOf(cardRequestDto.getTypeIds().size())));
+            } else if (cardRequestDto.getTypeOperation() == 1) {
+                jpqlQuery = JPAExpressions.select(qCardCombineTypeEntity.cardEntity.id)
+                        .from(qCardCombineTypeEntity)
+                        .where(qCardCombineTypeEntity.typeEntity.id.in(cardRequestDto.getTypeIds()));
+            }
+            builder.and(qCardImgEntity.cardEntity.id.in(jpqlQuery));
 
+
+        }
 
         List<Sort.Order> orders = new ArrayList<>();
         orders.add(new Sort.Order(cardRequestDto.getIsOrderDesc() ? Sort.Direction.DESC : Sort.Direction.ASC, "cardEntity." + cardRequestDto.getOrderOption()));
@@ -152,7 +172,7 @@ public class CardServiceImpl implements CardService {
         if (cardRequestDto.getParallelOption() == 0) {
             orders.add(new Sort.Order(Sort.Direction.ASC, "isParallel"));
         }
-        orders.add(new Sort.Order(Sort.Direction.ASC,"noteEntity.releaseDate"));
+        orders.add(new Sort.Order(Sort.Direction.ASC, "noteEntity.releaseDate"));
 
         Sort sort = Sort.by(orders);
 
