@@ -8,10 +8,11 @@ import com.joo.digimon.card.model.*;
 import com.joo.digimon.card.repository.CardImgRepository;
 import com.joo.digimon.card.repository.NoteRepository;
 import com.joo.digimon.card.repository.TypeRepository;
+import com.joo.digimon.crawling.enums.CardType;
+import com.joo.digimon.crawling.enums.Rarity;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
-import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.PathBuilder;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.JPQLQuery;
@@ -24,6 +25,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -38,134 +40,40 @@ public class CardServiceImpl implements CardService {
 
     @Override
     public CardResponseDto searchCards(CardRequestDto cardRequestDto) {
-        QCardImgEntity qCardImgEntity = QCardImgEntity.cardImgEntity;
-        QCardEntity qCardEntity = QCardEntity.cardEntity;
-        QCardCombineTypeEntity qCardCombineTypeEntity = QCardCombineTypeEntity.cardCombineTypeEntity;
-        QTypeEntity qTypeEntity = QTypeEntity.typeEntity;
+        QCardImgEntity cardImg = QCardImgEntity.cardImgEntity;
+        QCardEntity card = QCardEntity.cardEntity;
+        QCardCombineTypeEntity cardCombine = QCardCombineTypeEntity.cardCombineTypeEntity;
         BooleanBuilder builder = new BooleanBuilder();
 
-        //영문
-        if (!cardRequestDto.getIsEnglishCardInclude()) {
-            builder.and(qCardImgEntity.isEnCard.isNull()).or(qCardImgEntity.isEnCard.isFalse());
-        } else {
-            BooleanExpression isOnlyEnCardNullOrFalse = qCardEntity.isOnlyEnCard.isNull().or(qCardEntity.isOnlyEnCard.isFalse());
-            BooleanExpression isEnCardFalse = qCardImgEntity.isEnCard.isFalse().or(qCardImgEntity.isEnCard.isNull());
-            builder.and(isOnlyEnCardNullOrFalse.and(isEnCardFalse));
+        applySearchConditions(cardRequestDto, builder, cardImg, card, cardCombine);
+        Page<CardImgEntity> pageableResult = getPageableResult(cardRequestDto, builder, cardImg);
+        return new CardResponseDto(pageableResult, prefixUrl);
 
-            BooleanExpression isOnlyEnCardTrue = qCardEntity.isOnlyEnCard.isTrue();
-            builder.or(isOnlyEnCardTrue);
-        }
+    }
 
-        //검색어
-        if (cardRequestDto.getSearchString() != null && !cardRequestDto.getSearchString().isEmpty()) {
-            builder.and(
-                    qCardEntity.cardName.containsIgnoreCase(cardRequestDto.getSearchString())
-                            .or(qCardEntity.cardNo.containsIgnoreCase(cardRequestDto.getSearchString()))
-                            .or(qCardEntity.effect.containsIgnoreCase(cardRequestDto.getSearchString()))
-                            .or(qCardEntity.sourceEffect.containsIgnoreCase(cardRequestDto.getSearchString()))
-            );
-        }
+    private Page<CardImgEntity> getPageableResult(CardRequestDto cardRequestDto, BooleanBuilder builder, QCardImgEntity cardImg) {
+        Sort sort = createSort(cardRequestDto);
+        Pageable pageable = PageRequest.of(cardRequestDto.getPage() - 1, cardRequestDto.getSize(), sort);
 
-        //색상
-        if (cardRequestDto.getColors() != null) {
-            if (cardRequestDto.getColorOperation() == 0) {
-                builder.and(qCardEntity.color1.in(cardRequestDto.getColors()).and(qCardEntity.color2.in(cardRequestDto.getColors())));
-            } else if (cardRequestDto.getColorOperation() == 1) {
-                builder.and(qCardEntity.color1.in(cardRequestDto.getColors()).or(qCardEntity.color2.in(cardRequestDto.getColors())));
-            }
-        }
+        JPAQuery<Long> query = new JPAQuery<>(entityManager);
+        int totalCount = query.select(cardImg.id)
+                .from(cardImg)
+                .where(builder)
+                .fetch().size();
+        List<Integer> cardIds = query.select(cardImg.id)
+                .from(cardImg)
+                .where(builder)
+                .orderBy(convertSortToOrderSpecifiers(sort))
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
+                .fetch();
 
-        //lv
-        if (cardRequestDto.getLvs() != null) {
-            builder.and(qCardEntity.lv.in(cardRequestDto.getLvs()));
-        }
+        List<CardImgEntity> cardImgEntities = cardImgRepository.findByIdIn(cardIds, sort);
 
-        //카드 타입
-        if (cardRequestDto.getCardTypes() != null) {
-            builder.and(qCardEntity.cardType.in(cardRequestDto.getCardTypes()));
-        }
+        return new PageImpl<>(cardImgEntities, pageable, totalCount);
+    }
 
-        //playCost
-        if (cardRequestDto.getMinPlayCost() != 0) {
-            if (cardRequestDto.getMaxPlayCost() != 20) {
-                builder.and(qCardEntity.playCost.between(cardRequestDto.getMinPlayCost(), cardRequestDto.getMaxPlayCost()));
-            } else {
-                builder.and(qCardEntity.playCost.goe(cardRequestDto.getMinPlayCost()));
-            }
-        } else {
-            if (cardRequestDto.getMaxPlayCost() != 20) {
-                builder.and(qCardEntity.playCost.loe(cardRequestDto.getMaxPlayCost()));
-            }
-        }
-
-        //dp
-        if (cardRequestDto.getMinDp() != 1000) {
-            if (cardRequestDto.getMaxDp() != 16000) {
-                builder.and(qCardEntity.dp.between(cardRequestDto.getMinDp(), cardRequestDto.getMaxDp()));
-            } else {
-                builder.and(qCardEntity.dp.goe(cardRequestDto.getMinDp()));
-            }
-        } else {
-            if (cardRequestDto.getMaxDp() != 16000) {
-                builder.and(qCardEntity.dp.loe(cardRequestDto.getMaxDp()));
-            }
-        }
-
-        //진화코스트
-        if (cardRequestDto.getMinDigivolutionCost() != 0) {
-            if (cardRequestDto.getMaxDigivolutionCost() != 8) {
-                builder.and(qCardEntity.digivolveCost1.between(
-                        cardRequestDto.getMinDigivolutionCost(),
-                        cardRequestDto.getMaxDigivolutionCost()).or(qCardEntity.digivolveCost2.between(
-                        cardRequestDto.getMinDigivolutionCost(),
-                        cardRequestDto.getMaxDigivolutionCost())
-                ));
-            } else {
-                builder.and(qCardEntity.digivolveCost1.goe(
-                        cardRequestDto.getMinDigivolutionCost()).or(qCardEntity.digivolveCost2.goe(
-                        cardRequestDto.getMinDigivolutionCost())
-                ));
-            }
-        } else {
-            if (cardRequestDto.getMaxDigivolutionCost() != 8) {
-                builder.and(qCardEntity.digivolveCost1.loe(
-                        cardRequestDto.getMaxDigivolutionCost()).or(qCardEntity.digivolveCost2.loe(
-                        cardRequestDto.getMaxDigivolutionCost())
-                ));
-            }
-        }
-
-        //레어도
-        if (cardRequestDto.getRarities() != null) {
-            builder.and(qCardEntity.rarity.in(cardRequestDto.getRarities()));
-        }
-        if (cardRequestDto.getParallelOption() == 1) {
-            builder.and(qCardImgEntity.isParallel.eq(false));
-        } else if (cardRequestDto.getParallelOption() == 2) {
-            builder.and(qCardImgEntity.isParallel.eq(true));
-        }
-        if (cardRequestDto.getNoteId() != null) {
-            builder.and(qCardImgEntity.noteEntity.id.eq(cardRequestDto.getNoteId()));
-        }
-        //타입
-        if (cardRequestDto.getTypeIds() != null && !cardRequestDto.getTypeIds().isEmpty()) {
-            JPQLQuery<Integer> jpqlQuery = null;
-            if (cardRequestDto.getTypeOperation() == 0) {
-                jpqlQuery = JPAExpressions.select(qCardCombineTypeEntity.cardEntity.id)
-                        .from(qCardCombineTypeEntity)
-                        .where(qCardCombineTypeEntity.typeEntity.id.in(cardRequestDto.getTypeIds()))
-                        .groupBy(qCardCombineTypeEntity.cardEntity.id)
-                        .having(qCardCombineTypeEntity.typeEntity.id.countDistinct().eq(Long.valueOf(cardRequestDto.getTypeIds().size())));
-            } else if (cardRequestDto.getTypeOperation() == 1) {
-                jpqlQuery = JPAExpressions.select(qCardCombineTypeEntity.cardEntity.id)
-                        .from(qCardCombineTypeEntity)
-                        .where(qCardCombineTypeEntity.typeEntity.id.in(cardRequestDto.getTypeIds()));
-            }
-            builder.and(qCardImgEntity.cardEntity.id.in(jpqlQuery));
-
-
-        }
-
+    private Sort createSort(CardRequestDto cardRequestDto) {
         List<Sort.Order> orders = new ArrayList<>();
         orders.add(new Sort.Order(cardRequestDto.getIsOrderDesc() ? Sort.Direction.DESC : Sort.Direction.ASC, "cardEntity." + cardRequestDto.getOrderOption()));
 
@@ -174,37 +82,128 @@ public class CardServiceImpl implements CardService {
         }
         orders.add(new Sort.Order(Sort.Direction.ASC, "noteEntity.releaseDate"));
 
-        Sort sort = Sort.by(orders);
-
-        Pageable pageable = PageRequest.of(cardRequestDto.getPage() - 1, cardRequestDto.getSize(), sort);
-
-        JPAQuery<Long> query = new JPAQuery<>(entityManager);
-        int totalCount = query.select(qCardImgEntity.id)
-                .from(qCardImgEntity)
-                .where(builder)
-                .fetch().size();
-        List<Integer> cardIds = query.select(qCardImgEntity.id)
-                .from(qCardImgEntity)
-                .where(builder)
-                .orderBy(getOrderSpecifiers(sort))
-                .offset(pageable.getOffset())
-                .limit(pageable.getPageSize())
-                .fetch();
-
-
-        List<CardImgEntity> cardImgEntities = cardImgRepository.findByIdIn(cardIds, sort);
-        int totalPages = (int) Math.ceil((double) totalCount / cardRequestDto.getSize());
-
-        return new CardResponseDto(cardImgEntities, prefixUrl, cardRequestDto.getPage() - 1, totalCount, totalPages);
+        return Sort.by(orders);
     }
 
-    private OrderSpecifier<?>[] getOrderSpecifiers(Sort sort) {
+    private void applySearchConditions(CardRequestDto cardRequestDto, BooleanBuilder builder, QCardImgEntity cardImg, QCardEntity card, QCardCombineTypeEntity cardCombine) {
+        addEnglishCardCondition(cardRequestDto.getIsEnglishCardInclude(), builder, cardImg, card);
+        addSearchStringCondition(cardRequestDto.getSearchString(), builder, card);
+        addColorCondition(cardRequestDto, builder, card);
+        addLvCondition(cardRequestDto.getLvs(), builder, card);
+        addCardTypeCondition(cardRequestDto.getCardTypes(), builder, card);
+        addPlayCostCondition(cardRequestDto, builder, card);
+        addDpCondition(cardRequestDto, builder, card);
+        addDigivolveCostCondition(cardRequestDto, builder, card);
+        addRarityCondition(cardRequestDto.getRarities(), builder, card);
+        addParallelCondition(cardRequestDto.getParallelOption(), builder, cardImg);
+        addNoteCondition(cardRequestDto.getNoteId(), builder, cardImg);
+        addTypeCondition(cardRequestDto, cardCombine, builder, cardImg);
+    }
+
+    private void addTypeCondition(CardRequestDto cardRequestDto, QCardCombineTypeEntity cardCombine, BooleanBuilder builder, QCardImgEntity cardImg) {
+        if (cardRequestDto.getTypeIds() != null && !cardRequestDto.getTypeIds().isEmpty()) {
+            JPQLQuery<Integer> jpqlQuery = null;
+            if (cardRequestDto.getTypeOperation() == 0) {
+                jpqlQuery = JPAExpressions.select(cardCombine.cardEntity.id)
+                        .from(cardCombine)
+                        .where(cardCombine.typeEntity.id.in(cardRequestDto.getTypeIds()))
+                        .groupBy(cardCombine.cardEntity.id)
+                        .having(cardCombine.typeEntity.id.countDistinct().eq(Long.valueOf(cardRequestDto.getTypeIds().size())));
+            } else if (cardRequestDto.getTypeOperation() == 1) {
+                jpqlQuery = JPAExpressions.select(cardCombine.cardEntity.id)
+                        .from(cardCombine)
+                        .where(cardCombine.typeEntity.id.in(cardRequestDto.getTypeIds()));
+            }
+            builder.and(cardImg.cardEntity.id.in(jpqlQuery));
+        }
+    }
+
+    private void addNoteCondition(Integer noteId, BooleanBuilder builder, QCardImgEntity cardImg) {
+        if (noteId != null) {
+            builder.and(cardImg.noteEntity.id.eq(noteId));
+        }
+    }
+
+    private void addParallelCondition(Integer parallelOption, BooleanBuilder builder, QCardImgEntity cardImg) {
+        if (parallelOption == 1) {
+            builder.and(cardImg.isParallel.eq(false));
+        } else if (parallelOption == 2) {
+            builder.and(cardImg.isParallel.eq(true));
+        }
+    }
+
+    private void addRarityCondition(Set<Rarity> rarities, BooleanBuilder builder, QCardEntity card) {
+        if (rarities != null) {
+            builder.and(card.rarity.in(rarities));
+        }
+    }
+
+    private void addDigivolveCostCondition(CardRequestDto cardRequestDto, BooleanBuilder builder, QCardEntity card) {
+        builder.and(card.digivolveCost1.between(
+                cardRequestDto.getMinDigivolutionCost(),
+                cardRequestDto.getMaxDigivolutionCost()).or(card.digivolveCost2.between(
+                cardRequestDto.getMinDigivolutionCost(),
+                cardRequestDto.getMaxDigivolutionCost())
+        ));
+    }
+
+    private void addDpCondition(CardRequestDto cardRequestDto, BooleanBuilder builder, QCardEntity card) {
+        builder.and(card.dp.between(cardRequestDto.getMinDp(), cardRequestDto.getMaxDp()));
+    }
+
+    private void addPlayCostCondition(CardRequestDto cardRequestDto, BooleanBuilder builder, QCardEntity card) {
+        builder.and(card.playCost.between(cardRequestDto.getMinPlayCost(), cardRequestDto.getMaxPlayCost()));
+    }
+
+    private void addCardTypeCondition(Set<CardType> cardTypes, BooleanBuilder builder, QCardEntity card) {
+        if (cardTypes != null) {
+            builder.and(card.cardType.in(cardTypes));
+        }
+    }
+
+    private void addLvCondition(Set<Integer> lvs, BooleanBuilder builder, QCardEntity card) {
+        if (lvs != null) {
+            builder.and(card.lv.in(lvs));
+        }
+    }
+
+    private void addColorCondition(CardRequestDto cardRequestDto, BooleanBuilder builder, QCardEntity card) {
+        if (cardRequestDto.getColors() == null) {
+            return;
+        }
+
+        if (cardRequestDto.getColorOperation() == 0) {
+            builder.and(card.color1.in(cardRequestDto.getColors()).and(card.color2.in(cardRequestDto.getColors())));
+        } else if (cardRequestDto.getColorOperation() == 1) {
+            builder.and(card.color1.in(cardRequestDto.getColors()).or(card.color2.in(cardRequestDto.getColors())));
+        }
+
+    }
+
+    private void addSearchStringCondition(String searchString, BooleanBuilder builder, QCardEntity card) {
+        if (searchString != null && !searchString.isEmpty()) {
+            builder.and(
+                    card.cardName.containsIgnoreCase(searchString)
+                            .or(card.cardNo.containsIgnoreCase(searchString))
+                            .or(card.effect.containsIgnoreCase(searchString))
+                            .or(card.sourceEffect.containsIgnoreCase(searchString))
+            );
+        }
+    }
+
+    private void addEnglishCardCondition(boolean isEnglishCardInclude, BooleanBuilder builder, QCardImgEntity cardImg, QCardEntity card) {
+        if (!isEnglishCardInclude) {
+            builder.and(cardImg.isEnCard.isNull()).or(cardImg.isEnCard.isFalse());
+        }
+    }
+
+    private OrderSpecifier<?>[] convertSortToOrderSpecifiers(Sort sort) {
         return sort.stream()
-                .map(this::toOrderSpecifier)
+                .map(this::convertOrderToOrderSpecifier)
                 .toArray(OrderSpecifier[]::new);
     }
 
-    private OrderSpecifier<?> toOrderSpecifier(Sort.Order order) {
+    private OrderSpecifier<?> convertOrderToOrderSpecifier(Sort.Order order) {
         PathBuilder<CardImgEntity> entityPath = new PathBuilder<>(CardImgEntity.class, "cardImgEntity");
 
         if (order.isAscending()) {
