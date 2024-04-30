@@ -2,6 +2,7 @@ package com.joo.digimon.card.service;
 
 import com.joo.digimon.card.dto.CardRequestDto;
 import com.joo.digimon.card.dto.CardResponseDto;
+import com.joo.digimon.card.dto.CardTypeResponseDto;
 import com.joo.digimon.card.dto.NoteDto;
 import com.joo.digimon.card.model.*;
 import com.joo.digimon.card.repository.CardImgRepository;
@@ -27,6 +28,7 @@ public class CardServiceImpl implements CardService {
     private final CardImgRepository cardImgRepository;
     private final NoteRepository noteRepository;
     private final EntityManager entityManager;
+    private final TypeRepository typeRepository;
 
     @Value("${domain.url}")
     private String prefixUrl;
@@ -201,6 +203,16 @@ public class CardServiceImpl implements CardService {
         }
 
         return noteDtoList;
+    }
+
+    @Override
+    public List<CardTypeResponseDto> getTypes() {
+        List<TypeEntity> typeEntities = typeRepository.findAll();
+        List<CardTypeResponseDto> cardTypeResponseDtoList = new ArrayList<>();
+        for (TypeEntity typeEntity : typeEntities) {
+            cardTypeResponseDtoList.add(new CardTypeResponseDto(typeEntity));
+        }
+        return cardTypeResponseDtoList;
     }
 
 }
