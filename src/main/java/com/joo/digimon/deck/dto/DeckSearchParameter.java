@@ -1,6 +1,6 @@
 package com.joo.digimon.deck.dto;
 
-import com.joo.digimon.crawling.enums.Color;
+import com.joo.digimon.global.enums.Color;
 import lombok.Data;
 
 import java.util.Set;

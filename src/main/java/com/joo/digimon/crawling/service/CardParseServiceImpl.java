@@ -1,13 +1,13 @@
 package com.joo.digimon.crawling.service;
 
 import com.joo.digimon.crawling.dto.ReflectCardRequestDto;
-import com.joo.digimon.crawling.enums.CardType;
-import com.joo.digimon.crawling.enums.Color;
-import com.joo.digimon.crawling.enums.Form;
-import com.joo.digimon.crawling.enums.Rarity;
+import com.joo.digimon.global.enums.CardType;
+import com.joo.digimon.global.enums.Color;
+import com.joo.digimon.global.enums.Form;
+import com.joo.digimon.global.enums.Rarity;
 import com.joo.digimon.crawling.model.CrawlingCardEntity;
-import com.joo.digimon.exception.message.CardParseExceptionMessage;
-import com.joo.digimon.exception.model.CardParseException;
+import com.joo.digimon.global.exception.message.CardParseExceptionMessage;
+import com.joo.digimon.global.exception.model.CardParseException;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.springframework.stereotype.Service;

@@ -1,6 +1,6 @@
 package com.joo.digimon.deck.model;
 
-import com.joo.digimon.crawling.enums.Color;
+import com.joo.digimon.global.enums.Color;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

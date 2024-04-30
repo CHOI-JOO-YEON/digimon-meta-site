@@ -1,7 +1,7 @@
 package com.joo.digimon.card.dto;
 
 import com.joo.digimon.card.model.NoteEntity;
-import com.joo.digimon.crawling.enums.CardOrigin;
+import com.joo.digimon.global.enums.CardOrigin;
 import lombok.Data;
 
 import java.time.LocalDate;

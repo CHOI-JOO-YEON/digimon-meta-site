@@ -1,4 +1,4 @@
-package com.joo.digimon.exception.model;
+package com.joo.digimon.global.exception.model;
 
 public class CardImageException extends Exception {
     public CardImageException(String message) {

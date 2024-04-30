@@ -4,9 +4,6 @@ package com.joo.digimon.crawling.model;
 import com.joo.digimon.card.model.CardImgEntity;
 import com.joo.digimon.card.model.ParallelCardImgEntity;
 import com.joo.digimon.crawling.dto.CrawlingCardDto;
-import com.joo.digimon.crawling.enums.CardType;
-import com.joo.digimon.crawling.enums.Form;
-import com.joo.digimon.crawling.enums.Rarity;
 import jakarta.persistence.*;
 import lombok.*;
 

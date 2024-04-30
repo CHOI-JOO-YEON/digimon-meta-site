@@ -1,9 +1,9 @@
 package com.joo.digimon.crawling.dto;
 
-import com.joo.digimon.crawling.enums.CardType;
-import com.joo.digimon.crawling.enums.Color;
-import com.joo.digimon.crawling.enums.Form;
-import com.joo.digimon.crawling.enums.Rarity;
+import com.joo.digimon.global.enums.CardType;
+import com.joo.digimon.global.enums.Color;
+import com.joo.digimon.global.enums.Form;
+import com.joo.digimon.global.enums.Rarity;
 import lombok.Data;
 
 import java.util.List;
