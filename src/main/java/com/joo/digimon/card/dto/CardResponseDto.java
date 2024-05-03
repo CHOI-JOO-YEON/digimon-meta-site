@@ -71,6 +71,8 @@ public class CardResponseDto {
         String smallImgUrl;
         Boolean isParallel;
         String sortString;
+        String noteName;
+        Integer noteId;
         LocalDate releaseDate;
 
         public Card(CardImgEntity card, String prefixUrl) {
@@ -101,6 +103,8 @@ public class CardResponseDto {
             this.sortString=card.getCardEntity().getSortString();
             this.smallImgUrl=prefixUrl+card.getSmallImgUrl();
             this.releaseDate=card.getCardEntity().getReleaseDate();
+            this.noteName = card.getNoteEntity().getName();
+            this.noteId=card.getId();
         }
 
     }
