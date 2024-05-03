@@ -104,7 +104,7 @@ public class CardResponseDto {
             this.smallImgUrl=prefixUrl+card.getSmallImgUrl();
             this.releaseDate=card.getCardEntity().getReleaseDate();
             this.noteName = card.getNoteEntity().getName();
-            this.noteId=card.getId();
+            this.noteId=card.getNoteEntity().getId();
         }
 
     }
