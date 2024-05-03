@@ -80,6 +80,8 @@ public class ResponseDeckDto {
         String smallImgUrl;
         Boolean isParallel;
         String sortString;
+        String noteName;
+        Integer noteId;
         LocalDate releaseDate;
         Boolean isEn;
         public Card(CardImgEntity card,Integer cnt, String prefixUrl) {
@@ -116,6 +118,8 @@ public class ResponseDeckDto {
             this.smallImgUrl= prefixUrl + card.getSmallImgUrl();
             this.releaseDate=card.getCardEntity().getReleaseDate();
             this.isEn=Boolean.TRUE.equals( card.getIsEnCard());
+            this.noteId = card.getNoteEntity().getId();
+            this.noteName=card.getNoteEntity().getName();
         }
 
         public Card(DeckCardEntity deckCardEntity, String prefixUrl) {
