@@ -364,8 +364,14 @@ public class CrawlingEnServiceImpl implements CrawlingEnService {
             String firstNumberPart = String.format("%03d", Integer.parseInt(parts[1].replaceAll("\\D", "")));
             stringBuilder.append(firstNumberPart);
             return stringBuilder.toString();
-        } else {
+        } else if (cardNo.startsWith("LM")) {
             stringBuilder.append("E");
+            String[] parts = cardNo.split("-");
+            String firstNumberPart = String.format("%03d", Integer.parseInt(parts[1].replaceAll("\\D", "")));
+            stringBuilder.append(firstNumberPart);
+            return stringBuilder.toString();
+        } else {
+            stringBuilder.append("F");
         }
         String[] parts = cardNo.split("-");
 
