@@ -1,7 +1,9 @@
 package com.joo.digimon.util;
 
 import com.joo.digimon.global.exception.model.ForbiddenAccessException;
+import com.joo.digimon.global.exception.model.ReportException;
 import com.joo.digimon.global.exception.model.UnAuthorizationException;
+import feign.FeignException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -31,9 +33,17 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public void handleIllegalArgumentException() {}
 
+    @ExceptionHandler(ReportException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public void handleReportException() {}
+
     @ExceptionHandler(NoResourceFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public void handleNoResourceFoundException() {}
+
+    @ExceptionHandler(FeignException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public void handleFeignException() {}
 
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
