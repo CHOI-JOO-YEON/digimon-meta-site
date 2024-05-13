@@ -11,8 +11,10 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -79,6 +81,8 @@ public class DeckEntity {
     @CreationTimestamp
     private Timestamp createdDateTime;
 
+    private Timestamp updateTimestamp;
+
     private Boolean isPublic;
 
 
@@ -99,6 +103,7 @@ public class DeckEntity {
         this.deckName = requestDeckDto.getDeckName();
         this.isPublic = requestDeckDto.getIsPublic();
         this.format = format;
+        this.updateTimestamp= Timestamp.valueOf(LocalDateTime.now());
     }
 
     public void addDeckColor(DeckColor deckColor){
