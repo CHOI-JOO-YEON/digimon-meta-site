@@ -47,6 +47,7 @@ public class SecurityConfig {
                                 .requestMatchers(HttpMethod.GET, "/api/limit/**").permitAll()
                                 .requestMatchers("/api/crawling/**").hasRole("ADMIN")
                                 .requestMatchers("/api/manager/**").hasRole("MANAGER")
+                                .requestMatchers("/api/report/**").permitAll()
                                 .requestMatchers("/h2-console/**").permitAll()
                                 .requestMatchers("/api/account/**").permitAll()
                                 .requestMatchers("/api/deck/import/**").permitAll()
