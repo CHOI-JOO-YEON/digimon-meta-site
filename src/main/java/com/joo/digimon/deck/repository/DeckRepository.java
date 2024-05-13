@@ -32,4 +32,6 @@ public interface DeckRepository extends JpaRepository<DeckEntity,Integer> , Quer
 
     @EntityGraph("Deck.detail")
     List<DeckEntity> findByIdIn(List<Integer> ids);
+
+    List<DeckEntity> findByIdInOrderByUpdateTimestampDesc(List<Integer> deckIds);
 }

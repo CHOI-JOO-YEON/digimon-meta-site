@@ -260,11 +260,14 @@ public class DeckServiceImpl implements DeckService {
         List<Integer> deckIds = query.select(qDeckEntity.id)
                 .from(qDeckEntity)
                 .where(builder)
+                .orderBy(qDeckEntity.updateTimestamp.desc().nullsLast())
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .fetch();
 
-        List<DeckEntity> deckEntities = deckRepository.findByIdIn(deckIds);
+//        List<DeckEntity> deckEntities = deckRepository.findByIdIn(deckIds);
+        List<DeckEntity> deckEntities = deckRepository.findByIdInOrderByUpdateTimestampDesc(deckIds);
+
         return new PageImpl<>(deckEntities, pageable, totalCount);
     }
     @Override
@@ -345,6 +348,8 @@ public class DeckServiceImpl implements DeckService {
         if (deckSearchParameter.getFormatId() != null) {
             builder.and(qDeckEntity.format.id.eq(deckSearchParameter.getFormatId()));
         }
+
+
 
 
         return builder;
