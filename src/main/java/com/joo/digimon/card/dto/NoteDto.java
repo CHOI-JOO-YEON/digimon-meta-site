@@ -12,10 +12,12 @@ public class NoteDto {
     String name;
     LocalDate releaseDate;
     CardOrigin cardOrigin;
+    Integer priority;
     public NoteDto(NoteEntity noteEntity) {
         this.noteId=noteEntity.getId();
         this.name = noteEntity.getName();
         this.releaseDate = noteEntity.getReleaseDate();
         this.cardOrigin = noteEntity.getCardOrigin();
+        this.priority=noteEntity.getPriority();
     }
 }
