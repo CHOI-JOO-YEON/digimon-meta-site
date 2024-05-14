@@ -223,7 +223,7 @@ public class CardServiceImpl implements CardService {
     @Override
     public List<NoteDto> getNotes() {
         List<NoteDto> noteDtoList = new ArrayList<>();
-        List<NoteEntity> noteEntityList = noteRepository.findByIsDisableFalseOrIsDisableNullOrderByReleaseDateAscPriorityDesc();
+        List<NoteEntity> noteEntityList = noteRepository.findByIsDisableFalseOrIsDisableNullOrderByReleaseDateAscPriorityAsc();
         for (NoteEntity noteEntity : noteEntityList) {
             noteDtoList.add(new NoteDto(noteEntity));
         }
