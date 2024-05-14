@@ -12,4 +12,6 @@ public interface NoteRepository extends JpaRepository<NoteEntity,Integer> {
     Optional<NoteEntity> findByName(String name);
 
     List<NoteEntity> findByIsDisableFalseOrIsDisableNullOrderByReleaseDate();
+
+    List<NoteEntity> findByIsDisableFalseOrIsDisableNullOrderByReleaseDateAscPriorityDesc();
 }

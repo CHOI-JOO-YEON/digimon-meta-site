@@ -34,4 +34,8 @@ public class NoteEntity {
     Set<ParallelCardImgEntity> parallelCardImgEntities;
 
     Boolean isDisable;
+
+    Integer priority;
+
+
 }
