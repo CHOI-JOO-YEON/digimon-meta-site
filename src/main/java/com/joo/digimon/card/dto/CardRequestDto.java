@@ -21,7 +21,7 @@ public class CardRequestDto {
     Integer minPlayCost =0; //
     Integer maxPlayCost =20;
     Integer minDp=1000;
-    Integer maxDp=16000;
+    Integer maxDp=17000;
     Integer minDigivolutionCost=0;
     Integer MaxDigivolutionCost=8;
     Set<Rarity> rarities;
