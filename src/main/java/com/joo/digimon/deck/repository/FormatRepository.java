@@ -7,8 +7,10 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface FormatRepository extends JpaRepository<Format,Integer> {
     List<Format> findByEndDateIsAfter(LocalDate localDate, Sort sort);
+    Optional<Format> findTopByIsOnlyEnIsNullOrIsOnlyEnIsFalseOrderByStartDateDesc();
 }
