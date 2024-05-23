@@ -13,4 +13,5 @@ public interface FormatService {
     List<FormatResponseDto> getFormatList(LocalDate latestReleaseCardDate);
 
     void updateFormat(FormatUpdateRequestDto formatUpdateRequestDto);
+    FormatResponseDto getCurrentFormat();
 }
