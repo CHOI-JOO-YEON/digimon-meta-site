@@ -17,7 +17,9 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(NoSuchElementException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public void handleNoSuchElementException() {}
+    public void handleNoSuchElementException(Exception e) {
+        e.printStackTrace();
+    }
 
 
     @ExceptionHandler(UnAuthorizationException.class)
@@ -29,7 +31,9 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(IllegalArgumentException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public void handleIllegalArgumentException() {}
+    public void handleIllegalArgumentException(Exception e) {
+       e.printStackTrace();
+    }
 
     @ExceptionHandler(NoResourceFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
