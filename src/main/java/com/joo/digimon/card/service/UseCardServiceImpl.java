@@ -74,7 +74,7 @@ public class UseCardServiceImpl implements UseCardService {
                         deckCard.deckEntity.isValid.isTrue())
                 .groupBy(card.id)
                 .orderBy(Expressions.numberPath(Long.class, "usedCount").desc())
-                .limit(10);
+                .limit(20);
     }
 
     private List<UseCard> convertToUseCard(List<Tuple> results, Long totalCount) {
