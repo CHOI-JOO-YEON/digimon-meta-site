@@ -236,7 +236,6 @@ public class DeckServiceImpl implements DeckService {
     }
 
 
-
     @Override
     public PagedResponseDeckDto findDecks(DeckSearchParameter deckSearchParameter) {
         BooleanBuilder builder = getBuilderByDeckSearchParameter(deckSearchParameter);
@@ -270,6 +269,7 @@ public class DeckServiceImpl implements DeckService {
 
         return new PageImpl<>(deckEntities, pageable, totalCount);
     }
+
     @Override
     @Transactional
     public void deleteDeck(Integer deckId, User user) {
@@ -301,9 +301,10 @@ public class DeckServiceImpl implements DeckService {
 
         if (Boolean.TRUE.equals(deckSearchParameter.getIsOnlyValidDeck())) {
             builder.and(qDeckEntity.isValid.isTrue());
+
         }
 
-        if (deckSearchParameter.getLimitId() != null) {
+        if (Boolean.TRUE.equals(deckSearchParameter.getIsOnlyValidDeck()) && deckSearchParameter.getLimitId() != null) {
             Optional<LimitEntity> limitEntity = limitRepository.findById(deckSearchParameter.getLimitId());
             if (limitEntity.isPresent()) {
                 Set<LimitCardEntity> limitCardEntities = limitEntity.get().getLimitCardEntities();
@@ -348,8 +349,6 @@ public class DeckServiceImpl implements DeckService {
         if (deckSearchParameter.getFormatId() != null) {
             builder.and(qDeckEntity.format.id.eq(deckSearchParameter.getFormatId()));
         }
-
-
 
 
         return builder;

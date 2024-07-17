@@ -16,9 +16,10 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class FormatServiceImpl implements FormatService{
+public class FormatServiceImpl implements FormatService {
 
     private final FormatRepository formatRepository;
+
     @Override
     @Transactional
     public void createFormat(FormatRequestDto formatRequestDto) {
@@ -36,7 +37,7 @@ public class FormatServiceImpl implements FormatService{
         List<FormatResponseDto> result = new ArrayList<>();
 
         Sort sort = Sort.by("startDate").descending();
-        List<Format> formats= formatRepository.findByEndDateIsAfter(latestReleaseCardDate,sort);
+        List<Format> formats = formatRepository.findByEndDateIsAfter(latestReleaseCardDate, sort);
 
         for (Format format : formats) {
             result.add(new FormatResponseDto(format));
@@ -47,5 +48,11 @@ public class FormatServiceImpl implements FormatService{
     @Override
     public void updateFormat(FormatUpdateRequestDto formatUpdateRequestDto) {
 
+    }
+
+    @Override
+    public FormatResponseDto getCurrentFormat() {
+        Format format = formatRepository.findTopByIsOnlyEnIsNullOrIsOnlyEnIsFalseOrderByStartDateDesc().orElseThrow();
+        return new FormatResponseDto(format);
     }
 }

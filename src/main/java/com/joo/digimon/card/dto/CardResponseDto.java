@@ -25,6 +25,7 @@ public class CardResponseDto {
     List<CardDto> cards;
 
 
+
     public CardResponseDto(Page<CardImgEntity> page, String prefixUrl) {
         this.totalPages = page.getTotalPages();
         this.totalElements = Math.toIntExact(page.getTotalElements());
@@ -32,6 +33,7 @@ public class CardResponseDto {
         cards = new ArrayList<>();
         for (CardImgEntity cardImgEntity : page) {
             cards.add(new CardDto(cardImgEntity, prefixUrl));
+
         }
     }
 
@@ -42,6 +44,9 @@ public class CardResponseDto {
         cards = new ArrayList<>();
         for (CardImgEntity cardImgEntity : entities) {
             cards.add(new CardDto(cardImgEntity, prefixUrl));
+        }
+    }
+
         }
     }
 
