@@ -30,6 +30,7 @@ public class CardDto {
     String sourceEffect;
     Color color1;
     Color color2;
+    Color color3;
     Rarity rarity;
     CardType cardType;
     Form form;
@@ -44,6 +45,7 @@ public class CardDto {
     LocalDate releaseDate;
     Integer cnt;
     Boolean isEn;
+
     public CardDto(CardImgEntity card, String prefixUrl) {
         this.cardId = card.getId();
         this.cardNo = card.getCardEntity().getCardNo();
@@ -59,6 +61,7 @@ public class CardDto {
         this.sourceEffect = card.getCardEntity().getSourceEffect();
         this.color1 = card.getCardEntity().getColor1();
         this.color2 = card.getCardEntity().getColor2();
+        this.color3 = card.getCardEntity().getColor3();
         this.rarity = card.getCardEntity().getRarity();
         this.cardType = card.getCardEntity().getCardType();
         this.form = card.getCardEntity().getForm();
@@ -74,7 +77,7 @@ public class CardDto {
         this.releaseDate = card.getCardEntity().getReleaseDate();
         this.noteName = card.getNoteEntity().getName();
         this.noteId = card.getNoteEntity().getId();
-        this.isEn=Boolean.TRUE.equals( card.getIsEnCard());
+        this.isEn = Boolean.TRUE.equals(card.getIsEnCard());
     }
 
 

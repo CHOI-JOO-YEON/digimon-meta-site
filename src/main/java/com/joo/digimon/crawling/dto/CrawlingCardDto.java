@@ -27,6 +27,7 @@ public class CrawlingCardDto {
         String note;
         String color1;
         String color2;
+        String color3;
         String imgUrl;
         String errorMessage;
 

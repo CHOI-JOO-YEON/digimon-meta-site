@@ -88,6 +88,7 @@ public class CrawlingEnServiceImpl implements CrawlingEnService {
         Optional.ofNullable(updateCrawlingRequestDto.getNote()).ifPresent(crawlingCardEntity::setNote);
         Optional.ofNullable(updateCrawlingRequestDto.getColor1()).ifPresent(crawlingCardEntity::setColor1);
         Optional.ofNullable(updateCrawlingRequestDto.getColor2()).ifPresent(crawlingCardEntity::setColor2);
+        Optional.ofNullable(updateCrawlingRequestDto.getColor3()).ifPresent(crawlingCardEntity::setColor3);
         Optional.ofNullable(updateCrawlingRequestDto.getImgUrl()).ifPresent(crawlingCardEntity::setImgUrl);
         return crawlingCardEntity;
     }
@@ -310,8 +311,11 @@ public class CrawlingEnServiceImpl implements CrawlingEnService {
         if (matcher.find()) {
             String[] colorText = matcher.group(1).split("_");
             crawlingCardDto.setColor1(colorText[0]);
-            if (colorText.length == 2) {
+            if (colorText.length > 1) {
                 crawlingCardDto.setColor2(colorText[1]);
+            }
+            if (colorText.length > 2) {
+                crawlingCardDto.setColor3(colorText[2]);
             }
         }
     }

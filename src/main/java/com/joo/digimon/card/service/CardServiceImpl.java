@@ -184,9 +184,9 @@ public class CardServiceImpl implements CardService {
         }
 
         if (cardRequestDto.getColorOperation() == 0) {
-            builder.and(card.color1.in(cardRequestDto.getColors()).and(card.color2.in(cardRequestDto.getColors())));
+            builder.and(card.color1.in(cardRequestDto.getColors()).and(card.color2.in(cardRequestDto.getColors())).and(card.color3.in(cardRequestDto.getColors())));
         } else if (cardRequestDto.getColorOperation() == 1) {
-            builder.and(card.color1.in(cardRequestDto.getColors()).or(card.color2.in(cardRequestDto.getColors())));
+            builder.and(card.color1.in(cardRequestDto.getColors()).or(card.color2.in(cardRequestDto.getColors())).or(card.color3.in(cardRequestDto.getColors())));
         }
 
     }
