@@ -45,6 +45,8 @@ public class CardEntity {
     @Enumerated(EnumType.STRING)
     Color color2;
     @Enumerated(EnumType.STRING)
+    Color color3;
+    @Enumerated(EnumType.STRING)
     Rarity rarity;
     @Enumerated(EnumType.STRING)
     CardType cardType;

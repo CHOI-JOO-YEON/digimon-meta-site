@@ -31,5 +31,6 @@ public class ReflectCardRequestDto {
     String note;
     Color color1;
     Color color2;
+    Color color3;
     String originUrl;
 }

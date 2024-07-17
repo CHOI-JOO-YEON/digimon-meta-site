@@ -42,6 +42,7 @@ public class CrawlingCardEntity {
     String note;
     String color1;
     String color2;
+    String color3;
 
     @Column(unique = true)
     String imgUrl;

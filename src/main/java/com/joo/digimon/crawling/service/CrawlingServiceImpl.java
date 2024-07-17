@@ -92,6 +92,7 @@ public class CrawlingServiceImpl implements CrawlingService {
         Optional.ofNullable(updateCrawlingRequestDto.getNote()).ifPresent(crawlingCardEntity::setNote);
         Optional.ofNullable(updateCrawlingRequestDto.getColor1()).ifPresent(crawlingCardEntity::setColor1);
         Optional.ofNullable(updateCrawlingRequestDto.getColor2()).ifPresent(crawlingCardEntity::setColor2);
+        Optional.ofNullable(updateCrawlingRequestDto.getColor3()).ifPresent(crawlingCardEntity::setColor3);
         Optional.ofNullable(updateCrawlingRequestDto.getImgUrl()).ifPresent(crawlingCardEntity::setImgUrl);
         return crawlingCardEntity;
     }
@@ -155,7 +156,27 @@ public class CrawlingServiceImpl implements CrawlingService {
         if (cardEntity.isPresent()) {
             CardEntity card = cardEntity.get();
             if (Boolean.TRUE.equals(card.getIsOnlyEnCard())) {
-                CardEntity save = cardRepository.save(CardEntity.builder().id(card.getId()).sortString(generateSortString(reflectCardRequestDto.getCardNo())).cardNo(reflectCardRequestDto.getCardNo()).cardName(reflectCardRequestDto.getCardName()).attribute(reflectCardRequestDto.getAttribute()).dp(reflectCardRequestDto.getDp()).playCost(reflectCardRequestDto.getPlayCost()).digivolveCondition1(reflectCardRequestDto.getDigivolveCondition1()).digivolveCondition2(reflectCardRequestDto.getDigivolveCondition2()).digivolveCost1(reflectCardRequestDto.getDigivolveCost1()).digivolveCost2(reflectCardRequestDto.getDigivolveCost2()).lv(reflectCardRequestDto.getLv()).effect(reflectCardRequestDto.getEffect()).sourceEffect(reflectCardRequestDto.getSourceEffect()).cardType(reflectCardRequestDto.getCardType()).form(reflectCardRequestDto.getForm()).rarity(reflectCardRequestDto.getRarity()).color1(reflectCardRequestDto.getColor1()).color2(reflectCardRequestDto.getColor2()).isOnlyEnCard(false).build());
+                CardEntity save = cardRepository.save(CardEntity.builder().id(card.getId())
+                        .sortString(generateSortString(reflectCardRequestDto.getCardNo()))
+                        .cardNo(reflectCardRequestDto.getCardNo())
+                        .cardName(reflectCardRequestDto.getCardName())
+                        .attribute(reflectCardRequestDto.getAttribute())
+                        .dp(reflectCardRequestDto.getDp())
+                        .playCost(reflectCardRequestDto.getPlayCost())
+                        .digivolveCondition1(reflectCardRequestDto.getDigivolveCondition1())
+                        .digivolveCondition2(reflectCardRequestDto.getDigivolveCondition2())
+                        .digivolveCost1(reflectCardRequestDto.getDigivolveCost1())
+                        .digivolveCost2(reflectCardRequestDto.getDigivolveCost2())
+                        .lv(reflectCardRequestDto.getLv())
+                        .effect(reflectCardRequestDto.getEffect())
+                        .sourceEffect(reflectCardRequestDto.getSourceEffect())
+                        .cardType(reflectCardRequestDto.getCardType())
+                        .form(reflectCardRequestDto.getForm())
+                        .rarity(reflectCardRequestDto.getRarity())
+                        .color1(reflectCardRequestDto.getColor1())
+                        .color2(reflectCardRequestDto.getColor2())
+                        .color3(reflectCardRequestDto.getColor3())
+                        .isOnlyEnCard(false).build());
 
 
                 for (String type : reflectCardRequestDto.getTypes()) {
@@ -169,7 +190,27 @@ public class CrawlingServiceImpl implements CrawlingService {
         }
 
 
-        CardEntity save = cardRepository.save(CardEntity.builder().sortString(generateSortString(reflectCardRequestDto.getCardNo())).cardNo(reflectCardRequestDto.getCardNo()).cardName(reflectCardRequestDto.getCardName()).attribute(reflectCardRequestDto.getAttribute()).dp(reflectCardRequestDto.getDp()).playCost(reflectCardRequestDto.getPlayCost()).digivolveCondition1(reflectCardRequestDto.getDigivolveCondition1()).digivolveCondition2(reflectCardRequestDto.getDigivolveCondition2()).digivolveCost1(reflectCardRequestDto.getDigivolveCost1()).digivolveCost2(reflectCardRequestDto.getDigivolveCost2()).lv(reflectCardRequestDto.getLv()).effect(reflectCardRequestDto.getEffect()).sourceEffect(reflectCardRequestDto.getSourceEffect()).cardType(reflectCardRequestDto.getCardType()).form(reflectCardRequestDto.getForm()).rarity(reflectCardRequestDto.getRarity()).color1(reflectCardRequestDto.getColor1()).color2(reflectCardRequestDto.getColor2()).build());
+        CardEntity save = cardRepository.save(CardEntity.builder()
+                .sortString(generateSortString(reflectCardRequestDto.getCardNo()))
+                .cardNo(reflectCardRequestDto.getCardNo())
+                .cardName(reflectCardRequestDto.getCardName())
+                .attribute(reflectCardRequestDto.getAttribute())
+                .dp(reflectCardRequestDto.getDp())
+                .playCost(reflectCardRequestDto.getPlayCost())
+                .digivolveCondition1(reflectCardRequestDto.getDigivolveCondition1())
+                .digivolveCondition2(reflectCardRequestDto.getDigivolveCondition2())
+                .digivolveCost1(reflectCardRequestDto.getDigivolveCost1())
+                .digivolveCost2(reflectCardRequestDto.getDigivolveCost2())
+                .lv(reflectCardRequestDto.getLv())
+                .effect(reflectCardRequestDto.getEffect())
+                .sourceEffect(reflectCardRequestDto.getSourceEffect())
+                .cardType(reflectCardRequestDto.getCardType())
+                .form(reflectCardRequestDto.getForm())
+                .rarity(reflectCardRequestDto.getRarity())
+                .color1(reflectCardRequestDto.getColor1())
+                .color2(reflectCardRequestDto.getColor2())
+                .color3(reflectCardRequestDto.getColor3())
+                .build());
 
 
         for (String type : reflectCardRequestDto.getTypes()) {
@@ -348,8 +389,11 @@ public class CrawlingServiceImpl implements CrawlingService {
         if (matcher.find()) {
             String[] colorText = matcher.group(1).split("_");
             crawlingCardDto.setColor1(colorText[0]);
-            if (colorText.length == 2) {
+            if (colorText.length >1) {
                 crawlingCardDto.setColor2(colorText[1]);
+            }
+            if (colorText.length >2) {
+                crawlingCardDto.setColor3(colorText[2]);
             }
         }
     }
