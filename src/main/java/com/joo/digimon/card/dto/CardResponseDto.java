@@ -25,7 +25,6 @@ public class CardResponseDto {
     List<CardDto> cards;
 
 
-
     public CardResponseDto(Page<CardImgEntity> page, String prefixUrl) {
         this.totalPages = page.getTotalPages();
         this.totalElements = Math.toIntExact(page.getTotalElements());
@@ -47,7 +46,5 @@ public class CardResponseDto {
         }
     }
 
-        }
-    }
 
 }
