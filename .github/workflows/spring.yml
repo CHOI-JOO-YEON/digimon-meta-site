@@ -3,7 +3,7 @@ name: Deploy Spring Server to EC2 with AWS Secrets Manager
 on:
   push:
     branches:
-      - main
+      - master
 
 jobs:
   deploy:
