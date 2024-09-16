@@ -4,7 +4,7 @@ import com.joo.digimon.config.FeignClientConfig;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.*;
 
-@FeignClient(url = "",name = "scalingClient", configuration = FeignClientConfig.class)
+@FeignClient(url = "123",name = "scalingClient", configuration = FeignClientConfig.class)
 public interface ScalingClient {
 
     @PostMapping("/api")

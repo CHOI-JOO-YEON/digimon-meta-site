@@ -46,8 +46,7 @@ dependencies {
     implementation 'net.coobird:thumbnailator:0.4.20'
     implementation 'net.sf.uadetector:uadetector-resources:2014.10'
     implementation 'net.sf.uadetector:uadetector-core:0.9.22'
-    implementation 'io.awspring.cloud:spring-cloud-starter-aws-secrets-manager-config:2.4.2'
-
+    implementation group: 'com.amazonaws', name: 'aws-java-sdk-secretsmanager', version: '1.12.772'
 }
 
 tasks.named('test') {
