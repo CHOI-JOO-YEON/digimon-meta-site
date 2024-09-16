@@ -14,24 +14,28 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v2
 
-    # 2. Java 21 버전을 설정합니다.
+    # 2. gradlew에 실행 권한을 부여합니다.
+    - name: Grant execute permission for gradlew
+      run: chmod +x ./gradlew
+
+    # 3. Java 21 버전을 설정합니다.
     - name: Set up JDK 21
       uses: actions/setup-java@v1
       with:
         java-version: '21'
 
-    # 3. Gradle을 사용해 애플리케이션을 빌드합니다.
+    # 4. Gradle을 사용해 애플리케이션을 빌드합니다.
     - name: Build with Gradle
       run: ./gradlew build
 
-    # 4. 빌드된 JAR 파일을 EC2로 전송합니다.
+    # 5. 빌드된 JAR 파일을 EC2로 전송합니다.
     - name: Copy files to EC2
       run: |
         scp -i ~/.ssh/id_rsa \
           build/libs/digimon-meta-site-0.0.1-SNAPSHOT.jar \
           ubuntu@13.125.113.222:/home/ubuntu/
 
-    # 5. EC2로 SSH 접속 후 Docker 컨테이너를 실행합니다.
+    # 6. EC2로 SSH 접속 후 Docker 컨테이너를 실행합니다.
     - name: SSH into EC2 and deploy with Docker
       run: |
         # GitHub Secrets에서 SSH 키를 가져와서 파일로 저장
@@ -46,7 +50,7 @@ jobs:
         sudo apt install -y awscli jq
         
         # AWS Secrets Manager에서 모든 시크릿을 가져옵니다
-        SECRETS=$(aws secretsmanager get-secret-value --secret-id digimon_meta_prod --query SecretString --output text)
+        SECRETS=$(aws secretsmanager get-secret-value --secret-id digimon_meta_secrets --query SecretString --output text)
 
         # JSON 응답에서 모든 키-값을 환경 변수로 설정
         echo $SECRETS | jq -r 'to_entries | .[] | "export \(.key)=\(.value)"' > /tmp/set_envs.sh
