@@ -3,12 +3,8 @@ spring:
     consul:
       config:
         enabled: false
-    aws:
-      secretsmanager:
-        enabled: true
-        default-context: digimon-meta-prod  # 기본 시크릿 이름 (AWS Secrets Manager에 저장된 이름)
-        prefix: /  # 시크릿 경로의 루트 설정
-        fail-fast: true  # 시크릿을 가져오지 못하면 애플리케이션이 실패하도록 설정
+  config:
+    import: aws-secretsmanager:/digimon-meta-prod
   application:
     name: Digimon-Meta
   security:
