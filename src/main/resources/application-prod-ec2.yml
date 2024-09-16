@@ -1,4 +1,8 @@
 spring:
+  cloud:
+    consul:
+      config:
+        enabled: false
   application:
     name: Digimon-Meta
   security:
