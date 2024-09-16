@@ -71,7 +71,11 @@ jobs:
 
         sudo apt update
         sudo apt install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin
-        
+
+        # Docker 그룹에 현재 사용자 추가 및 Docker 데몬 재시작
+        sudo usermod -aG docker $USER
+        sudo systemctl restart docker
+
         # AWS Secrets Manager에서 모든 시크릿을 가져옵니다
         SECRETS=$(aws secretsmanager get-secret-value --secret-id digimon_meta_secrets --query SecretString --output text)
 
@@ -85,7 +89,10 @@ jobs:
 
         # 환경 변수를 사용하여 Docker 컨테이너 실행
         docker run -d --name digimon-meta \
-        -p 8080:8080 /home/ubuntu/digimon-meta-site-0.0.1-SNAPSHOT.jar
+          -p 8080:8080 \
+          -v /home/ubuntu/digimon-meta-site-0.0.1-SNAPSHOT.jar:/app.jar \
+          openjdk:21 \
+          java -jar /app.jar
         EOF
       env:
         SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
