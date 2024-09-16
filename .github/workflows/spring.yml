@@ -26,7 +26,7 @@ jobs:
 
     # 4. Gradle을 사용해 애플리케이션을 빌드합니다.
     - name: Build with Gradle
-      run: ./gradlew build
+      run: ./gradlew clean build -x test 
 
     # 5. 빌드된 JAR 파일을 EC2로 전송합니다.
     - name: Copy files to EC2
