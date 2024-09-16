@@ -52,9 +52,9 @@ jobs:
         # AWS Secrets Manager에서 시크릿 가져오기
         SECRETS=$(aws secretsmanager get-secret-value --secret-id digimon-meta-prod --query SecretString --output text)
 
-        # 시크릿 값이 비어 있지 않으면 처리
+        # 시크릿 값이 비어 있지 않으면 처리 (점(.)을 언더스코어(_)로 변환)
         if [ -n "$SECRETS" ]; then
-          echo "$SECRETS" | jq -r 'to_entries | .[] | "export \(.key)=\(.value)"' > /tmp/set_envs.sh
+          echo "$SECRETS" | jq -r 'to_entries | .[] | "export \(.key|gsub(\"\\.\"; \"_\"))=\(.value)"' > /tmp/set_envs.sh
           source /tmp/set_envs.sh
         else
           echo "Secrets could not be retrieved from AWS Secrets Manager."
