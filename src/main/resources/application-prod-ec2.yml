@@ -1,8 +1,15 @@
 spring:
+
   cloud:
     consul:
       config:
         enabled: false
+  aws:
+    secretsmanager:
+      enabled: true
+      prefix: / # 시크릿 경로 설정
+      default-context: digimon-meta-prod # 기본 시크릿 ID
+      fail-fast: true
   application:
     name: Digimon-Meta
   security:
