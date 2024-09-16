@@ -49,13 +49,14 @@ jobs:
       run: |
         ssh -i ~/.ssh/id_rsa ubuntu@13.125.113.222 << 'EOF'
         
-        # AWS CLI 설치
+        # unzip 설치 후 AWS CLI 설치
+        sudo apt update
+        sudo apt install -y unzip
         curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
         unzip awscliv2.zip
         sudo ./aws/install
-        
-        # Docker 설치
-        sudo apt update
+
+        # Docker 설치 (이미 설치되어 있더라도 확인)
         sudo apt install -y \
             ca-certificates \
             curl \
@@ -72,23 +73,22 @@ jobs:
         sudo apt update
         sudo apt install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin
 
-        # Docker 그룹에 현재 사용자 추가 및 Docker 데몬 재시작
-        sudo usermod -aG docker $USER
+        # Docker 데몬에 대한 권한 문제 해결: sudo 사용
         sudo systemctl restart docker
 
         # AWS Secrets Manager에서 모든 시크릿을 가져옵니다
-        SECRETS=$(aws secretsmanager get-secret-value --secret-id digimon_meta_secrets --query SecretString --output text)
+        SECRETS=$(sudo aws secretsmanager get-secret-value --secret-id digimon_meta_secrets --query SecretString --output text)
 
         # JSON 응답에서 모든 키-값을 환경 변수로 설정
         echo $SECRETS | jq -r 'to_entries | .[] | "export \(.key)=\(.value)"' > /tmp/set_envs.sh
         source /tmp/set_envs.sh
 
         # 이미 실행 중인 컨테이너가 있으면 중지하고 제거
-        docker stop digimon-meta || true
-        docker rm digimon-meta || true
+        sudo docker stop digimon-meta || true
+        sudo docker rm digimon-meta || true
 
         # 환경 변수를 사용하여 Docker 컨테이너 실행
-        docker run -d --name digimon-meta \
+        sudo docker run -d --name digimon-meta \
           -p 8080:8080 \
           -v /home/ubuntu/digimon-meta-site-0.0.1-SNAPSHOT.jar:/app.jar \
           openjdk:21 \
