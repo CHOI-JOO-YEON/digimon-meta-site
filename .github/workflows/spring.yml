@@ -52,7 +52,7 @@ jobs:
         # AWS Secrets Manager에서 시크릿 가져오기
         SECRETS=$(aws secretsmanager get-secret-value --secret-id digimon-meta-prod --query SecretString --output text)
 
-        # 시크릿 값이 비어 있는지 확인하고 파싱
+        # 시크릿 값이 비어 있지 않으면 처리
         if [ -n "$SECRETS" ]; then
           echo "$SECRETS" | jq -r 'to_entries | .[] | "export \(.key)=\(.value)"' > /tmp/set_envs.sh
           source /tmp/set_envs.sh
@@ -65,8 +65,8 @@ jobs:
         sudo docker stop digimon-meta || true
         sudo docker rm digimon-meta || true
 
-        # 환경 변수를 사용하여 Docker 컨테이너 실행, prod-ec2 프로필 활성화
-        sudo docker run -d --name digimon-meta \
+        # Docker 컨테이너 실행, 모든 환경 변수를 한 번에 전달
+        env $(cat /tmp/set_envs.sh | xargs) sudo docker run -d --name digimon-meta \
           -p 8080:8080 \
           -v /home/ubuntu/digimon-meta-site-0.0.1-SNAPSHOT.jar:/app.jar \
           openjdk:21 \
