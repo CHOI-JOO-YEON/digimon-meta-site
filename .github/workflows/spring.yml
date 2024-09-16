@@ -76,18 +76,23 @@ jobs:
         # Docker 데몬에 대한 권한 문제 해결: sudo 사용
         sudo systemctl restart docker
 
-        # AWS Secrets Manager에서 모든 시크릿을 가져옵니다
-        SECRETS=$(sudo aws secretsmanager get-secret-value --secret-id digimon_meta_secrets --query SecretString --output text)
+        # AWS Secrets Manager에서 시크릿 가져오기
+        SECRETS=$(aws secretsmanager get-secret-value --secret-id digimon_meta_secrets --query SecretString --output text)
 
-        # JSON 응답에서 모든 키-값을 환경 변수로 설정
-        echo $SECRETS | jq -r 'to_entries | .[] | "export \(.key)=\(.value)"' > /tmp/set_envs.sh
-        source /tmp/set_envs.sh
+        # 시크릿 값이 비어 있는지 확인하고 파싱
+        if [ -n "$SECRETS" ]; then
+          echo "$SECRETS" | jq -r 'to_entries | .[] | "export \(.key)=\(.value)"' > /tmp/set_envs.sh
+          source /tmp/set_envs.sh
+        else
+          echo "Secrets could not be retrieved from AWS Secrets Manager."
+          exit 1
+        fi
 
         # 이미 실행 중인 컨테이너가 있으면 중지하고 제거
         sudo docker stop digimon-meta || true
         sudo docker rm digimon-meta || true
 
-        # 환경 변수를 사용하여 Docker 컨테이너 실행
+        # 환경 변수를 사용하여 Docker 컨테이너 실행, prod-ec2 프로필 활성화
         sudo docker run -d --name digimon-meta \
           -p 8080:8080 \
           -v /home/ubuntu/digimon-meta-site-0.0.1-SNAPSHOT.jar:/app.jar \
