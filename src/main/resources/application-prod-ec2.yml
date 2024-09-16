@@ -7,7 +7,7 @@ spring:
       region:
         static: ap-northeast-2 # 리전 정보 추가
   config:
-    import: aws-secretsmanager:/digimon-meta-prod
+    import: aws-secretsmanager:digimon-meta-prod
   application:
     name: Digimon-Meta
   security:
