@@ -3,7 +3,7 @@ name: Deploy Spring Server to EC2 with AWS Secrets Manager
 on:
   push:
     branches:
-      - master
+      - master  
 
 jobs:
   deploy:
@@ -28,21 +28,25 @@ jobs:
     - name: Build with Gradle
       run: ./gradlew clean build -x test 
 
-    # 5. 빌드된 JAR 파일을 EC2로 전송합니다.
+    # 5. GitHub Secrets에서 SSH 키를 설정합니다.
+    - name: Setup SSH key
+      run: |
+        mkdir -p ~/.ssh
+        echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+        chmod 600 ~/.ssh/id_rsa
+        # SSH 호스트 키 검증 비활성화
+        echo -e "Host *\n\tStrictHostKeyChecking no\n" > ~/.ssh/config
+
+    # 6. 빌드된 JAR 파일을 EC2로 전송합니다.
     - name: Copy files to EC2
       run: |
         scp -i ~/.ssh/id_rsa \
           build/libs/digimon-meta-site-0.0.1-SNAPSHOT.jar \
           ubuntu@13.125.113.222:/home/ubuntu/
 
-    # 6. EC2로 SSH 접속 후 Docker 컨테이너를 실행합니다.
+    # 7. EC2로 SSH 접속 후 Docker 컨테이너를 실행합니다.
     - name: SSH into EC2 and deploy with Docker
       run: |
-        # GitHub Secrets에서 SSH 키를 가져와서 파일로 저장
-        echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
-        chmod 600 ~/.ssh/id_rsa
-        
-        # SSH 접속하여 Docker 컨테이너 실행
         ssh -i ~/.ssh/id_rsa ubuntu@13.125.113.222 << 'EOF'
         
         # AWS CLI와 jq 설치
