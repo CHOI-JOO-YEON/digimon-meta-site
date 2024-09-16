@@ -44,37 +44,10 @@ jobs:
           build/libs/digimon-meta-site-0.0.1-SNAPSHOT.jar \
           ubuntu@13.125.113.222:/home/ubuntu/
 
-    # 7. EC2로 SSH 접속 후 Docker 및 AWS CLI 설치 및 컨테이너 실행
+    # 7. EC2로 SSH 접속 후 AWS Secrets Manager에서 시크릿 가져오기 및 Docker 실행
     - name: SSH into EC2 and deploy with Docker
       run: |
         ssh -i ~/.ssh/id_rsa ubuntu@13.125.113.222 << 'EOF'
-        
-        # unzip 설치 후 AWS CLI 설치
-        sudo apt update
-        sudo apt install -y unzip
-        curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
-        unzip -o awscliv2.zip  # -o 플래그로 덮어쓰기 자동 처리
-        sudo ./aws/install
-
-        # Docker 설치 (이미 설치되어 있더라도 확인)
-        sudo apt install -y \
-            ca-certificates \
-            curl \
-            gnupg \
-            lsb-release
-
-        sudo mkdir -p /etc/apt/keyrings
-        curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
-
-        echo \
-          "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
-          $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
-
-        sudo apt update
-        sudo apt install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin
-
-        # Docker 데몬에 대한 권한 문제 해결: sudo 사용
-        sudo systemctl restart docker
 
         # AWS Secrets Manager에서 시크릿 가져오기
         SECRETS=$(aws secretsmanager get-secret-value --secret-id digimon_meta_secrets --query SecretString --output text)
