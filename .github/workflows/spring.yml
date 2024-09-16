@@ -50,7 +50,7 @@ jobs:
         ssh -i ~/.ssh/id_rsa ubuntu@13.125.113.222 << 'EOF'
 
         # AWS Secrets Manager에서 시크릿 가져오기
-        SECRETS=$(aws secretsmanager get-secret-value --secret-id digimon_meta_secrets --query SecretString --output text)
+        SECRETS=$(aws secretsmanager get-secret-value --secret-id digimon_meta_prod --query SecretString --output text)
 
         # 시크릿 값이 비어 있는지 확인하고 파싱
         if [ -n "$SECRETS" ]; then
