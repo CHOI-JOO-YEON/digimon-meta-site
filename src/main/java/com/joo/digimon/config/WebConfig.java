@@ -23,6 +23,7 @@ public class WebConfig implements WebMvcConfigurer {
         registry.addMapping("/**")
                 .allowedOriginPatterns("http://localhost:*")
                 .allowedOriginPatterns("https://www.digimon-meta.site/*")
+                .allowedOriginPatterns("https://digimon-meta.site/*")
                 .allowedMethods("*")
                 .allowedHeaders("*")
                 .allowCredentials(true);
