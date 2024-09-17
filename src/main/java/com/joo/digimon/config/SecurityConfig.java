@@ -70,8 +70,8 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.addAllowedOriginPattern("http://localhost:*");
-        configuration.addAllowedOriginPattern("https://www.digimon-meta.site");
-        configuration.addAllowedOriginPattern("https://www.digimon-meta.site/*");
+        configuration.addAllowedOriginPattern("https://digimon-meta.site");
+        configuration.addAllowedOriginPattern("https://digimon-meta.site/*");
         configuration.addAllowedMethod("*");
         configuration.addAllowedHeader("*");
         configuration.setAllowCredentials(true);
