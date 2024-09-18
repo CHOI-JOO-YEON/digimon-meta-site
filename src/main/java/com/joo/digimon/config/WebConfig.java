@@ -18,6 +18,11 @@ import java.util.List;
 public class WebConfig implements WebMvcConfigurer {
     private final UserArgumentResolver userArgumentResolver;
     private final RequestLoggingInterceptor requestLoggingInterceptor;
+
+
+    /*
+    cors 설정은 SecurityConfig에서 관리 중
+     */
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**")

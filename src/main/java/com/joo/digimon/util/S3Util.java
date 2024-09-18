@@ -24,8 +24,6 @@ public class S3Util {
     @Value("${s3.bucket-name}")
     String bucketName;
 
-    private final RestTemplate restTemplate;
-
     private final S3Client s3Client;
 
 

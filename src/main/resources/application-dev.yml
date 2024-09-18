@@ -2,6 +2,9 @@ spring:
   jpa:
     hibernate:
       ddl-auto: update
+#    properties:
+#      hibernate:
+#        format_sql: true
     show-sql: true
   h2:
     console:
@@ -16,11 +19,7 @@ spring:
   cloud:
     consul:
       config:
-        enabled: true
-      port: 8500
-      host: 192.168.50.199
-  config:
-    import: "consul:"
+        enabled: false
   security:
     oauth2:
       client:
@@ -31,11 +30,13 @@ spring:
             scope:
               - profile_nickname
             client-name: kakao
+            client-id: dummy-client-id
+            redirect-uri: localhost:50000
         provider:
           kakao:
-            authorization-uri: https://kauth.kakao.com/oauth/authorize
-            token-uri: https://kauth.kakao.com/oauth/token
-            user-info-uri: https://kapi.kakao.com/v2/user/
+            authorization-uri: http://localhost:8089/oauth/authorize
+            token-uri: http://localhost:8089/oauth/token
+            user-info-uri: http://localhost:8089/v2/user/me
 admin:
   id: adminJoo
   password: adad23415
@@ -45,3 +46,15 @@ jwt:
 img:
   original: test/original/images/
   small: test/small/images/
+aws:
+  s3:
+    endpoint: http://127.0.0.1:4566
+  access-key-id: dummy-key-id
+  access-key-secret: dummy-key-secret
+s3:
+  bucket-name: digimon-meta-dev-bucket
+back:
+  digimon: https://digimon-meta.site/images/digimon_back.png
+  digitama: https://digimon-meta.site/images/digitama_back.png
+domain:
+  url: http://127.0.0.1:4566/digimon-meta-dev-bucket/
