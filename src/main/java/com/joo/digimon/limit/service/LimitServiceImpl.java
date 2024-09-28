@@ -8,19 +8,36 @@ import com.joo.digimon.limit.model.LimitCardEntity;
 import com.joo.digimon.limit.model.LimitEntity;
 import com.joo.digimon.limit.repository.LimitCardRepository;
 import com.joo.digimon.limit.repository.LimitRepository;
+
+import jakarta.annotation.PostConstruct;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
-public class LimitServiceImpl implements LimitService{
+public class LimitServiceImpl implements LimitService {
     private final LimitRepository limitRepository;
     private final LimitCardRepository limitCardRepository;
     private final CardRepository cardRepository;
+
+    @PostConstruct
+    @Transactional
+    public void init() {
+        Optional<LimitEntity> limitEntity = limitRepository.findById(1);
+        if (limitEntity.isPresent()) {
+            return;
+        }
+        limitRepository.save(LimitEntity.builder()
+                .restrictionBeginDate(LocalDate.now())
+                .build());
+    }
+
     @Override
     @Transactional
     public List<GetLimitResponseDto> findAll() {
@@ -39,7 +56,7 @@ public class LimitServiceImpl implements LimitService{
     @Transactional
     public void create(CreateLimitRequestDto createLimitRequestDto) {
         LimitEntity limitEntity = limitRepository.save(LimitEntity.builder()
-                        .restrictionBeginDate(createLimitRequestDto.getRestrictionBeginDate())
+                .restrictionBeginDate(createLimitRequestDto.getRestrictionBeginDate())
                 .build());
 
         List<LimitCardEntity> limitCardEntities = new ArrayList<>();

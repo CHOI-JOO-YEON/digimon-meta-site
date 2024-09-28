@@ -13,4 +13,6 @@ import java.util.Optional;
 public interface FormatRepository extends JpaRepository<Format,Integer> {
     List<Format> findByEndDateIsAfter(LocalDate localDate, Sort sort);
     Optional<Format> findTopByIsOnlyEnIsNullOrIsOnlyEnIsFalseOrderByStartDateDesc();
+    List<Format> findByEndDateGreaterThanEqual(LocalDate latestReleaseCardDate, Sort sort);
+
 }

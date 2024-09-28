@@ -2,7 +2,6 @@ package com.joo.digimon.user.controller;
 
 import com.joo.digimon.user.dto.LoginResponseDto;
 import com.joo.digimon.user.dto.UsernameLoginRequestDto;
-import com.joo.digimon.user.service.NicknameService;
 import com.joo.digimon.user.service.UserService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
@@ -20,7 +19,8 @@ public class AccountController {
     private final UserService userService;
 
     @GetMapping("/token/kakao")
-    public ResponseEntity<?> getKakaoToken(@RequestParam String code, HttpServletResponse response) throws IOException {
+    public ResponseEntity<?> getKakaoToken(@RequestParam(name = "code") String code, HttpServletResponse response) throws IOException {
+        System.out.println("!!!!!!!!!!!!!!!!!!!!!");
         LoginResponseDto loginResponseDto = userService.getKakaoToken(code);
         setTokenCookie(response, loginResponseDto);
         return new ResponseEntity<>(loginResponseDto, HttpStatus.OK);

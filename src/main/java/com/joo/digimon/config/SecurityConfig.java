@@ -41,11 +41,11 @@ public class SecurityConfig {
                 .authorizeHttpRequests(
                         request -> request
                                 .requestMatchers("/api/crawling/**").hasRole("ADMIN")
+                                .requestMatchers("/api/admin/**").hasRole("ADMIN")
                                 .requestMatchers(HttpMethod.POST, "/api/format/**").hasRole("ADMIN")
                                 .requestMatchers(HttpMethod.GET, "/api/format/**").permitAll()
                                 .requestMatchers(HttpMethod.POST, "/api/limit/**").hasRole("ADMIN")
                                 .requestMatchers(HttpMethod.GET, "/api/limit/**").permitAll()
-                                .requestMatchers("/api/crawling/**").hasRole("ADMIN")
                                 .requestMatchers("/api/manager/**").hasRole("MANAGER")
                                 .requestMatchers("/h2-console/**").permitAll()
                                 .requestMatchers("/api/account/**").permitAll()

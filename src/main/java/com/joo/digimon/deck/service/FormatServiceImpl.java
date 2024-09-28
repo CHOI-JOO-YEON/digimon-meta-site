@@ -5,6 +5,7 @@ import com.joo.digimon.deck.dto.FormatResponseDto;
 import com.joo.digimon.deck.dto.FormatUpdateRequestDto;
 import com.joo.digimon.deck.model.Format;
 import com.joo.digimon.deck.repository.FormatRepository;
+import jakarta.annotation.PostConstruct;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
@@ -13,12 +14,28 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 public class FormatServiceImpl implements FormatService {
 
     private final FormatRepository formatRepository;
+
+    @PostConstruct
+    @Transactional
+    public void init() {
+        Optional<Format> optionalFormat = formatRepository.findById(1);
+        if (optionalFormat.isPresent()) {
+            return;
+        }
+        formatRepository.save(Format.builder()
+                .name("ALL")
+                .startDate(LocalDate.of(1998, 7, 15))
+                .endDate(LocalDate.of(9999, 12, 31))
+                .isOnlyEn(false)
+                .build());
+    }
 
     @Override
     @Transactional
@@ -37,7 +54,7 @@ public class FormatServiceImpl implements FormatService {
         List<FormatResponseDto> result = new ArrayList<>();
 
         Sort sort = Sort.by("startDate").descending();
-        List<Format> formats = formatRepository.findByEndDateIsAfter(latestReleaseCardDate, sort);
+        List<Format> formats = formatRepository.findByEndDateGreaterThanEqual(latestReleaseCardDate, sort);
 
         for (Format format : formats) {
             result.add(new FormatResponseDto(format));
