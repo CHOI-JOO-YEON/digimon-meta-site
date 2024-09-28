@@ -17,12 +17,15 @@ public interface CrawlingService {
     List<CrawlingCardDto> getUnreflectedCrawlingCardDtoList(Integer size);
 
     @Transactional
-    List<ReflectCardResponseDto> saveCardByReflectCardRequestList(List<ReflectCardRequestDto> reflectCardRequestDtoList);
+    List<ReflectCardResponseDto> saveCardByReflectCardRequestList(List<ReflectCardRequestDto> reflectCardRequestDtoList, String locale);
 
-    CrawlingResultDto crawlAndSaveByUrl(String url) throws IOException;
 
-    List<CrawlingCardEntity> crawlUrlAndBuildEntityList(String url) throws IOException;
+    CrawlingResultDto crawlAndSaveByUrl(String url, String locale, String note) throws IOException;
+
     List<Document> getDocumentListByFirstPageUrl(String url) throws IOException;
+
     List<Element> getCardElementsByDocument(Document document);
-    CrawlingCardDto crawlingCardByElement(Element element);
+
+    CrawlingCardDto crawlingCardByElement(Element element, String locale);
+
 }

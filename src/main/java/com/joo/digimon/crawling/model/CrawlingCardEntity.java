@@ -51,6 +51,8 @@ public class CrawlingCardEntity {
     Boolean isReflect;
     Boolean isEnCard;
 
+    String locale;
+
     public CrawlingCardEntity(CrawlingCardDto dto) {
         this.cardNo = dto.getCardNo();
         this.rarity = dto.getRarity();
@@ -72,6 +74,7 @@ public class CrawlingCardEntity {
         this.color2 = dto.getColor2();
         this.imgUrl = dto.getImgUrl();
         this.isReflect = false;
+        this.locale = dto.getLocale();
     }
 
     @OneToOne(mappedBy = "crawlingCardEntity")

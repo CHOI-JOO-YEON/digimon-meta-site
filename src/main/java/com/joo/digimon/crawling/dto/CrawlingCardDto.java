@@ -30,6 +30,7 @@ public class CrawlingCardDto {
         String color3;
         String imgUrl;
         String errorMessage;
+        String locale;
 
     public CrawlingCardDto(CrawlingCardEntity crawlingCardEntity) {
         this.id = crawlingCardEntity.getId();
@@ -53,6 +54,7 @@ public class CrawlingCardDto {
         this.color2 = crawlingCardEntity.getColor2();
         this.imgUrl = crawlingCardEntity.getImgUrl();
         this.errorMessage = crawlingCardEntity.getErrorMessage();
+        this.locale = crawlingCardEntity.getLocale();
     }
 
 }

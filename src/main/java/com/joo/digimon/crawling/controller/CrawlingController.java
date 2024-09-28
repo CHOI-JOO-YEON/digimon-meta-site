@@ -2,7 +2,6 @@ package com.joo.digimon.crawling.controller;
 
 import com.joo.digimon.card.service.CardImageService;
 import com.joo.digimon.crawling.dto.UpdateCrawlingRequestDto;
-import com.joo.digimon.crawling.service.CrawlingEnService;
 import com.joo.digimon.crawling.service.CrawlingService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -18,37 +17,18 @@ import java.util.List;
 public class CrawlingController {
     private final CrawlingService crawlingService;
     private final CardImageService cardImageService;
-    private final CrawlingEnService crawlingEnService;
+
 
     @PostMapping("/page")
-    public ResponseEntity<?> crawlingPage(@RequestParam(name = "page-url") String pageUrl) throws IOException {
-        return new ResponseEntity<>(crawlingService.crawlAndSaveByUrl(pageUrl), HttpStatus.CREATED);
+    public ResponseEntity<?> crawlingPageEnOnlyNote(@RequestParam(name = "page-url") String pageUrl, @RequestParam(name = "locale") String locale, @RequestParam(name = "note", required = false) String note) throws IOException {
+        return new ResponseEntity<>(crawlingService.crawlAndSaveByUrl(pageUrl, locale, note), HttpStatus.CREATED);
     }
-
-    @PostMapping("/page/en")
-    public ResponseEntity<?> crawlingPageEn(@RequestParam(name = "page-url") String pageUrl) throws IOException {
-        return new ResponseEntity<>(crawlingEnService.crawlAndSaveByUrl(pageUrl), HttpStatus.CREATED);
-    }
-
-    @PostMapping("/page/en/only-note")
-    public ResponseEntity<?> crawlingPageEnOnlyNote(@RequestParam(name = "page-url") String pageUrl, @RequestParam(name="note") String note) throws IOException {
-        return new ResponseEntity<>(crawlingEnService.crawlAndSaveByUrl(pageUrl, note), HttpStatus.CREATED);
-    }
-//    @PostMapping("/save")
-//    public ResponseEntity<?> crawlingCard(@RequestBody List<ReflectCardRequestDto> reflectCardRequestDtoList) {
-//        return new ResponseEntity<>(crawlingService.saveCardByReflectCardRequestList(reflectCardRequestDtoList), HttpStatus.CREATED);
-//    }
-
 
     @PostMapping("/update")
     public ResponseEntity<?> crawlingCard(@RequestBody List<UpdateCrawlingRequestDto> updateCrawlingRequestDtoList) {
         return new ResponseEntity<>(crawlingService.updateCrawlingEntityAndSaveCard(updateCrawlingRequestDtoList), HttpStatus.OK);
     }
 
-    @PostMapping("/update/en")
-    public ResponseEntity<?> crawlingCardEn(@RequestBody List<UpdateCrawlingRequestDto> updateCrawlingRequestDtoList) {
-        return new ResponseEntity<>(crawlingEnService.updateCrawlingEntityAndSaveCard(updateCrawlingRequestDtoList), HttpStatus.OK);
-    }
     @GetMapping("/list")
     public ResponseEntity<?> getUnReflectCrawlingCardList(@RequestParam("size") Integer size) {
         return new ResponseEntity<>(crawlingService.getUnreflectedCrawlingCardDtoList(size), HttpStatus.OK);

@@ -65,4 +65,12 @@ public class CardEntity {
 
     Boolean isOnlyEnCard;
 
+    @OneToOne
+    EnglishCardEntity englishCard;
+
+
+    public void updateEnglishCard(EnglishCardEntity englishCard) {
+        this.englishCard = englishCard;
+    }
+
 }

@@ -1,7 +1,9 @@
 package com.joo.digimon.global.enums;
 
 public enum Color {
-    RED, BLUE, YELLOW, GREEN, BLACK, PURPLE, WHITE;
+    RED, BLUE, YELLOW, GREEN, BLACK, PURPLE, WHITE
+    ,ERROR
+    ;
 
     public static Color getColorByString(String colorString) {
         for (Color value : Color.values()) {
@@ -9,6 +11,6 @@ public enum Color {
                 return value;
             }
         }
-        throw new IllegalArgumentException("잘못된 색깔 문자열");
+       return ERROR;
     }
 }

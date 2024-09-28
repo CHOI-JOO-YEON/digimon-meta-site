@@ -20,7 +20,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Nullable;
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -40,6 +42,7 @@ public class CrawlingServiceImpl implements CrawlingService {
     private final NoteRepository noteRepository;
     private final CardParseService cardParseService;
     private final DeletedEnCardImgRepository deletedEnCardImgRepository;
+    private final EnglishCardRepository englishCardRepository;
 
     @Transactional
     @Override
@@ -57,7 +60,8 @@ public class CrawlingServiceImpl implements CrawlingService {
 
             CrawlingCardEntity crawlingCardEntity = updateCrawlingEntity(updateCrawlingRequestDto);
             try {
-                saveCardByReflectCardRequest(cardParseService.crawlingCardParse(crawlingCardEntity));
+                saveCardByReflectCardRequest(cardParseService.crawlingCardParse(crawlingCardEntity), crawlingCardEntity.getLocale());
+
                 crawlingResultDto.successCountIncrease();
                 crawlingCardEntity.setIsReflect(true);
             } catch (CardParseException | CardImageException e) {
@@ -110,11 +114,11 @@ public class CrawlingServiceImpl implements CrawlingService {
 
     @Override
     @Transactional
-    public List<ReflectCardResponseDto> saveCardByReflectCardRequestList(List<ReflectCardRequestDto> reflectCardRequestDtoList) {
+    public List<ReflectCardResponseDto> saveCardByReflectCardRequestList(List<ReflectCardRequestDto> reflectCardRequestDtoList, String locale) {
         List<ReflectCardResponseDto> reflectCardResponseDtoList = new ArrayList<>();
         for (ReflectCardRequestDto reflectCardRequestDto : reflectCardRequestDtoList) {
             try {
-                saveCardByReflectCardRequest(reflectCardRequestDto);
+                saveCardByReflectCardRequest(reflectCardRequestDto, locale);
                 reflectCardResponseDtoList.add(new ReflectCardResponseDto(reflectCardRequestDto.getId(), true));
             } catch (Exception e) {
                 reflectCardResponseDtoList.add(new ReflectCardResponseDto(reflectCardRequestDto.getId(), false));
@@ -126,10 +130,18 @@ public class CrawlingServiceImpl implements CrawlingService {
 
 
     @Transactional
-    public void saveCardByReflectCardRequest(ReflectCardRequestDto reflectCardRequestDto) throws CardParseException, CardImageException {
+    public void saveCardByReflectCardRequest(ReflectCardRequestDto reflectCardRequestDto, String locale) throws CardParseException, CardImageException {
         CrawlingCardEntity crawlingCardEntity = crawlingCardRepository.findById(reflectCardRequestDto.getId()).orElseThrow();
 
-        CardEntity cardEntity = getCardEntityOrInsert(reflectCardRequestDto);
+
+        CardEntity cardEntity;
+
+        if (locale.equals("ENG")) {
+            cardEntity = getEnglishCardEntityOrInsert(reflectCardRequestDto);
+        } else {
+            cardEntity = getCardEntityOrInsert(reflectCardRequestDto);
+        }
+
         NoteEntity noteEntity = noteRepository.findByName(reflectCardRequestDto.getNote()).orElseGet(() -> noteRepository.save(NoteEntity.builder().name(reflectCardRequestDto.getNote()).build()));
 
         if (Boolean.FALSE.equals(reflectCardRequestDto.getIsParallel())) {
@@ -240,7 +252,8 @@ public class CrawlingServiceImpl implements CrawlingService {
         } else {
             stringBuilder.append("E");
         }
-// '-'를 기준으로 문자열을 분리
+
+        // '-'를 기준으로 문자열을 분리
         String[] parts = cardNo.split("-");
 
         // 첫 번째 숫자 부분을 처리 (3자리로 맞춤)
@@ -256,10 +269,10 @@ public class CrawlingServiceImpl implements CrawlingService {
         return stringBuilder.toString();
     }
 
+
     @Override
-    @Transactional
-    public CrawlingResultDto crawlAndSaveByUrl(String url) throws IOException {
-        List<CrawlingCardEntity> crawlingCardEntities = crawlUrlAndBuildEntityList(url);
+    public CrawlingResultDto crawlAndSaveByUrl(String url, String locale, @Nullable String note) throws IOException {
+        List<CrawlingCardEntity> crawlingCardEntities = crawlUrlAndBuildEntityList(url, locale, note);
         CrawlingResultDto crawlingResultDto = new CrawlingResultDto();
 
         for (CrawlingCardEntity crawlingCardEntity : crawlingCardEntities) {
@@ -268,23 +281,20 @@ public class CrawlingServiceImpl implements CrawlingService {
                 continue;
             }
             try {
-                saveCardByReflectCardRequest(cardParseService.crawlingCardParse(crawlingCardEntity));
+                saveCardByReflectCardRequest(cardParseService.crawlingCardParse(crawlingCardEntity), crawlingCardEntity.getLocale());
                 crawlingResultDto.successCountIncrease();
                 crawlingCardEntity.setIsReflect(true);
-            } catch (CardParseException | CardImageException e) {
+            } catch (CardParseException e) {
                 crawlingCardEntity.updateErrorMessage(e.getMessage());
                 crawlingResultDto.addFailedCrawling(new CrawlingCardDto(crawlingCardEntity));
             } catch (Exception e) {
                 log.error("{} 에서 {} 발생 {}", crawlingCardEntity, e.getMessage(), e);
             }
         }
-
         return crawlingResultDto;
-
     }
 
-    @Override
-    public List<CrawlingCardEntity> crawlUrlAndBuildEntityList(String url) throws IOException {
+    public List<CrawlingCardEntity> crawlUrlAndBuildEntityList(String url, String locale, @Nullable String note) throws IOException {
         List<Document> documentListByFirstPageUrl = getDocumentListByFirstPageUrl(url);
 
         List<Element> cardElement = new ArrayList<>();
@@ -293,7 +303,15 @@ public class CrawlingServiceImpl implements CrawlingService {
         }
         List<CrawlingCardDto> crawlingCardDtoList = new ArrayList<>();
         for (Element element : cardElement) {
-            crawlingCardDtoList.add(crawlingCardByElement(element));
+
+            CrawlingCardDto crawlingCardDto = crawlingCardByElement(element, locale);
+
+
+            if ((note == null || crawlingCardDto.getNote().equals(note))
+                    && (!locale.equals("ENG") || !crawlingCardDto.getIsParallel())) {
+
+                crawlingCardDtoList.add(crawlingCardDto);
+            }
         }
         List<CrawlingCardEntity> crawlingCardEntities = new ArrayList<>();
 
@@ -334,14 +352,24 @@ public class CrawlingServiceImpl implements CrawlingService {
     }
 
     @Override
-    public CrawlingCardDto crawlingCardByElement(Element element) {
+    public CrawlingCardDto crawlingCardByElement(Element element, String locale) {
         CrawlingCardDto crawlingCardDto = new CrawlingCardDto();
 
+        crawlingCardDto.setLocale(locale);
         crawlingCardDto.setIsParallel(!element.select(".cardParallel").isEmpty());
         extractCardColor(crawlingCardDto, element);
         extractCardInfoHead(element, crawlingCardDto);
-        extractCardInfoBody(element, crawlingCardDto);
-        extractCardInfoBottom(element, crawlingCardDto);
+
+
+        if (locale.equals("KOR")) {
+            extractCardInfoBottom(element, crawlingCardDto);
+            extractCardInfoBody(element, crawlingCardDto);
+        } else if (locale.equals("ENG")) {
+            extractEngCardInfoBottom(element, crawlingCardDto);
+            crawlingCardDto.setForm(element.select(".cardinfo_top_body dl:contains(Form) dd").text());
+            extractEngCardInfoBody(element, crawlingCardDto);
+        }
+
 
         return crawlingCardDto;
     }
@@ -350,6 +378,12 @@ public class CrawlingServiceImpl implements CrawlingService {
         crawlingCardDto.setEffect(changeJapanMiddlePoint(parseElementToPlainText(element.select(".cardinfo_bottom dl:contains(상단 텍스트) dd"))));
         crawlingCardDto.setSourceEffect(changeJapanMiddlePoint(parseElementToPlainText(element.select(".cardinfo_bottom dl:contains(하단 텍스트) dd"))));
         crawlingCardDto.setNote(changeJapanMiddlePoint(element.select(".cardinfo_bottom dl:contains(입수 정보) dd").text()));
+    }
+
+    private void extractEngCardInfoBottom(Element element, CrawlingCardDto crawlingCardDto) {
+        crawlingCardDto.setEffect(parseElementToPlainText(element.select(".cardinfo_bottom dl dt:matchesOwn(^Effect$) + dd")));
+        crawlingCardDto.setSourceEffect(parseElementToPlainText(element.select(".cardinfo_bottom dl:contains(Inherited Effect) dd")));
+        crawlingCardDto.setNote(element.select(".cardinfo_bottom dl:contains(Notes) dd").text());
     }
 
     private String parseElementToPlainText(Elements select) {
@@ -364,15 +398,30 @@ public class CrawlingServiceImpl implements CrawlingService {
 
 
         crawlingCardDto.setCardName(changeJapanMiddlePoint(element.selectFirst(".card_name").text()));
-
-        crawlingCardDto.setImgUrl(element.select(".card_img>img").attr("src"));
         crawlingCardDto.setForm(element.select(".cardinfo_top_body dl:contains(형태) dd").text());
+        crawlingCardDto.setImgUrl(element.select(".card_img>img").attr("src"));
         crawlingCardDto.setAttribute(element.select(".cardinfo_top_body dl:contains(속성) dd").text());
         crawlingCardDto.setType(element.select(".cardinfo_top_body dl:contains(유형) dd").text());
         crawlingCardDto.setDP(element.select(".cardinfo_top_body dl:contains(DP) dd").text());
         crawlingCardDto.setPlayCost(element.select(".cardinfo_top_body dl:contains(등장 코스트) dd").text());
         crawlingCardDto.setDigivolveCost1(element.select(".cardinfo_top_body dl:contains(진화 코스트 1) dd").text());
         crawlingCardDto.setDigivolveCost2(element.select(".cardinfo_top_body dl:contains(진화 코스트 2) dd").text());
+    }
+
+    private void extractEngCardInfoBody(Element element, CrawlingCardDto crawlingCardDto) {
+        Element lvElement = element.selectFirst(".cardlv");
+        if (lvElement != null) {
+            crawlingCardDto.setLv(lvElement.text());
+        }
+        crawlingCardDto.setCardName(element.selectFirst(".card_name").text());
+        crawlingCardDto.setImgUrl(element.select(".card_img>img").attr("src"));
+        crawlingCardDto.setForm(element.select(".cardinfo_top_body dl:contains(Form) dd").text());
+        crawlingCardDto.setAttribute(element.select(".cardinfo_top_body dl:contains(Attribute) dd").text());
+        crawlingCardDto.setType(element.select(".cardinfo_top_body dl:contains(Type) dd").text());
+        crawlingCardDto.setDP(element.select(".cardinfo_top_body dl:contains(DP) dd").text());
+        crawlingCardDto.setPlayCost(element.select(".cardinfo_top_body dl:contains(Play Cost) dd").text());
+        crawlingCardDto.setDigivolveCost1(element.select(".cardinfo_top_body dl:contains(Digivolve Cost 1) dd").text());
+        crawlingCardDto.setDigivolveCost2(element.select(".cardinfo_top_body dl:contains(Digivolve Cost 2) dd").text());
     }
 
     private void extractCardInfoHead(Element element, CrawlingCardDto crawlingCardDto) {
@@ -389,10 +438,10 @@ public class CrawlingServiceImpl implements CrawlingService {
         if (matcher.find()) {
             String[] colorText = matcher.group(1).split("_");
             crawlingCardDto.setColor1(colorText[0]);
-            if (colorText.length >1) {
+            if (colorText.length > 1) {
                 crawlingCardDto.setColor2(colorText[1]);
             }
-            if (colorText.length >2) {
+            if (colorText.length > 2) {
                 crawlingCardDto.setColor3(colorText[2]);
             }
         }
@@ -408,5 +457,43 @@ public class CrawlingServiceImpl implements CrawlingService {
         return new String(textArray);
     }
 
+    @Transactional
+    public CardEntity getEnglishCardEntityOrInsert(ReflectCardRequestDto reflectCardRequestDto) {
+        EnglishCardEntity englishCardEntity = englishCardRepository.save(EnglishCardEntity.builder()
+                .effect(reflectCardRequestDto.getEffect())
+                .sourceEffect(reflectCardRequestDto.getSourceEffect())
+                .cardName(reflectCardRequestDto.getCardName())
+                .build());
+
+        CardEntity cardEntity = cardRepository.findByCardNo(reflectCardRequestDto.getCardNo()).orElseGet(
+                () -> {
+                    CardEntity save = cardRepository.save(
+                            CardEntity.builder()
+                                    .sortString(generateSortString(reflectCardRequestDto.getCardNo()))
+                                    .cardNo(reflectCardRequestDto.getCardNo())
+                                    .dp(reflectCardRequestDto.getDp())
+                                    .playCost(reflectCardRequestDto.getPlayCost())
+                                    .digivolveCondition1(reflectCardRequestDto.getDigivolveCondition1())
+                                    .digivolveCondition2(reflectCardRequestDto.getDigivolveCondition2())
+                                    .digivolveCost1(reflectCardRequestDto.getDigivolveCost1())
+                                    .digivolveCost2(reflectCardRequestDto.getDigivolveCost2())
+                                    .lv(reflectCardRequestDto.getLv())
+                                    .cardType(reflectCardRequestDto.getCardType())
+                                    .form(reflectCardRequestDto.getForm())
+                                    .rarity(reflectCardRequestDto.getRarity())
+                                    .color1(reflectCardRequestDto.getColor1())
+                                    .color2(reflectCardRequestDto.getColor2())
+                                    .isOnlyEnCard(true)
+                                    .releaseDate(LocalDate.of(9999, 12, 31))
+                                    .build());
+
+                    return save;
+                }
+        );
+
+        cardEntity.updateEnglishCard(englishCardEntity);
+
+        return cardEntity;
+    }
 
 }

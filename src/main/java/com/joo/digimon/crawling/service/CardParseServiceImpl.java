@@ -23,49 +23,31 @@ public class CardParseServiceImpl implements CardParseService {
         dto.setId(crawlingCard.getId());
         dto.setCardNo(parseCardNo(crawlingCard.getCardNo()));
         dto.setRarity(parseCardRarity(crawlingCard.getRarity()));
-        dto.setCardType(parseCardType(crawlingCard.getCardType()));
+        dto.setCardType(parseCardType(crawlingCard.getCardType(), crawlingCard.getLocale()));
         dto.setLv(parseLv(crawlingCard.getLv(), dto.getCardType()));
         dto.setIsParallel(crawlingCard.getIsParallel());
-        dto.setCardName(parseCardName(crawlingCard.getCardName()));
-        dto.setForm(parseForm(crawlingCard.getForm(), dto.getCardType()));
-        dto.setAttribute(parseAttribute(crawlingCard.getAttribute()));
-        dto.setTypes(parseTypes(crawlingCard.getType(), dto.getCardType()));
+        dto.setCardName(parseCardName(crawlingCard.getCardName(), crawlingCard.getLocale()));
         dto.setDp(parseDp(crawlingCard.getDP()));
         dto.setPlayCost(parsePlayCost(crawlingCard.getPlayCost()));
         dto.setEffect(parseEffect(crawlingCard.getEffect()));
         dto.setSourceEffect(parseSourceEffect(crawlingCard.getSourceEffect()));
         dto.setNote(parseNote(crawlingCard.getNote()));
-
         dto.setColor1(parseColor(crawlingCard.getColor1()));
         dto.setColor2(parseColor(crawlingCard.getColor2()));
-        dto.setOriginUrl(parseUrl(crawlingCard.getImgUrl()));
 
-        setDtoDigivolve(dto, crawlingCard);
+        if (crawlingCard.getLocale().equals("KOR")) {
+            dto.setOriginUrl(parseUrl(crawlingCard.getImgUrl()));
+            dto.setForm(parseForm(crawlingCard.getForm(), dto.getCardType(), crawlingCard.getLocale()));
+            dto.setAttribute(parseAttribute(crawlingCard.getAttribute()));
+            dto.setTypes(parseTypes(crawlingCard.getType(), dto.getCardType()));
+            setDtoDigivolve(dto, crawlingCard);
+        } else if (crawlingCard.getLocale().equals("ENG")) {
+            dto.setOriginUrl(parseEnUrl(crawlingCard.getImgUrl()));
+        }
+
         return dto;
     }
 
-    @Override
-    public ReflectCardRequestDto crawlingCardParseEn(CrawlingCardEntity crawlingCard) throws CardParseException {
-        ReflectCardRequestDto dto = new ReflectCardRequestDto();
-        dto.setId(crawlingCard.getId());
-        dto.setCardNo(parseCardNo(crawlingCard.getCardNo()));
-        dto.setRarity(parseCardRarity(crawlingCard.getRarity()));
-        dto.setCardType(parseCardTypeEn(crawlingCard.getCardType()));
-        dto.setLv(parseLv(crawlingCard.getLv(), dto.getCardType()));
-        dto.setIsParallel(crawlingCard.getIsParallel());
-        dto.setCardName(crawlingCard.getCardName());
-        dto.setDp(parseDp(crawlingCard.getDP()));
-        dto.setPlayCost(parsePlayCost(crawlingCard.getPlayCost()));
-        dto.setEffect(parseEffect(crawlingCard.getEffect()));
-        dto.setSourceEffect(parseSourceEffect(crawlingCard.getSourceEffect()));
-        dto.setNote(parseNote(crawlingCard.getNote()));
-
-        dto.setColor1(parseColor(crawlingCard.getColor1()));
-        dto.setColor2(parseColor(crawlingCard.getColor2()));
-        dto.setOriginUrl(parseEnUrl(crawlingCard.getImgUrl()));
-
-        return dto;
-    }
 
     private String parseCardNo(String cardNo) throws CardParseException {
         if (cardNo == null) {
@@ -75,44 +57,19 @@ public class CardParseServiceImpl implements CardParseService {
     }
 
     private Rarity parseCardRarity(String rarity) throws CardParseException {
-        if (rarity == null) {
-            throw new CardParseException(CardParseExceptionMessage.WRONG_RARITY);
-        }
-        try {
-            return Rarity.valueOf(rarity);
-        } catch (IllegalArgumentException e) {
-            throw new CardParseException(CardParseExceptionMessage.WRONG_RARITY);
-        }
+        return Rarity.parseRarity(rarity);
     }
 
-    private CardType parseCardType(String cardType) throws CardParseException {
-        if (cardType == null) {
-            throw new CardParseException(CardParseExceptionMessage.WRONG_CARD_TYPE);
-        }
-        try {
-            return CardType.findByKor(cardType);
-        } catch (IllegalArgumentException e) {
-            throw new CardParseException(CardParseExceptionMessage.WRONG_CARD_TYPE);
-        }
+    private CardType parseCardType(String cardType, String locale) throws CardParseException {
+        return CardType.findByString(cardType, locale);
     }
 
-    private CardType parseCardTypeEn(String cardType) throws CardParseException {
-        if (cardType == null) {
-            throw new CardParseException(CardParseExceptionMessage.WRONG_CARD_TYPE);
-        }
-        try {
-            return CardType.findByEng(cardType);
-        } catch (IllegalArgumentException e) {
-            throw new CardParseException(CardParseExceptionMessage.WRONG_CARD_TYPE);
-        }
-    }
-
-    private Integer parseLv(String lv, CardType cardType) throws CardParseException {
+    private Integer parseLv(String lv, CardType cardType) {
         if (cardType.equals(CardType.OPTION) || cardType.equals(CardType.TAMER)) {
             return null;
         }
         if (lv == null) {
-            throw new CardParseException(CardParseExceptionMessage.WRONG_LV);
+            return -1;
         }
         String replace = lv.replace("Lv.", "");
         if (replace.equals("-")) {
@@ -121,7 +78,11 @@ public class CardParseServiceImpl implements CardParseService {
         return Integer.parseInt(replace);
     }
 
-    private String parseCardName(String cardName) throws CardParseException {
+    private String parseCardName(String cardName, String locale) throws CardParseException {
+        if (locale.equals("ENG")) {
+            return cardName;
+        }
+
         if (cardName == null) {
             throw new CardParseException(CardParseExceptionMessage.WRONG_CARD_NAME);
         }
@@ -139,18 +100,11 @@ public class CardParseServiceImpl implements CardParseService {
         return cardNameStringBuilder.toString();
     }
 
-    private Form parseForm(String form, CardType cardType) throws CardParseException {
+    private Form parseForm(String form, CardType cardType, String locale) throws CardParseException {
         if (cardType.equals(CardType.OPTION) || cardType.equals(CardType.TAMER)) {
             return null;
         }
-        if (form == null) {
-            throw new CardParseException(CardParseExceptionMessage.WRONG_FORM);
-        }
-        try {
-            return Form.findByKor(form);
-        } catch (IllegalArgumentException e) {
-            throw new CardParseException(CardParseExceptionMessage.WRONG_FORM);
-        }
+        return Form.findForm(form, locale);
     }
 
     private String parseAttribute(String attribute) {
@@ -165,7 +119,7 @@ public class CardParseServiceImpl implements CardParseService {
             return new ArrayList<>();
         }
         if (type == null) {
-            throw new CardParseException(CardParseExceptionMessage.WRONG_TYPE);
+            return new ArrayList<>();
         }
         String[] types = type.split(",");
         List<String> typeList = new ArrayList<>();
@@ -181,12 +135,12 @@ public class CardParseServiceImpl implements CardParseService {
         }
         try {
             double doubleValue = Double.parseDouble(dp);
-            int intValue = (int) doubleValue;
-            return Integer.valueOf(intValue);
+            return (int) doubleValue;
         } catch (NumberFormatException e) {
-            throw new CardParseException(CardParseExceptionMessage.WRONG_DP);
+            return -1;
         }
     }
+
     private Integer parsePlayCost(String playCost) throws CardParseException {
         if (playCost.equals("-")) {
             return null;
@@ -194,7 +148,7 @@ public class CardParseServiceImpl implements CardParseService {
         try {
             return Integer.parseInt(playCost);
         } catch (NumberFormatException e) {
-            throw new CardParseException(CardParseExceptionMessage.WRONG_PLAY_COST);
+            return -1;
         }
     }
 
@@ -220,11 +174,7 @@ public class CardParseServiceImpl implements CardParseService {
         if (color == null) {
             return null;
         }
-        try {
-            return Color.getColorByString(color);
-        } catch (IllegalArgumentException e) {
-            throw new CardParseException(CardParseExceptionMessage.WRONG_COLOR);
-        }
+        return Color.getColorByString(color);
     }
 
     private String parseUrl(String imgUrl) throws CardParseException {
@@ -259,8 +209,8 @@ public class CardParseServiceImpl implements CardParseService {
 
     }
 
-    private Digivolve parseDigivolve( String digivolveString) throws CardParseException {
-        if (digivolveString == null||digivolveString.equals("-")) {
+    private Digivolve parseDigivolve(String digivolveString) throws CardParseException {
+        if (digivolveString == null || digivolveString.equals("-")) {
             return null;
         }
         String[] digivolveStrings = digivolveString.split("~");
@@ -279,9 +229,10 @@ public class CardParseServiceImpl implements CardParseService {
 
 
     }
+
     @Getter
     @AllArgsConstructor
-    private static class Digivolve{
+    private static class Digivolve {
         Integer digivolveCost;
         Integer digivolveCondition;
     }

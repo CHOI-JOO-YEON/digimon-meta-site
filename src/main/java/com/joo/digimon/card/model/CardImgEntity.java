@@ -20,6 +20,7 @@ import lombok.*;
                 @NamedSubgraph(
                         name = "cardEntitySubgraph",
                         attributeNodes = {
+                                @NamedAttributeNode(value = "englishCard"),
                                 @NamedAttributeNode(value = "cardCombineTypeEntities",subgraph = "typeSubgraph"),
                         }
                 ),

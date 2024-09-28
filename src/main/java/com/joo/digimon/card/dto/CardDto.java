@@ -49,7 +49,21 @@ public class CardDto {
     public CardDto(CardImgEntity card, String prefixUrl) {
         this.cardId = card.getId();
         this.cardNo = card.getCardEntity().getCardNo();
-        this.cardName = card.getCardEntity().getCardName();
+
+
+
+
+        if (card.getCardEntity().getCardName()==null) {
+            this.cardName = card.getCardEntity().getEnglishCard().getCardName();
+            this.effect = card.getCardEntity().getEnglishCard().getEffect();
+            this.sourceEffect = card.getCardEntity().getEnglishCard().getSourceEffect();
+        }else{
+            this.cardName = card.getCardEntity().getCardName();
+            this.effect = card.getCardEntity().getEffect();
+            this.sourceEffect = card.getCardEntity().getSourceEffect();
+        }
+
+
         this.lv = card.getCardEntity().getLv();
         this.dp = card.getCardEntity().getDp();
         this.playCost = card.getCardEntity().getPlayCost();
@@ -57,8 +71,6 @@ public class CardDto {
         this.digivolveCondition1 = card.getCardEntity().getDigivolveCondition1();
         this.digivolveCost2 = card.getCardEntity().getDigivolveCost2();
         this.digivolveCondition2 = card.getCardEntity().getDigivolveCondition2();
-        this.effect = card.getCardEntity().getEffect();
-        this.sourceEffect = card.getCardEntity().getSourceEffect();
         this.color1 = card.getCardEntity().getColor1();
         this.color2 = card.getCardEntity().getColor2();
         this.color3 = card.getCardEntity().getColor3();
