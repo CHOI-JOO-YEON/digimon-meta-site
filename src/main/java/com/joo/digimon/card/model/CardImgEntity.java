@@ -3,6 +3,9 @@ package com.joo.digimon.card.model;
 import com.joo.digimon.crawling.model.CrawlingCardEntity;
 import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.data.annotation.LastModifiedDate;
+
+import java.time.LocalDateTime;
 
 @Entity
 @NoArgsConstructor
@@ -56,6 +59,10 @@ public class CardImgEntity {
 
     Boolean isParallel;
     Boolean isEnCard;
+
+    @LastModifiedDate
+    @Column(name = "modified_at")
+    private LocalDateTime modifiedAt;
 
     public void updateUploadUrl(String originalPrefix, String smallPrefix, String url) {
         this.uploadUrl = originalPrefix+url;

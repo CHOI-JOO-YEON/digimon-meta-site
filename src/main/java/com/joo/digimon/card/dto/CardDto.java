@@ -5,6 +5,9 @@ import com.joo.digimon.card.model.CardImgEntity;
 
 import lombok.*;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+
 
 @Getter
 @Setter
@@ -14,10 +17,13 @@ import lombok.*;
 public class CardDto extends CardVo {
 
     Boolean isEn;
+    LocalDateTime modifiedAt;
 
     public CardDto(CardImgEntity card, String prefixUrl) {
         super(card, prefixUrl);
         this.isEn = card.getIsEnCard();
+        this.modifiedAt = card.getModifiedAt() == null ?
+                LocalDateTime.of(1998, 7, 15, 9, 30) : card.getModifiedAt();
     }
 
 
