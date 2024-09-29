@@ -6,5 +6,10 @@ public interface CardImageService {
     int uploadNotUploadYetKorCardImages();
 
     @Transactional
+    int uploadAllImage();
+
+    @Transactional
     int uploadNotUploadYetEnCardImages();
+
+    int getUploadYetCount();
 }

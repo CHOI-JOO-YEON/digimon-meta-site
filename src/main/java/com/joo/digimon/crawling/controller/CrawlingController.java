@@ -36,12 +36,12 @@ public class CrawlingController {
 
     @PostMapping("/upload-all")
     public ResponseEntity<?> uploadAll() {
-        return new ResponseEntity<>(cardImageService.uploadNotUploadYetKorCardImages(), HttpStatus.OK);
+        return new ResponseEntity<>(cardImageService.uploadAllImage(), HttpStatus.OK);
     }
 
-    @PostMapping("/upload-all/en")
-    public ResponseEntity<?> uploadAllEn() {
-        return new ResponseEntity<>(cardImageService.uploadNotUploadYetEnCardImages(), HttpStatus.OK);
+    @GetMapping("/upload-yet-count")
+    public ResponseEntity<?> uploadYetCount() {
+        return new ResponseEntity<>(cardImageService.getUploadYetCount(),HttpStatus.OK);
     }
 
 }

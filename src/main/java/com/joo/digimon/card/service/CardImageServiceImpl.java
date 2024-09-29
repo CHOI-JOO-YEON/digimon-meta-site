@@ -54,6 +54,26 @@ public class CardImageServiceImpl implements CardImageService {
         return cnt;
     }
 
+    @Transactional
+    @Override
+    public int uploadAllImage() {
+        int cnt = 0;
+
+        List<CardImgEntity> cardImgEntityList = cardImgRepository.findByUploadUrlIsNullAndIsEnCardIsNull();
+
+        for (CardImgEntity cardImgEntity : cardImgEntityList) {
+            try {
+                uploadImage(cardImgEntity, KO_URL_PREFIX);
+                cnt++;
+            } catch (IOException ignore) {
+
+            }
+
+        }
+
+        return cnt;
+    }
+
     @Override
     @Transactional
     public int uploadNotUploadYetEnCardImages() {
@@ -72,6 +92,11 @@ public class CardImageServiceImpl implements CardImageService {
         }
 
         return cnt;
+    }
+
+    @Override
+    public int getUploadYetCount() {
+        return cardImgRepository.findByUploadUrlIsNullAndIsEnCardIsNull().size();
     }
 
     private void uploadImage(CardImgEntity cardImgEntity, String urlPrefix) throws IOException {

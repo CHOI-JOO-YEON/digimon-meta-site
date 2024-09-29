@@ -21,8 +21,8 @@ public class CardController {
     private final CardService cardService;
     private final UseCardService useCardService;
     private final FormatService formatService;
-    @GetMapping("/search")
 
+    @GetMapping("/search")
     public ResponseEntity<CardResponseDto> getCards(@ModelAttribute CardRequestDto cardRequestDto){
 
         return new ResponseEntity<>(cardService.searchCards(cardRequestDto), HttpStatus.OK);

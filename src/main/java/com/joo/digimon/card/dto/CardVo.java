@@ -7,13 +7,16 @@ import com.joo.digimon.global.enums.CardType;
 import com.joo.digimon.global.enums.Color;
 import com.joo.digimon.global.enums.Form;
 import com.joo.digimon.global.enums.Rarity;
-import lombok.Data;
+import lombok.*;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-@Data
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class CardVo {
     Integer cardId;
@@ -30,6 +33,7 @@ public class CardVo {
     String sourceEffect;
     Color color1;
     Color color2;
+    Color color3;
     Rarity rarity;
     CardType cardType;
     Form form;
@@ -44,9 +48,18 @@ public class CardVo {
     LocalDate releaseDate;
 
     public CardVo(CardImgEntity card, String prefixUrl) {
+        if (card.getCardEntity().getCardName()==null) {
+            this.cardName = card.getCardEntity().getEnglishCard().getCardName();
+            this.effect = card.getCardEntity().getEnglishCard().getEffect();
+            this.sourceEffect = card.getCardEntity().getEnglishCard().getSourceEffect();
+        }else{
+            this.cardName = card.getCardEntity().getCardName();
+            this.effect = card.getCardEntity().getEffect();
+            this.sourceEffect = card.getCardEntity().getSourceEffect();
+        }
+
         this.cardId = card.getId();
         this.cardNo = card.getCardEntity().getCardNo();
-        this.cardName = card.getCardEntity().getCardName();
         this.lv = card.getCardEntity().getLv();
         this.dp = card.getCardEntity().getDp();
         this.playCost = card.getCardEntity().getPlayCost();
@@ -54,10 +67,9 @@ public class CardVo {
         this.digivolveCondition1 = card.getCardEntity().getDigivolveCondition1();
         this.digivolveCost2 = card.getCardEntity().getDigivolveCost2();
         this.digivolveCondition2 = card.getCardEntity().getDigivolveCondition2();
-        this.effect = card.getCardEntity().getEffect();
-        this.sourceEffect = card.getCardEntity().getSourceEffect();
         this.color1 = card.getCardEntity().getColor1();
         this.color2 = card.getCardEntity().getColor2();
+        this.color3 = card.getCardEntity().getColor3();
         this.rarity = card.getCardEntity().getRarity();
         this.cardType = card.getCardEntity().getCardType();
         this.form = card.getCardEntity().getForm();
