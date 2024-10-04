@@ -7,17 +7,26 @@ import lombok.Data;
 import java.time.LocalDate;
 
 @Data
-public class NoteDto {
+public class ResponseNoteDto {
     Integer noteId;
     String name;
     LocalDate releaseDate;
     CardOrigin cardOrigin;
     Integer priority;
-    public NoteDto(NoteEntity noteEntity) {
-        this.noteId=noteEntity.getId();
+    Integer cardCount;
+
+    public ResponseNoteDto(NoteEntity noteEntity) {
+        this.noteId = noteEntity.getId();
         this.name = noteEntity.getName();
         this.releaseDate = noteEntity.getReleaseDate();
         this.cardOrigin = noteEntity.getCardOrigin();
-        this.priority=noteEntity.getPriority();
+        this.priority = noteEntity.getPriority();
+        if (noteEntity.getCardImgEntities() != null) {
+            this.cardCount = noteEntity.getCardImgEntities().size();
+        } else {
+            this.cardCount = 0;
+        }
+
+
     }
 }

@@ -1,5 +1,6 @@
 package com.joo.digimon.card.model;
 
+import com.joo.digimon.card.dto.UpdateNoteDto;
 import com.joo.digimon.global.enums.CardOrigin;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -16,6 +17,12 @@ import java.util.Set;
 @NoArgsConstructor
 @Builder
 @Table(name = "NOTES_TB")
+@NamedEntityGraph(
+        name = "NoteEntity.byCardImg",
+        attributeNodes = {
+                @NamedAttributeNode(value = "cardImgEntities")
+        }
+)
 public class NoteEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -37,5 +44,19 @@ public class NoteEntity {
 
     Integer priority;
 
+    public void update(UpdateNoteDto dto) {
+        if(dto.getName()!=null) {
+            this.name = dto.getName();
+        }
+        if(dto.getReleaseDate()!=null) {
+            this.releaseDate = dto.getReleaseDate();
+        }
+        if(dto.getCardOrigin()!=null) {
+            this.cardOrigin = dto.getCardOrigin();
+        }
+        if(dto.getPriority()!=null) {
+            this.priority = dto.getPriority();
+        }
+    }
 
 }
