@@ -160,7 +160,15 @@ public class CrawlingServiceImpl implements CrawlingService {
                 return;
             }
         }
-        cardImgRepository.save(CardImgEntity.builder().isParallel(reflectCardRequestDto.getIsParallel()).noteEntity(noteEntity).crawlingCardEntity(crawlingCardEntity).cardEntity(cardEntity).originUrl(reflectCardRequestDto.getOriginUrl()).build());
+        cardImgRepository.save(
+                CardImgEntity.builder()
+                        .isParallel(reflectCardRequestDto.getIsParallel())
+                        .noteEntity(noteEntity)
+                        .crawlingCardEntity(crawlingCardEntity)
+                        .cardEntity(cardEntity)
+                        .originUrl(reflectCardRequestDto.getOriginUrl())
+                        .isEnCard(locale.equals("ENG"))
+                        .build());
     }
 
     private CardEntity getCardEntityOrInsert(ReflectCardRequestDto reflectCardRequestDto) {

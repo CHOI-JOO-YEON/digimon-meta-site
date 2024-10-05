@@ -44,19 +44,11 @@ public class NoteEntity {
 
     Integer priority;
 
-    public void update(UpdateNoteDto dto) {
-        if(dto.getName()!=null) {
-            this.name = dto.getName();
-        }
-        if(dto.getReleaseDate()!=null) {
-            this.releaseDate = dto.getReleaseDate();
-        }
-        if(dto.getCardOrigin()!=null) {
-            this.cardOrigin = dto.getCardOrigin();
-        }
-        if(dto.getPriority()!=null) {
-            this.priority = dto.getPriority();
-        }
+    public void putNote(UpdateNoteDto dto) {
+        this.name = dto.getName();
+        this.releaseDate = dto.getReleaseDate();
+        this.cardOrigin = dto.getCardOrigin();
+        this.priority = dto.getPriority();
     }
 
 }

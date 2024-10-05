@@ -1,41 +1,42 @@
 package com.joo.digimon.card.service;
 
-import com.joo.digimon.card.dto.CardDto;
-import com.joo.digimon.card.dto.CreateNoteDto;
-import com.joo.digimon.card.dto.ResponseNoteDto;
-import com.joo.digimon.card.dto.UpdateNoteDto;
-import com.joo.digimon.card.model.CardImgEntity;
-import com.joo.digimon.card.model.NoteEntity;
-import com.joo.digimon.card.repository.CardImgRepository;
-import com.joo.digimon.card.repository.NoteRepository;
+import com.joo.digimon.card.dto.*;
+import com.joo.digimon.card.model.*;
+import com.joo.digimon.card.repository.*;
 import com.joo.digimon.global.exception.model.CanNotDeleteException;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class CardAdminServiceImpl implements CardAdminService {
     private final CardImgRepository cardImgRepository;
     private final NoteRepository noteRepository;
+    private final EnglishCardRepository englishCardRepository;
+    private final CardCombineTypeRepository cardCombineTypeRepository;
+    private final TypeRepository typeRepository;
+    @PersistenceContext
+    private EntityManager entityManager;
 
     @Value("${domain.url}")
     private String prefixUrl;
 
     @Override
-    public List<CardDto> getAllCard() {
+    @Transactional
+    public List<CardAdminResponseDto> getAllCard() {
         List<CardImgEntity> cardImgRepositoryAll = cardImgRepository.findAll();
 
-        List<CardDto> allCards = new ArrayList<>();
+        List<CardAdminResponseDto> allCards = new ArrayList<>();
 
         for (CardImgEntity cardImgEntity : cardImgRepositoryAll) {
-            allCards.add(new CardDto(cardImgEntity, prefixUrl));
+            allCards.add(new CardAdminResponseDto(cardImgEntity, prefixUrl));
         }
 
         return allCards;
@@ -57,10 +58,10 @@ public class CardAdminServiceImpl implements CardAdminService {
     @Transactional
     public List<ResponseNoteDto> deleteNote(Integer noteId) {
         Optional<NoteEntity> noteEntityOptional = noteRepository.findById(noteId);
-        if(noteEntityOptional.isEmpty()) {
+        if (noteEntityOptional.isEmpty()) {
             throw new NoSuchElementException();
         }
-        if(noteEntityOptional.get().getCardImgEntities().size()>1){
+        if (noteEntityOptional.get().getCardImgEntities().size() > 1) {
             throw new CanNotDeleteException("연관관계인 카드가 있어 삭제에 실패했습니다.");
         }
 
@@ -71,16 +72,83 @@ public class CardAdminServiceImpl implements CardAdminService {
 
     @Override
     @Transactional
-    public List<ResponseNoteDto> updateNotes(List<UpdateNoteDto> updateNoteDtoList) {
+    public List<ResponseNoteDto> putNotes(List<UpdateNoteDto> updateNoteDtoList) {
         for (UpdateNoteDto updateNoteDto : updateNoteDtoList) {
             Optional<NoteEntity> note = noteRepository.findById(updateNoteDto.getNoteId());
-            if(note.isEmpty()){
+            if (note.isEmpty()) {
                 throw new NoSuchElementException();
             }
-            note.get().update(updateNoteDto);
+            note.get().putNote(updateNoteDto);
         }
 
         return getAllResponseNoteDto();
+    }
+
+    @Transactional
+    @Override
+    public List<CardAdminResponseDto> updateCards(List<CardAdminRequestDto> cardAdminRequestDtoList) {
+        for (CardAdminRequestDto cardAdminRequestDto : cardAdminRequestDtoList) {
+            CardImgEntity cardImgEntity = getCardImgEntity(cardAdminRequestDto);
+
+            updateCardEnglishProperty(cardAdminRequestDto, cardImgEntity);
+            cardImgEntity.update(cardAdminRequestDto);
+            updateType(cardAdminRequestDto, cardImgEntity);
+        }
+//        entityManager.flush();
+//        entityManager.clear();
+        return getAllCard();
+    }
+
+    @Transactional
+    public CardImgEntity getCardImgEntity(CardAdminRequestDto cardAdminRequestDto) {
+        Optional<CardImgEntity> optionalCardImg = cardImgRepository.findById(cardAdminRequestDto.getCardId());
+        if (optionalCardImg.isEmpty()) {
+            throw new NoSuchElementException();
+        }
+        return optionalCardImg.get();
+    }
+
+    @Transactional
+    public void updateType(CardAdminRequestDto cardAdminRequestDto, CardImgEntity cardImgEntity) {
+        if (cardAdminRequestDto.getTypes()!=null) {
+            Set<String> types = cardAdminRequestDto.getTypes();
+            cardCombineTypeRepository.deleteAll(cardImgEntity.getCardEntity().getCardCombineTypeEntities());
+            Set<CardCombineTypeEntity> cardCombineTypeEntities = new HashSet<>();
+            for (String type : types) {
+                TypeEntity typeEntity;
+                if(typeRepository.findByName(type).isPresent()) {
+                    typeEntity = typeRepository.findByName(type).get();
+                }else{
+                    typeEntity = typeRepository.save(TypeEntity.builder().name(type).build());
+                }
+                cardCombineTypeEntities.add(
+                        CardCombineTypeEntity.builder()
+                                .cardEntity(cardImgEntity.getCardEntity())
+                                .typeEntity(typeEntity)
+                                .build()
+                );
+            }
+            cardCombineTypeRepository.saveAll(cardCombineTypeEntities);
+            cardImgEntity.updateType(cardCombineTypeEntities);
+        }
+
+    }
+
+    @Transactional
+    public void updateCardEnglishProperty(CardAdminRequestDto cardAdminRequestDto, CardImgEntity cardImgEntity) {
+        if (!isEngPresent(cardAdminRequestDto)) {
+            return;
+        }
+        EnglishCardEntity englishCard = cardImgEntity.getCardEntity().getEnglishCard();
+        if (englishCard == null) {
+            englishCard = EnglishCardEntity.builder().card(cardImgEntity.getCardEntity()).build();
+        }
+        englishCard.update(cardAdminRequestDto);
+        englishCardRepository.save(englishCard);
+    }
+
+    private boolean isEngPresent(CardAdminRequestDto cardAdminRequestDto) {
+        return cardAdminRequestDto.getCardEngName()!=null || cardAdminRequestDto.getEngEffect()!=null || cardAdminRequestDto.getEngSourceEffect()!=null;
     }
 
     private List<ResponseNoteDto> getAllResponseNoteDto() {

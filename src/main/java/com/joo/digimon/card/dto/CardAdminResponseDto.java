@@ -1,27 +1,24 @@
 package com.joo.digimon.card.dto;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.joo.digimon.card.model.CardCombineTypeEntity;
 import com.joo.digimon.card.model.CardImgEntity;
 import com.joo.digimon.global.enums.CardType;
 import com.joo.digimon.global.enums.Color;
 import com.joo.digimon.global.enums.Form;
 import com.joo.digimon.global.enums.Rarity;
-import lombok.*;
+import lombok.Data;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
-@JsonInclude(JsonInclude.Include.NON_NULL)
-public class CardVo {
+@Data
+public class CardAdminResponseDto {
     Integer cardId;
     String cardNo;
     String cardName;
+    String cardEngName;
     Integer lv;
     Integer dp;
     Integer playCost;
@@ -30,7 +27,9 @@ public class CardVo {
     Integer digivolveCost2;
     Integer digivolveCondition2;
     String effect;
+    String engEffect;
     String sourceEffect;
+    String engSourceEffect;
     Color color1;
     Color color2;
     Color color3;
@@ -46,29 +45,21 @@ public class CardVo {
     String noteName;
     Integer noteId;
     LocalDate releaseDate;
+    Boolean isEn;
+    LocalDateTime modifiedAt;
 
-    public CardVo(CardImgEntity card, String prefixUrl) {
-        if (card.getCardEntity().getCardName() == null) {
-            if (card.getIsEnCard() != null) {
-                this.cardName = card.getCardEntity().getEnglishCard().getCardName();
-            }
-        } else {
-            this.cardName = card.getCardEntity().getCardName();
+    public CardAdminResponseDto(CardImgEntity card, String prefixUrl) {
+        if(card.getIsEnCard()!=null&&card.getIsEnCard()) {
+            this.cardEngName = card.getCardEntity().getEnglishCard().getCardName();
+            this.engEffect = card.getCardEntity().getEnglishCard().getEffect();
+            this.engSourceEffect = card.getCardEntity().getEnglishCard().getSourceEffect();
         }
-        if (card.getCardEntity().getEffect() == null) {
-            if (card.getIsEnCard() != null) {
-                this.effect = card.getCardEntity().getEnglishCard().getEffect();
-            }
-        } else {
-            this.effect = card.getCardEntity().getEffect();
-        }
-        if (card.getCardEntity().getSourceEffect() == null) {
-            if (card.getIsEnCard() != null) {
-                this.sourceEffect = card.getCardEntity().getEnglishCard().getSourceEffect();
-            }
-        } else {
-            this.sourceEffect = card.getCardEntity().getSourceEffect();
-        }
+
+
+        this.cardName = card.getCardEntity().getCardName();
+        this.effect = card.getCardEntity().getEffect();
+        this.sourceEffect = card.getCardEntity().getSourceEffect();
+
 
         this.cardId = card.getId();
         this.cardNo = card.getCardEntity().getCardNo();
@@ -97,7 +88,8 @@ public class CardVo {
         this.releaseDate = card.getCardEntity().getReleaseDate();
         this.noteName = card.getNoteEntity().getName();
         this.noteId = card.getNoteEntity().getId();
+        this.isEn = card.getIsEnCard();
+        this.modifiedAt = card.getModifiedAt() == null ?
+                LocalDateTime.of(1998, 7, 15, 9, 30) : card.getModifiedAt();
     }
-
-
 }

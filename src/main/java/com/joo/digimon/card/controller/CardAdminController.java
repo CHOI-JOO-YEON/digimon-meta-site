@@ -1,11 +1,11 @@
 package com.joo.digimon.card.controller;
 
 
+import com.joo.digimon.card.dto.CardAdminRequestDto;
 import com.joo.digimon.card.dto.CreateNoteDto;
 import com.joo.digimon.card.dto.UpdateNoteDto;
 import com.joo.digimon.card.service.CardAdminService;
 import com.joo.digimon.card.service.CardService;
-import com.joo.digimon.deck.dto.FormatResponseDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -26,6 +26,11 @@ public class CardAdminController {
         return new ResponseEntity<>(cardAdminService.getAllCard(), HttpStatus.OK);
     }
 
+    @PutMapping("/update")
+    public ResponseEntity<?> updateCard(@RequestBody List<CardAdminRequestDto> cardAdminRequestDtoList) {
+        return new ResponseEntity<>(cardAdminService.updateCards(cardAdminRequestDtoList), HttpStatus.OK);
+    }
+
     @GetMapping("/notes")
     public ResponseEntity<?> getAllNotes() {
         return new ResponseEntity<>(cardService.getNotes(), HttpStatus.OK);
@@ -41,8 +46,8 @@ public class CardAdminController {
         return new ResponseEntity<>(cardAdminService.deleteNote(noteId), HttpStatus.OK);
     }
 
-    @PostMapping("/note/update")
+    @PutMapping("/note/update")
     public ResponseEntity<?> updateNote(@RequestBody List<UpdateNoteDto> updateNoteDtoList) {
-        return new ResponseEntity<>(cardAdminService.updateNotes(updateNoteDtoList), HttpStatus.OK);
+        return new ResponseEntity<>(cardAdminService.putNotes(updateNoteDtoList), HttpStatus.OK);
     }
 }

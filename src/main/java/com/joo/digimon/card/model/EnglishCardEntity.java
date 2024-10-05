@@ -1,5 +1,6 @@
 package com.joo.digimon.card.model;
 
+import com.joo.digimon.card.dto.CardAdminRequestDto;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -24,5 +25,13 @@ public class EnglishCardEntity {
 
     @OneToOne
     CardEntity card;
+
+    public void update(CardAdminRequestDto dto) {
+        this.effect = dto.getEngEffect();
+        this.sourceEffect = dto.getEngSourceEffect();
+        this.cardName = dto.getCardEngName();
+
+    }
+
 
 }
