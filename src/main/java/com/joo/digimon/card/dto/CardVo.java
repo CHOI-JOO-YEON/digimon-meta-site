@@ -49,21 +49,21 @@ public class CardVo {
 
     public CardVo(CardImgEntity card, String prefixUrl) {
         if (card.getCardEntity().getCardName() == null) {
-            if (card.getIsEnCard() != null) {
+            if (card.getCardEntity().getEnglishCard() != null) {
                 this.cardName = card.getCardEntity().getEnglishCard().getCardName();
             }
         } else {
             this.cardName = card.getCardEntity().getCardName();
         }
         if (card.getCardEntity().getEffect() == null) {
-            if (card.getIsEnCard() != null) {
+            if (card.getCardEntity().getEnglishCard() != null) {
                 this.effect = card.getCardEntity().getEnglishCard().getEffect();
             }
         } else {
             this.effect = card.getCardEntity().getEffect();
         }
         if (card.getCardEntity().getSourceEffect() == null) {
-            if (card.getIsEnCard() != null) {
+            if (card.getCardEntity().getEnglishCard() != null) {
                 this.sourceEffect = card.getCardEntity().getEnglishCard().getSourceEffect();
             }
         } else {
