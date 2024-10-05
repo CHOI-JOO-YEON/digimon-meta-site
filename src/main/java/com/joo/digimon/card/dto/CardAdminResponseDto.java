@@ -49,7 +49,7 @@ public class CardAdminResponseDto {
     LocalDateTime modifiedAt;
 
     public CardAdminResponseDto(CardImgEntity card, String prefixUrl) {
-        if(card.getIsEnCard()!=null&&card.getIsEnCard()) {
+        if (card.getCardEntity().getEnglishCard() != null && card.getIsEnCard()) {
             this.cardEngName = card.getCardEntity().getEnglishCard().getCardName();
             this.engEffect = card.getCardEntity().getEnglishCard().getEffect();
             this.engSourceEffect = card.getCardEntity().getEnglishCard().getSourceEffect();
