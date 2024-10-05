@@ -20,7 +20,6 @@ public class AccountController {
 
     @GetMapping("/token/kakao")
     public ResponseEntity<?> getKakaoToken(@RequestParam(name = "code") String code, HttpServletResponse response) throws IOException {
-        System.out.println("!!!!!!!!!!!!!!!!!!!!!");
         LoginResponseDto loginResponseDto = userService.getKakaoToken(code);
         setTokenCookie(response, loginResponseDto);
         return new ResponseEntity<>(loginResponseDto, HttpStatus.OK);
