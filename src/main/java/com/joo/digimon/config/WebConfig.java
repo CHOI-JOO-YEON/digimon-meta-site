@@ -26,7 +26,7 @@ public class WebConfig implements WebMvcConfigurer {
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**")
-                .allowedOriginPatterns("http://localhost:*", "https://digimon-meta.site")
+                .allowedOriginPatterns("http://localhost:9999", "http://localhost:50000", "https://digimon-meta.site")
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                 .allowedMethods("*")
                 .allowedHeaders("*")

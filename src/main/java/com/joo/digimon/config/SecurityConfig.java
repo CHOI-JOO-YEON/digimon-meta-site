@@ -69,9 +69,10 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.addAllowedOriginPattern("http://localhost:*");
+        configuration.addAllowedOriginPattern("http://localhost:9999");
+        configuration.addAllowedOriginPattern("http://localhost:50000");
         configuration.addAllowedOriginPattern("https://digimon-meta.site");
-        configuration.addAllowedOriginPattern("https://digimon-meta.site/*");
+//        configuration.addAllowedOriginPattern("https://digimon-meta.site/*");
         configuration.addAllowedMethod("*");
         configuration.addAllowedHeader("*");
         configuration.setAllowCredentials(true);
