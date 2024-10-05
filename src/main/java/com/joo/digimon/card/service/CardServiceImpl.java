@@ -3,7 +3,7 @@ package com.joo.digimon.card.service;
 import com.joo.digimon.card.dto.CardRequestDto;
 import com.joo.digimon.card.dto.CardResponseDto;
 import com.joo.digimon.card.dto.CardTypeResponseDto;
-import com.joo.digimon.card.dto.NoteDto;
+import com.joo.digimon.card.dto.ResponseNoteDto;
 import com.joo.digimon.card.model.*;
 import com.joo.digimon.card.repository.CardImgRepository;
 import com.joo.digimon.card.repository.NoteRepository;
@@ -225,11 +225,11 @@ public class CardServiceImpl implements CardService {
     }
 
     @Override
-    public List<NoteDto> getNotes() {
-        List<NoteDto> noteDtoList = new ArrayList<>();
+    public List<ResponseNoteDto> getNotes() {
+        List<ResponseNoteDto> noteDtoList = new ArrayList<>();
         List<NoteEntity> noteEntityList = noteRepository.findByIsDisableFalseOrIsDisableNullOrderByReleaseDateAscPriorityAsc();
         for (NoteEntity noteEntity : noteEntityList) {
-            noteDtoList.add(new NoteDto(noteEntity));
+            noteDtoList.add(new ResponseNoteDto(noteEntity));
         }
 
         return noteDtoList;

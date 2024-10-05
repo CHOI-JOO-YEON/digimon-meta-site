@@ -59,17 +59,8 @@ public class CardImageServiceImpl implements CardImageService {
     public int uploadAllImage() {
         int cnt = 0;
 
-        List<CardImgEntity> cardImgEntityList = cardImgRepository.findByUploadUrlIsNullAndIsEnCardIsNull();
-
-        for (CardImgEntity cardImgEntity : cardImgEntityList) {
-            try {
-                uploadImage(cardImgEntity, KO_URL_PREFIX);
-                cnt++;
-            } catch (IOException ignore) {
-
-            }
-
-        }
+        cnt += uploadNotUploadYetEnCardImages();
+        cnt += uploadNotUploadYetKorCardImages();
 
         return cnt;
     }
@@ -96,7 +87,7 @@ public class CardImageServiceImpl implements CardImageService {
 
     @Override
     public int getUploadYetCount() {
-        return cardImgRepository.findByUploadUrlIsNullAndIsEnCardIsNull().size();
+        return cardImgRepository.findByUploadUrlIsNull().size();
     }
 
     private void uploadImage(CardImgEntity cardImgEntity, String urlPrefix) throws IOException {
@@ -112,7 +103,7 @@ public class CardImageServiceImpl implements CardImageService {
         }
         s3Util.uploadImageToS3(originalUploadPrefix + keyNameBuilder, image, "png");
         s3Util.uploadImageToS3(smallUploadPrefix + keyNameBuilder, compressedImage, "png");
-        cardImgEntity.updateUploadUrl(originalUploadPrefix,smallUploadPrefix,keyNameBuilder.toString());
+        cardImgEntity.updateUploadUrl(originalUploadPrefix, smallUploadPrefix, keyNameBuilder.toString());
     }
 
     private void uploadImageEn(CardImgEntity cardImgEntity, String urlPrefix) throws IOException {
@@ -124,9 +115,9 @@ public class CardImageServiceImpl implements CardImageService {
         if (cardImgEntity.getIsParallel()) {
             keyNameBuilder.append("P").append(cardImgEntity.getId());
         }
-        String uploadPrefix = originalUploadPrefix+"en/";
+        String uploadPrefix = originalUploadPrefix + "en/";
         s3Util.uploadImageToS3(uploadPrefix + keyNameBuilder, image, "png");
-        cardImgEntity.updateUploadUrl(uploadPrefix,uploadPrefix,keyNameBuilder.toString());
+        cardImgEntity.updateUploadUrl(uploadPrefix, uploadPrefix, keyNameBuilder.toString());
     }
 
     private BufferedImage getImageData(String imageUrl) throws IOException {

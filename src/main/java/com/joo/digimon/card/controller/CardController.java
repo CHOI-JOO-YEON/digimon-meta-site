@@ -2,7 +2,7 @@ package com.joo.digimon.card.controller;
 
 import com.joo.digimon.card.dto.CardRequestDto;
 import com.joo.digimon.card.dto.CardResponseDto;
-import com.joo.digimon.card.dto.NoteDto;
+import com.joo.digimon.card.dto.ResponseNoteDto;
 import com.joo.digimon.card.service.CardService;
 import com.joo.digimon.card.service.UseCardService;
 import com.joo.digimon.deck.dto.FormatResponseDto;
@@ -29,7 +29,7 @@ public class CardController {
     }
 
     @GetMapping("/note")
-    public ResponseEntity<List<NoteDto>> getNotes() {
+    public ResponseEntity<List<ResponseNoteDto>> getNotes() {
         return new ResponseEntity<>(cardService.getNotes(), HttpStatus.OK);
     }
 

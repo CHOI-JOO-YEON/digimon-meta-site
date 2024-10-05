@@ -1,8 +1,17 @@
 package com.joo.digimon.card.model;
 
+import com.joo.digimon.card.dto.CardAdminRequestDto;
+import com.joo.digimon.card.dto.UpdateNoteDto;
 import com.joo.digimon.crawling.model.CrawlingCardEntity;
 import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Set;
 
 @Entity
 @NoArgsConstructor
@@ -21,7 +30,7 @@ import lombok.*;
                         name = "cardEntitySubgraph",
                         attributeNodes = {
                                 @NamedAttributeNode(value = "englishCard"),
-                                @NamedAttributeNode(value = "cardCombineTypeEntities",subgraph = "typeSubgraph"),
+                                @NamedAttributeNode(value = "cardCombineTypeEntities", subgraph = "typeSubgraph"),
                         }
                 ),
                 @NamedSubgraph(
@@ -57,8 +66,37 @@ public class CardImgEntity {
     Boolean isParallel;
     Boolean isEnCard;
 
+    private LocalDateTime modifiedAt;
+
     public void updateUploadUrl(String originalPrefix, String smallPrefix, String url) {
-        this.uploadUrl = originalPrefix+url;
-        this.smallImgUrl= smallPrefix+url;
+        this.uploadUrl = originalPrefix + url;
+        this.smallImgUrl = smallPrefix + url;
+    }
+
+    public void update(CardAdminRequestDto dto) {
+        this.cardEntity.cardNo = dto.getCardNo();
+        this.cardEntity.cardName = dto.getCardName();
+        this.cardEntity.lv = dto.getLv();
+        this.cardEntity.dp = dto.getDp();
+        this.cardEntity.playCost = dto.getPlayCost();
+        this.cardEntity.digivolveCost1 = dto.getDigivolveCost1();
+        this.cardEntity.digivolveCondition1 = dto.getDigivolveCondition1();
+        this.cardEntity.digivolveCost2 = dto.getDigivolveCost2();
+        this.cardEntity.digivolveCondition2 = dto.getDigivolveCondition2();
+        this.cardEntity.effect = dto.getEffect();
+        this.cardEntity.sourceEffect = dto.getSourceEffect();
+        this.cardEntity.color1 = dto.getColor1();
+        this.cardEntity.color2 = dto.getColor2();
+        this.cardEntity.color3 = dto.getColor3();
+        this.cardEntity.rarity = dto.getRarity();
+        this.cardEntity.cardType = dto.getCardType();
+        this.cardEntity.form = dto.getForm();
+        this.cardEntity.attribute = dto.getAttribute();
+        this.cardEntity.releaseDate = dto.getReleaseDate();
+        this.isEnCard = dto.getIsEn();
+        this.modifiedAt = LocalDateTime.now();
+    }
+    public void updateType(Set<CardCombineTypeEntity> cardCombineTypeEntityList){
+        this.cardEntity.cardCombineTypeEntities = cardCombineTypeEntityList;
     }
 }
