@@ -6,11 +6,11 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 public interface CardAdminService {
-    List<CardAdminResponseDto> getAllCard();
+    List<AdminCardDto> getAllCard();
     List<ResponseNoteDto> createNote(CreateNoteDto createNoteDto);
     List<ResponseNoteDto> deleteNote(Integer noteId);
     List<ResponseNoteDto> putNotes(List<UpdateNoteDto> updateNoteDtoList);
-
     @Transactional
-    List<CardAdminResponseDto> updateCards(List<CardAdminRequestDto> cardAdminRequestDtoList);
+    List<AdminCardDto> updateCards(List<CardAdminRequestDto> cardAdminRequestDtoList);
+
 }

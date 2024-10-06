@@ -2,6 +2,7 @@ package com.joo.digimon.card.controller;
 
 
 import com.joo.digimon.card.dto.CardAdminRequestDto;
+import com.joo.digimon.card.dto.CardRequestDto;
 import com.joo.digimon.card.dto.CreateNoteDto;
 import com.joo.digimon.card.dto.UpdateNoteDto;
 import com.joo.digimon.card.service.CardAdminService;
@@ -26,9 +27,15 @@ public class CardAdminController {
         return new ResponseEntity<>(cardAdminService.getAllCard(), HttpStatus.OK);
     }
 
+    @GetMapping("/")
+    public ResponseEntity<?> getCards(@ModelAttribute CardRequestDto cardRequestDto) {
+        return new ResponseEntity<>(cardService.searchAdminCards(cardRequestDto), HttpStatus.OK);
+    }
+
     @PutMapping("/update")
     public ResponseEntity<?> updateCard(@RequestBody List<CardAdminRequestDto> cardAdminRequestDtoList) {
-        return new ResponseEntity<>(cardAdminService.updateCards(cardAdminRequestDtoList), HttpStatus.OK);
+        cardAdminService.updateCards(cardAdminRequestDtoList);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @GetMapping("/notes")

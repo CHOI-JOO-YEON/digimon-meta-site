@@ -14,7 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Data
-public class CardAdminResponseDto {
+public class AdminCardDto {
     Integer cardId;
     String cardNo;
     String cardName;
@@ -48,7 +48,7 @@ public class CardAdminResponseDto {
     Boolean isEn;
     LocalDateTime modifiedAt;
 
-    public CardAdminResponseDto(CardImgEntity card, String prefixUrl) {
+    public AdminCardDto(CardImgEntity card, String prefixUrl) {
         if (card.getCardEntity().getEnglishCard() != null && card.getIsEnCard()) {
             this.cardEngName = card.getCardEntity().getEnglishCard().getCardName();
             this.engEffect = card.getCardEntity().getEnglishCard().getEffect();
