@@ -12,7 +12,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -30,13 +29,13 @@ public class CardAdminServiceImpl implements CardAdminService {
 
     @Override
     @Transactional
-    public List<CardAdminResponseDto> getAllCard() {
+    public List<AdminCardDto> getAllCard() {
         List<CardImgEntity> cardImgRepositoryAll = cardImgRepository.findAll();
 
-        List<CardAdminResponseDto> allCards = new ArrayList<>();
+        List<AdminCardDto> allCards = new ArrayList<>();
 
         for (CardImgEntity cardImgEntity : cardImgRepositoryAll) {
-            allCards.add(new CardAdminResponseDto(cardImgEntity, prefixUrl));
+            allCards.add(new AdminCardDto(cardImgEntity, prefixUrl));
         }
 
         return allCards;
@@ -86,7 +85,7 @@ public class CardAdminServiceImpl implements CardAdminService {
 
     @Transactional
     @Override
-    public List<CardAdminResponseDto> updateCards(List<CardAdminRequestDto> cardAdminRequestDtoList) {
+    public List<AdminCardDto> updateCards(List<CardAdminRequestDto> cardAdminRequestDtoList) {
         for (CardAdminRequestDto cardAdminRequestDto : cardAdminRequestDtoList) {
             CardImgEntity cardImgEntity = getCardImgEntity(cardAdminRequestDto);
 
@@ -94,10 +93,9 @@ public class CardAdminServiceImpl implements CardAdminService {
             cardImgEntity.update(cardAdminRequestDto);
             updateType(cardAdminRequestDto, cardImgEntity);
         }
-//        entityManager.flush();
-//        entityManager.clear();
         return getAllCard();
     }
+
 
     @Transactional
     public CardImgEntity getCardImgEntity(CardAdminRequestDto cardAdminRequestDto) {

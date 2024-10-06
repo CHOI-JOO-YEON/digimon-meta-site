@@ -1,14 +1,12 @@
 package com.joo.digimon.card.service;
 
-import com.joo.digimon.card.dto.CardRequestDto;
-import com.joo.digimon.card.dto.CardResponseDto;
-import com.joo.digimon.card.dto.CardTypeResponseDto;
-import com.joo.digimon.card.dto.ResponseNoteDto;
+import com.joo.digimon.card.dto.*;
 import com.joo.digimon.card.model.*;
 import com.joo.digimon.card.repository.CardImgRepository;
 import com.joo.digimon.card.repository.NoteRepository;
 import com.joo.digimon.card.repository.TypeRepository;
 import com.joo.digimon.global.enums.CardType;
+import com.joo.digimon.global.enums.Form;
 import com.joo.digimon.global.enums.Rarity;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Order;
@@ -51,6 +49,18 @@ public class CardServiceImpl implements CardService {
 
     }
 
+    @Override
+    public AdminCardResponseDto searchAdminCards(CardRequestDto cardRequestDto){
+        QCardImgEntity cardImg = QCardImgEntity.cardImgEntity;
+        QCardEntity card = QCardEntity.cardEntity;
+        QCardCombineTypeEntity cardCombine = QCardCombineTypeEntity.cardCombineTypeEntity;
+        BooleanBuilder builder = new BooleanBuilder();
+
+        applySearchConditions(cardRequestDto, builder, cardImg, card, cardCombine);
+        Page<CardImgEntity> pageableResult = getPageableResult(cardRequestDto, builder, cardImg);
+        return new AdminCardResponseDto(pageableResult, prefixUrl);
+    }
+
     private Page<CardImgEntity> getPageableResult(CardRequestDto cardRequestDto, BooleanBuilder builder, QCardImgEntity cardImg) {
         Sort sort = createSort(cardRequestDto);
         Pageable pageable = PageRequest.of(cardRequestDto.getPage() - 1, cardRequestDto.getSize(), sort);
@@ -75,7 +85,12 @@ public class CardServiceImpl implements CardService {
 
     private Sort createSort(CardRequestDto cardRequestDto) {
         List<Sort.Order> orders = new ArrayList<>();
-        orders.add(new Sort.Order(cardRequestDto.getIsOrderDesc() ? Sort.Direction.DESC : Sort.Direction.ASC, "cardEntity." + cardRequestDto.getOrderOption()));
+        if("modifiedAt".equals(cardRequestDto.getOrderOption())){
+            orders.add(new Sort.Order(cardRequestDto.getIsOrderDesc() ? Sort.Direction.DESC : Sort.Direction.ASC, cardRequestDto.getOrderOption()));
+        }else{
+            orders.add(new Sort.Order(cardRequestDto.getIsOrderDesc() ? Sort.Direction.DESC : Sort.Direction.ASC, "cardEntity." + cardRequestDto.getOrderOption()));
+        }
+
 
         if (cardRequestDto.getParallelOption() == 0) {
             orders.add(new Sort.Order(Sort.Direction.ASC, "isParallel"));
@@ -98,6 +113,13 @@ public class CardServiceImpl implements CardService {
         addParallelCondition(cardRequestDto.getParallelOption(), builder, cardImg);
         addNoteCondition(cardRequestDto.getNoteId(), builder, cardImg);
         addTypeCondition(cardRequestDto, cardCombine, builder, cardImg);
+        addFormCondition(cardRequestDto.getForms(),builder,card);
+    }
+
+    private void addFormCondition(Set<Form> forms, BooleanBuilder builder, QCardEntity card) {
+        if (forms != null) {
+            builder.and(card.form.in(forms));
+        }
     }
 
     private void addTypeCondition(CardRequestDto cardRequestDto, QCardCombineTypeEntity cardCombine, BooleanBuilder builder, QCardImgEntity cardImg) {

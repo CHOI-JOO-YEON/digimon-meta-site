@@ -3,6 +3,7 @@ package com.joo.digimon.card.dto;
 import com.joo.digimon.global.annotation.valid.OrderValid;
 import com.joo.digimon.global.enums.CardType;
 import com.joo.digimon.global.enums.Color;
+import com.joo.digimon.global.enums.Form;
 import com.joo.digimon.global.enums.Rarity;
 import lombok.Data;
 
@@ -37,9 +38,10 @@ public class CardRequestDto {
     String orderOption = "cardNo";
     Boolean isOrderDesc = false;
 
-
     Set<Integer> typeIds;
     Integer typeOperation=1; //0 = and, 1 = or
+
+    Set<Form> forms;
 
 
 }
