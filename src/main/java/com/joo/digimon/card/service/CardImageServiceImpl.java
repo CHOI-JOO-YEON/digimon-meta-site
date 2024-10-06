@@ -40,6 +40,7 @@ public class CardImageServiceImpl implements CardImageService {
         int cnt = 0;
 
         List<CardImgEntity> cardImgEntityList = cardImgRepository.findByUploadUrlIsNullAndIsEnCardIsNull();
+        cardImgEntityList.addAll(cardImgRepository.findByUploadUrlIsNullAndIsEnCardIsFalse());
 
         for (CardImgEntity cardImgEntity : cardImgEntityList) {
             try {
