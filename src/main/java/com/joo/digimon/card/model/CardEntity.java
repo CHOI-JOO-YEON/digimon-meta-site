@@ -65,7 +65,7 @@ public class CardEntity {
 
     Boolean isOnlyEnCard;
 
-    @OneToOne
+    @OneToOne(mappedBy = "cardEntity")
     EnglishCardEntity englishCard;
 
 

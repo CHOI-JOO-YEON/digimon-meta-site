@@ -13,4 +13,5 @@ public interface CardAdminService {
     @Transactional
     List<AdminCardDto> updateCards(List<CardAdminRequestDto> cardAdminRequestDtoList);
 
+    List<TypeDto> getAllType();
 }
