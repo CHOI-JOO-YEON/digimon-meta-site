@@ -104,6 +104,35 @@ public class CardAdminServiceImpl implements CardAdminService {
         return typeDtoList;
     }
 
+    @Override
+    @Transactional
+    public List<TypeDto> deleteType(Integer typeId) {
+        Optional<TypeEntity> typeEntityOptional = typeRepository.findById(typeId);
+        if (typeEntityOptional.isEmpty()) {
+            throw new NoSuchElementException();
+        }
+        if (typeEntityOptional.get().getCardCombineTypes().size() > 1) {
+            throw new CanNotDeleteException("연관관계인 카드가 있어 삭제에 실패했습니다.");
+        }
+
+        typeRepository.deleteById(typeId);
+
+        return getAllType();
+    }
+
+    @Override
+    @Transactional
+    public List<TypeDto> putTypes(List<TypeDto> typeDtoList) {
+        for (TypeDto typeDto : typeDtoList) {
+            Optional<TypeEntity> typeEntityOptional = typeRepository.findById(typeDto.getTypeId());
+            if (typeEntityOptional.isEmpty()) {
+                throw new NoSuchElementException();
+            }
+            typeEntityOptional.get().putType(typeDto);
+        }
+        return getAllType();
+    }
+
 
     @Transactional
     public CardImgEntity getCardImgEntity(CardAdminRequestDto cardAdminRequestDto) {

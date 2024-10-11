@@ -1,17 +1,20 @@
 package com.joo.digimon.card.dto;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.joo.digimon.card.model.TypeEntity;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
+@NoArgsConstructor
 public class TypeDto {
-    Integer id;
+    Integer typeId;
     String name;
     String engName;
     Integer cardCount;
 
     public TypeDto(TypeEntity typeEntity) {
-        this.id = typeEntity.getId();
+        this.typeId = typeEntity.getId();
         this.name = typeEntity.getName();
         this.engName = typeEntity.getEngName();
         this.cardCount = typeEntity.getCardCombineTypes().size();

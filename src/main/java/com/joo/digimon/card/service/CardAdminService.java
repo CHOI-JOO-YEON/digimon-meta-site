@@ -14,4 +14,8 @@ public interface CardAdminService {
     List<AdminCardDto> updateCards(List<CardAdminRequestDto> cardAdminRequestDtoList);
 
     List<TypeDto> getAllType();
+
+    List<TypeDto> deleteType(Integer typeId);
+
+    List<TypeDto> putTypes(List<TypeDto> typeDtoList);
 }

@@ -1,5 +1,7 @@
 package com.joo.digimon.card.model;
 
+import com.joo.digimon.card.dto.TypeDto;
+import com.joo.digimon.card.dto.UpdateNoteDto;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -30,6 +32,11 @@ public class TypeEntity {
     String name;
     String engName;
 
-    @OneToMany
+    @OneToMany(mappedBy = "typeEntity")
     List<CardCombineTypeEntity> cardCombineTypes;
+
+    public void putType(TypeDto dto) {
+        this.name = dto.getName();
+        this.engName = dto.getEngName();
+    }
 }
