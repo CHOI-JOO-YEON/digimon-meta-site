@@ -21,8 +21,6 @@ public class CardAdminServiceImpl implements CardAdminService {
     private final EnglishCardRepository englishCardRepository;
     private final CardCombineTypeRepository cardCombineTypeRepository;
     private final TypeRepository typeRepository;
-    @PersistenceContext
-    private EntityManager entityManager;
 
     @Value("${domain.url}")
     private String prefixUrl;
@@ -139,7 +137,7 @@ public class CardAdminServiceImpl implements CardAdminService {
         }
         EnglishCardEntity englishCard = cardImgEntity.getCardEntity().getEnglishCard();
         if (englishCard == null) {
-            englishCard = EnglishCardEntity.builder().card(cardImgEntity.getCardEntity()).build();
+            englishCard = EnglishCardEntity.builder().cardEntity(cardImgEntity.getCardEntity()).build();
         }
         englishCard.update(cardAdminRequestDto);
         englishCardRepository.save(englishCard);

@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
+import java.util.Optional;
 
 @Entity
 @NoArgsConstructor
@@ -24,13 +25,13 @@ public class EnglishCardEntity {
     LocalDate releaseDate;
 
     @OneToOne
-    CardEntity card;
+    @JoinColumn(name = "cards_tb_id")
+    CardEntity cardEntity;
 
     public void update(CardAdminRequestDto dto) {
-        this.effect = dto.getEngEffect();
-        this.sourceEffect = dto.getEngSourceEffect();
-        this.cardName = dto.getCardEngName();
-
+        Optional.ofNullable(dto.getEngEffect()).ifPresent(value -> this.effect = value);
+        Optional.ofNullable(dto.getEngSourceEffect()).ifPresent(value -> this.sourceEffect = value);
+        Optional.ofNullable(dto.getCardEngName()).ifPresent(value -> this.cardName = value);
     }
 
 

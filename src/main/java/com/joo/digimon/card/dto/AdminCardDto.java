@@ -12,6 +12,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Data
 public class AdminCardDto {
@@ -49,18 +50,17 @@ public class AdminCardDto {
     LocalDateTime modifiedAt;
 
     public AdminCardDto(CardImgEntity card, String prefixUrl) {
-        if (card.getCardEntity().getEnglishCard() != null && card.getIsEnCard()) {
-            this.cardEngName = card.getCardEntity().getEnglishCard().getCardName();
-            this.engEffect = card.getCardEntity().getEnglishCard().getEffect();
-            this.engSourceEffect = card.getCardEntity().getEnglishCard().getSourceEffect();
-        }
 
-
+        Optional.ofNullable(card.getCardEntity().getEnglishCard()).ifPresent(
+                englishCardEntity -> {
+                    Optional.ofNullable(englishCardEntity.getCardName()).ifPresent(value -> this.cardEngName = value);
+                    Optional.ofNullable(englishCardEntity.getEffect()).ifPresent(value -> this.engEffect = value);
+                    Optional.ofNullable(englishCardEntity.getSourceEffect()).ifPresent(value -> this.engSourceEffect = value);
+                }
+        );
         this.cardName = card.getCardEntity().getCardName();
         this.effect = card.getCardEntity().getEffect();
         this.sourceEffect = card.getCardEntity().getSourceEffect();
-
-
         this.cardId = card.getId();
         this.cardNo = card.getCardEntity().getCardNo();
         this.lv = card.getCardEntity().getLv();
