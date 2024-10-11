@@ -1,10 +1,7 @@
 package com.joo.digimon.card.controller;
 
 
-import com.joo.digimon.card.dto.CardAdminRequestDto;
-import com.joo.digimon.card.dto.CardRequestDto;
-import com.joo.digimon.card.dto.CreateNoteDto;
-import com.joo.digimon.card.dto.UpdateNoteDto;
+import com.joo.digimon.card.dto.*;
 import com.joo.digimon.card.service.CardAdminService;
 import com.joo.digimon.card.service.CardService;
 import lombok.RequiredArgsConstructor;
@@ -56,5 +53,20 @@ public class CardAdminController {
     @PutMapping("/note/update")
     public ResponseEntity<?> updateNote(@RequestBody List<UpdateNoteDto> updateNoteDtoList) {
         return new ResponseEntity<>(cardAdminService.putNotes(updateNoteDtoList), HttpStatus.OK);
+    }
+
+    @GetMapping("/types")
+    public ResponseEntity<?> getAllTypes() {
+        return new ResponseEntity<>(cardAdminService.getAllType(), HttpStatus.OK);
+    }
+
+    @DeleteMapping("/type/{type-id}")
+    public ResponseEntity<?> deleteType(@PathVariable(name = "type-id") Integer typeId) {
+        return new ResponseEntity<>(cardAdminService.deleteType(typeId), HttpStatus.OK);
+    }
+
+    @PutMapping("/type/update")
+    public ResponseEntity<?> updateType(@RequestBody List<TypeDto> typeDtoList) {
+        return new ResponseEntity<>(cardAdminService.putTypes(typeDtoList), HttpStatus.OK);
     }
 }
