@@ -89,6 +89,8 @@ public class CardAdminServiceImpl implements CardAdminService {
 
             updateCardEnglishProperty(cardAdminRequestDto, cardImgEntity);
             cardImgEntity.update(cardAdminRequestDto);
+            NoteEntity noteEntity = noteRepository.findById(cardAdminRequestDto.getNoteId()).orElseThrow();
+            cardImgEntity.updateNote(noteEntity);
             updateType(cardAdminRequestDto, cardImgEntity);
         }
         return getAllCard();
