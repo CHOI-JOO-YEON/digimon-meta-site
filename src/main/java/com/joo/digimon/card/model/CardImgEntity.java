@@ -99,4 +99,8 @@ public class CardImgEntity {
     public void updateType(Set<CardCombineTypeEntity> cardCombineTypeEntityList){
         this.cardEntity.cardCombineTypeEntities = cardCombineTypeEntityList;
     }
+
+    public void updateNote(NoteEntity noteEntity) {
+        this.noteEntity=noteEntity;
+    }
 }
