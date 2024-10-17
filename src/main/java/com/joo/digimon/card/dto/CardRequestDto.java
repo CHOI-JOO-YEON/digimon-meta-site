@@ -12,7 +12,7 @@ import java.util.Set;
 @Data
 public class CardRequestDto {
     String searchString;
-    Integer noteId;
+    Set<Integer> noteId;
     Set<Color> colors;
     Integer colorOperation=1; //0 = and, 1 = or
     Set<Integer> lvs;

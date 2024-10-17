@@ -140,9 +140,10 @@ public class CardServiceImpl implements CardService {
         }
     }
 
-    private void addNoteCondition(Integer noteId, BooleanBuilder builder, QCardImgEntity cardImg) {
-        if (noteId != null) {
-            builder.and(cardImg.noteEntity.id.eq(noteId));
+    private void addNoteCondition(Set<Integer> noteIds, BooleanBuilder builder, QCardImgEntity cardImg) {
+        if (noteIds != null) {
+            builder.and(cardImg.noteEntity.id.in(noteIds));
+//            builder.and(cardImg.noteEntity.id.eq(noteId));
         }
     }
 
