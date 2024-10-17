@@ -4,8 +4,6 @@ import com.joo.digimon.card.dto.*;
 import com.joo.digimon.card.model.*;
 import com.joo.digimon.card.repository.*;
 import com.joo.digimon.global.exception.model.CanNotDeleteException;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -195,5 +193,16 @@ public class CardAdminServiceImpl implements CardAdminService {
             responseNoteDtos.add(new ResponseNoteDto(noteEntity));
         }
         return responseNoteDtos;
+    }
+
+    @Override
+    public List<ResponseNoteDto> getNotes() {
+        List<ResponseNoteDto> noteDtoList = new ArrayList<>();
+        List<NoteEntity> noteEntityList = noteRepository.findAll();
+        for (NoteEntity noteEntity : noteEntityList) {
+            noteDtoList.add(new ResponseNoteDto(noteEntity));
+        }
+
+        return noteDtoList;
     }
 }

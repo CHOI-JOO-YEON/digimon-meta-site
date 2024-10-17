@@ -49,6 +49,7 @@ public class NoteEntity {
         this.releaseDate = dto.getReleaseDate();
         this.cardOrigin = dto.getCardOrigin();
         this.priority = dto.getPriority();
+        this.isDisable = dto.getIsDisable();
     }
 
 }

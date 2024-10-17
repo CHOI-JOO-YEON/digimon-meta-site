@@ -17,4 +17,5 @@ public class UpdateNoteDto {
     LocalDate releaseDate;
     CardOrigin cardOrigin;
     Integer priority;
+    Boolean isDisable;
 }

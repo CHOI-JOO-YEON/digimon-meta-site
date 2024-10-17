@@ -37,7 +37,7 @@ public class CardAdminController {
 
     @GetMapping("/notes")
     public ResponseEntity<?> getAllNotes() {
-        return new ResponseEntity<>(cardService.getNotes(), HttpStatus.OK);
+        return new ResponseEntity<>(cardAdminService.getNotes(), HttpStatus.OK);
     }
 
     @PostMapping("/note")

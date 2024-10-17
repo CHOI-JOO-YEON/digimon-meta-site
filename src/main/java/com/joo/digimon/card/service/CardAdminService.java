@@ -18,4 +18,6 @@ public interface CardAdminService {
     List<TypeDto> deleteType(Integer typeId);
 
     List<TypeDto> putTypes(List<TypeDto> typeDtoList);
+
+    List<ResponseNoteDto> getNotes();
 }
