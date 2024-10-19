@@ -45,6 +45,7 @@ public class FormatServiceImpl implements FormatService {
                         .name(formatRequestDto.getFormatName())
                         .startDate(formatRequestDto.getStartDate())
                         .endDate(formatRequestDto.getEndDate())
+                        .isOnlyEn(formatRequestDto.getIsOnlyEn())
                         .build()
         );
     }
@@ -63,13 +64,32 @@ public class FormatServiceImpl implements FormatService {
     }
 
     @Override
-    public void updateFormat(FormatUpdateRequestDto formatUpdateRequestDto) {
+    public List<FormatResponseDto> getAllFormat() {
+        List<FormatResponseDto> result = new ArrayList<>();
+        List<Format> formats = formatRepository.findAll();
+        for (Format format : formats) {
+            result.add(new FormatResponseDto(format));
+        }
+        return result;
+    }
 
+    @Override
+    @Transactional
+    public void updateFormat(List<FormatUpdateRequestDto> dtos) {
+        for (FormatUpdateRequestDto dto : dtos) {
+        Format format = formatRepository.findById(dto.getId()).orElseThrow();
+        format.update(dto);
+        }
     }
 
     @Override
     public FormatResponseDto getCurrentFormat() {
         Format format = formatRepository.findTopByIsOnlyEnIsNullOrIsOnlyEnIsFalseOrderByStartDateDesc().orElseThrow();
         return new FormatResponseDto(format);
+    }
+
+    @Override
+    public void deleteFormat(Integer formatId) {
+        formatRepository.deleteById(formatId);
     }
 }

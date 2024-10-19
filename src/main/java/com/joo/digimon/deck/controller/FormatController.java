@@ -21,17 +21,4 @@ public class FormatController {
     ResponseEntity<?> getAllFormat(@RequestParam("date") LocalDate latestReleaseCardDate){
         return new ResponseEntity<>(formatService.getFormatList(latestReleaseCardDate), HttpStatus.OK);
     }
-
-
-    @PostMapping
-    ResponseEntity<?> createFormat(@RequestBody FormatRequestDto formatRequestDto) {
-        formatService.createFormat(formatRequestDto);
-        return new ResponseEntity<>(HttpStatus.CREATED);
-    }
-
-    @PostMapping("/update")
-    ResponseEntity<?> createFormat(@RequestBody FormatUpdateRequestDto formatUpdateRequestDto) {
-        formatService.updateFormat(formatUpdateRequestDto);
-        return new ResponseEntity<>(HttpStatus.OK);
-    }
 }

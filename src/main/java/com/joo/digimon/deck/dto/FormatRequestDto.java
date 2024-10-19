@@ -9,4 +9,5 @@ public class FormatRequestDto {
     String formatName;
     LocalDate startDate;
     LocalDate endDate;
+    Boolean isOnlyEn;
 }

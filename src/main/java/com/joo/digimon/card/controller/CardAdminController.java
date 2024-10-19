@@ -4,6 +4,10 @@ package com.joo.digimon.card.controller;
 import com.joo.digimon.card.dto.*;
 import com.joo.digimon.card.service.CardAdminService;
 import com.joo.digimon.card.service.CardService;
+import com.joo.digimon.deck.dto.FormatRequestDto;
+import com.joo.digimon.deck.dto.FormatResponseDto;
+import com.joo.digimon.deck.dto.FormatUpdateRequestDto;
+import com.joo.digimon.deck.service.FormatService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,11 +22,13 @@ public class CardAdminController {
 
     private final CardAdminService cardAdminService;
     private final CardService cardService;
+    private final FormatService formatService;
 
     @GetMapping("/all")
     public ResponseEntity<?> getAllCard() {
         return new ResponseEntity<>(cardAdminService.getAllCard(), HttpStatus.OK);
     }
+
 
     @GetMapping("/")
     public ResponseEntity<?> getCards(@ModelAttribute CardRequestDto cardRequestDto) {
@@ -68,5 +74,28 @@ public class CardAdminController {
     @PutMapping("/type/update")
     public ResponseEntity<?> updateType(@RequestBody List<TypeDto> typeDtoList) {
         return new ResponseEntity<>(cardAdminService.putTypes(typeDtoList), HttpStatus.OK);
+    }
+
+    @GetMapping("/format")
+    public ResponseEntity<?> getAllFormat() {
+        return new ResponseEntity<>(formatService.getAllFormat(), HttpStatus.OK);
+    }
+
+    @PostMapping("/format")
+    ResponseEntity<?> createFormat(@RequestBody FormatRequestDto formatRequestDto) {
+        formatService.createFormat(formatRequestDto);
+        return new ResponseEntity<>(HttpStatus.CREATED);
+    }
+
+    @PutMapping("/format")
+    ResponseEntity<?> updateFormat(@RequestBody List<FormatUpdateRequestDto> dtos) {
+        formatService.updateFormat(dtos);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @DeleteMapping("/format/{format-id}")
+    ResponseEntity<?> updateFormat(@PathVariable(name = "format-id") Integer formatId) {
+        formatService.deleteFormat(formatId);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 }
