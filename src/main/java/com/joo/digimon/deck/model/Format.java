@@ -1,5 +1,7 @@
 package com.joo.digimon.deck.model;
 
+import com.joo.digimon.deck.dto.FormatRequestDto;
+import com.joo.digimon.deck.dto.FormatUpdateRequestDto;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -20,12 +22,13 @@ public class Format {
     Integer id;
 
     String name;
-
-//    @ManyToOne
-//    @JoinColumn(name = "languages_tb_id")
-//    Language language;
-
     Boolean isOnlyEn;
     LocalDate startDate;
     LocalDate endDate;
+    public void update(FormatUpdateRequestDto dto){
+        this.name = dto.getFormatName();
+        this.isOnlyEn = dto.getIsOnlyEn();
+        this.startDate = dto.getStartDate();
+        this.endDate = dto.getEndDate();
+    }
 }
