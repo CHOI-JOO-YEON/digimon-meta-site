@@ -23,21 +23,23 @@ public class ResponseDeckDto {
     List<Card> cards;
     Set<Color> colors;
     Integer formatId;
+    Boolean isPublic;
 
     public ResponseDeckDto(DeckEntity deck, String prefixUrl) {
         this.authorId = deck.getUser().getId();
         this.authorName = deck.getUser().getNickName();
         this.deckId = deck.getId();
-        this.deckName=deck.getDeckName();
+        this.deckName = deck.getDeckName();
+        this.isPublic = deck.getIsPublic();
         cards = new ArrayList<>();
         for (DeckCardEntity deckCardEntity : deck.getDeckCardEntities()) {
-            cards.add(new Card(deckCardEntity,prefixUrl));
+            cards.add(new Card(deckCardEntity, prefixUrl));
         }
         colors = new HashSet<>();
         for (DeckColor deckColor : deck.getDeckColors()) {
             colors.add(deckColor.getColor());
         }
-        formatId=deck.getFormat().getId();
+        formatId = deck.getFormat().getId();
     }
 
 
@@ -46,23 +48,23 @@ public class ResponseDeckDto {
     }
 
     public void addCard(CardImgEntity cardImgEntity, Integer cnt, String prefixUrl) {
-        cards.add(new Card(cardImgEntity,cnt,prefixUrl));
+        cards.add(new Card(cardImgEntity, cnt, prefixUrl));
     }
 
 
     @Getter
     private class Card extends CardDto {
         Integer cnt;
-        public Card(CardImgEntity card,Integer cnt, String prefixUrl) {
-            super(card,prefixUrl);
-            this.cnt=cnt;
+
+        public Card(CardImgEntity card, Integer cnt, String prefixUrl) {
+            super(card, prefixUrl);
+            this.cnt = cnt;
         }
 
 
-
         public Card(DeckCardEntity deckCardEntity, String prefixUrl) {
-            super(deckCardEntity.getCardImgEntity(),prefixUrl);
-            this.cnt=deckCardEntity.getCnt();
+            super(deckCardEntity.getCardImgEntity(), prefixUrl);
+            this.cnt = deckCardEntity.getCnt();
         }
 
     }
