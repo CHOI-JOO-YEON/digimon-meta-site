@@ -1,7 +1,6 @@
 package com.joo.digimon.card.service;
 
 import com.joo.digimon.card.dto.card.CardAdminPutDto;
-import com.joo.digimon.card.dto.card.CardSummeryDto;
 import com.joo.digimon.card.dto.note.CreateNoteDto;
 import com.joo.digimon.card.dto.note.ResponseNoteDto;
 import com.joo.digimon.card.dto.note.UpdateNoteDto;
@@ -10,7 +9,6 @@ import com.joo.digimon.card.model.*;
 import com.joo.digimon.card.repository.*;
 import com.joo.digimon.global.exception.model.CanNotDeleteException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,11 +22,6 @@ public class CardAdminServiceImpl implements CardAdminService {
     private final EnglishCardRepository englishCardRepository;
     private final CardCombineTypeRepository cardCombineTypeRepository;
     private final TypeRepository typeRepository;
-    private final CardRepository cardRepository;
-
-    @Value("${domain.url}")
-    private String prefixUrl;
-
 
     @Override
     @Transactional
@@ -50,7 +43,7 @@ public class CardAdminServiceImpl implements CardAdminService {
             throw new NoSuchElementException();
         }
         if (noteEntityOptional.get().getCardImgEntities().size() > 1) {
-            throw new CanNotDeleteException("연관관계인 카드가 있어 삭제에 실패했습니다.");
+            throw new CanNotDeleteException("연관 관계인 카드가 있어 삭제에 실패했습니다.");
         }
 
         noteRepository.deleteById(noteId);
@@ -104,11 +97,9 @@ public class CardAdminServiceImpl implements CardAdminService {
             throw new NoSuchElementException();
         }
         if (typeEntityOptional.get().getCardCombineTypes().size() > 1) {
-            throw new CanNotDeleteException("연관관계인 카드가 있어 삭제에 실패했습니다.");
+            throw new CanNotDeleteException("연관 관계인 카드가 있어 삭제에 실패했습니다.");
         }
-
         typeRepository.deleteById(typeId);
-
         return getAllType();
     }
 
@@ -196,16 +187,5 @@ public class CardAdminServiceImpl implements CardAdminService {
         }
 
         return noteDtoList;
-    }
-
-    @Override
-    public List<CardSummeryDto> getAllCardSummery(){
-        List<CardEntity> cardEntities = cardRepository.findAll();
-        List<CardSummeryDto> cardSummeryDtoList = new ArrayList<>();
-        for (CardEntity cardEntity : cardEntities) {
-            cardSummeryDtoList.add(new CardSummeryDto(cardEntity));
-        }
-        return cardSummeryDtoList;
-
     }
 }

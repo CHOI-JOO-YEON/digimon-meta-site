@@ -25,5 +25,4 @@ public interface CardAdminService {
 
     List<ResponseNoteDto> getNotes();
 
-    List<CardSummeryDto> getAllCardSummery();
 }
