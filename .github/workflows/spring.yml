@@ -10,8 +10,6 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-
-
       # 1. GitHub 리포지토리에서 코드를 체크아웃합니다.
       - name: Checkout code
         uses: actions/checkout@v2
@@ -44,14 +42,24 @@ jobs:
         run: |
           ssh -i ~/.ssh/id_rsa ubuntu@${{ secrets.EC2_IP }} "echo SSH connection successful"
 
-      # 7. 빌드된 JAR 파일을 EC2로 전송합니다.
+      # 7. EC2에 SSH 접속 후 /home/ubuntu 권한을 변경합니다.
+      - name: Change permissions on EC2
+        run: |
+          ssh -i ~/.ssh/id_rsa ubuntu@${{ secrets.EC2_IP }} "sudo chmod 777 /home/ubuntu"
+
+      # 8. 빌드된 JAR 파일을 EC2로 전송합니다.
       - name: Copy files to EC2
         run: |
-            scp -v -i ~/.ssh/id_rsa \
-            build/libs/digimon-meta-site-0.0.1-SNAPSHOT.jar \
-            ubuntu@${{ secrets.EC2_IP }}:/home/ubuntu/
+          scp -v -i ~/.ssh/id_rsa \
+          build/libs/digimon-meta-site-0.0.1-SNAPSHOT.jar \
+          ubuntu@${{ secrets.EC2_IP }}:/home/ubuntu/
 
-      # 8. EC2로 SSH 접속 후 Docker 컨테이너 실행
+      # 9. EC2에 SSH 접속 후 권한을 다시 복구합니다.
+      - name: Revert permissions on EC2
+        run: |
+          ssh -i ~/.ssh/id_rsa ubuntu@${{ secrets.EC2_IP }} "sudo chmod 755 /home/ubuntu"
+
+      # 10. EC2로 SSH 접속 후 Docker 컨테이너 실행
       - name: SSH into EC2 and deploy with Docker
         run: |
           ssh -i ~/.ssh/id_rsa ubuntu@${{ secrets.EC2_IP }} << 'EOF'
