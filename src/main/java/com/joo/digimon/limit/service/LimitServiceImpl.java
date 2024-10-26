@@ -2,7 +2,7 @@ package com.joo.digimon.limit.service;
 
 import com.joo.digimon.card.model.CardEntity;
 import com.joo.digimon.card.repository.CardRepository;
-import com.joo.digimon.limit.dto.CreateLimitRequestDto;
+import com.joo.digimon.limit.dto.LimitPutRequestDto;
 import com.joo.digimon.limit.dto.GetLimitResponseDto;
 import com.joo.digimon.limit.model.LimitCardEntity;
 import com.joo.digimon.limit.model.LimitEntity;
@@ -17,7 +17,6 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -29,8 +28,8 @@ public class LimitServiceImpl implements LimitService {
     @PostConstruct
     @Transactional
     public void init() {
-        Optional<LimitEntity> limitEntity = limitRepository.findById(1);
-        if (limitEntity.isPresent()) {
+        List<LimitEntity> limitEntities = limitRepository.findAll();
+        if (!limitEntities.isEmpty()) {
             return;
         }
         limitRepository.save(LimitEntity.builder()
@@ -54,15 +53,48 @@ public class LimitServiceImpl implements LimitService {
 
     @Override
     @Transactional
-    public void create(CreateLimitRequestDto createLimitRequestDto) {
+    public void createLimit(LimitPutRequestDto limitPutRequestDto) {
         LimitEntity limitEntity = limitRepository.save(LimitEntity.builder()
-                .restrictionBeginDate(createLimitRequestDto.getRestrictionBeginDate())
+                .restrictionBeginDate(limitPutRequestDto.getRestrictionBeginDate())
                 .build());
+
+        updateLimitCardEntity(limitPutRequestDto, limitEntity);
+    }
+
+    @Transactional
+    @Override
+    public void updateLimits(List<LimitPutRequestDto> limitPutRequestDto) {
+        for (LimitPutRequestDto putRequestDto : limitPutRequestDto) {
+            updateLimit(putRequestDto);
+        }
+    }
+
+
+    @Override
+    @Transactional
+    public void updateLimit(LimitPutRequestDto limitPutRequestDto) {
+        LimitEntity limitEntity = limitRepository.findById(limitPutRequestDto.getId()).orElseThrow();
+        limitEntity.update(limitPutRequestDto);
+        updateLimitCardEntity(limitPutRequestDto, limitEntity);
+    }
+
+    @Override
+    @Transactional
+    public void deleteLimit(Integer limitId) {
+        LimitEntity limitEntity = limitRepository.findById(limitId).orElseThrow();
+        deleteLimitCardEntity(limitEntity);
+        limitRepository.delete(limitEntity);
+    }
+
+    @Transactional
+    public void updateLimitCardEntity(LimitPutRequestDto limitPutRequestDto, LimitEntity limitEntity) {
+        deleteLimitCardEntity(limitEntity);
+
 
         List<LimitCardEntity> limitCardEntities = new ArrayList<>();
 
-        if (createLimitRequestDto.getBanList() != null) {
-            for (String cardNo : createLimitRequestDto.getBanList()) {
+        if (limitPutRequestDto.getBanList() != null) {
+            for (String cardNo : limitPutRequestDto.getBanList()) {
                 CardEntity cardEntity = cardRepository.findByCardNo(cardNo).orElseThrow();
                 limitCardEntities.add(LimitCardEntity.builder()
                         .allowedQuantity(0)
@@ -71,8 +103,8 @@ public class LimitServiceImpl implements LimitService {
                         .build());
             }
         }
-        if (createLimitRequestDto.getRestrictList() != null) {
-            for (String cardNo : createLimitRequestDto.getRestrictList()) {
+        if (limitPutRequestDto.getRestrictList() != null) {
+            for (String cardNo : limitPutRequestDto.getRestrictList()) {
                 CardEntity cardEntity = cardRepository.findByCardNo(cardNo).orElseThrow();
                 limitCardEntities.add(LimitCardEntity.builder()
                         .allowedQuantity(1)
@@ -81,8 +113,15 @@ public class LimitServiceImpl implements LimitService {
                         .build());
             }
         }
-
-
         limitCardRepository.saveAll(limitCardEntities);
     }
+
+    @Transactional
+    public void deleteLimitCardEntity(LimitEntity limitEntity) {
+        if (limitEntity.getLimitCardEntities() != null && !limitEntity.getLimitCardEntities().isEmpty()) {
+            limitCardRepository.deleteAll();
+        }
+    }
+
+
 }

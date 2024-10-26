@@ -1,6 +1,8 @@
 package com.joo.digimon.limit.model;
 
+import com.joo.digimon.limit.dto.LimitPutRequestDto;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 import java.time.LocalDate;
@@ -32,8 +34,14 @@ public class LimitEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Integer id;
 
+    @Column(nullable = false)
+    @NotNull
     LocalDate restrictionBeginDate;
 
     @OneToMany(mappedBy = "limitEntity")
     Set<LimitCardEntity> limitCardEntities;
+
+    public void update(LimitPutRequestDto limitPutRequestDto) {
+        this.restrictionBeginDate = limitPutRequestDto.getRestrictionBeginDate();
+    }
 }

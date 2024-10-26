@@ -3,8 +3,10 @@ package com.joo.digimon.util;
 import com.joo.digimon.global.exception.model.CanNotDeleteException;
 import com.joo.digimon.global.exception.model.ForbiddenAccessException;
 import com.joo.digimon.global.exception.model.UnAuthorizationException;
+import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.converter.HttpMessageConversionException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -43,6 +45,18 @@ public class GlobalExceptionHandler {
 
     }
 
+    @ExceptionHandler(HttpMessageConversionException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public void handleHttpMessageConversionException(Exception e) {
+
+    }
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public void handleConstraintViolationException(Exception e) {
+
+    }
+
     @ExceptionHandler(NoResourceFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public void handleNoResourceFoundException() {
@@ -51,5 +65,6 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public void handleOtherException(Exception e) {
+        e.printStackTrace();
     }
 }

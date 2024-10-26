@@ -1,6 +1,11 @@
 package com.joo.digimon.card.service;
 
-import com.joo.digimon.card.dto.*;
+import com.joo.digimon.card.dto.card.CardAdminPutDto;
+import com.joo.digimon.card.dto.card.CardSummeryDto;
+import com.joo.digimon.card.dto.note.CreateNoteDto;
+import com.joo.digimon.card.dto.note.ResponseNoteDto;
+import com.joo.digimon.card.dto.note.UpdateNoteDto;
+import com.joo.digimon.card.dto.type.TypeDto;
 import com.joo.digimon.card.model.*;
 import com.joo.digimon.card.repository.*;
 import com.joo.digimon.global.exception.model.CanNotDeleteException;
@@ -19,6 +24,7 @@ public class CardAdminServiceImpl implements CardAdminService {
     private final EnglishCardRepository englishCardRepository;
     private final CardCombineTypeRepository cardCombineTypeRepository;
     private final TypeRepository typeRepository;
+    private final CardRepository cardRepository;
 
     @Value("${domain.url}")
     private String prefixUrl;
@@ -190,5 +196,16 @@ public class CardAdminServiceImpl implements CardAdminService {
         }
 
         return noteDtoList;
+    }
+
+    @Override
+    public List<CardSummeryDto> getAllCardSummery(){
+        List<CardEntity> cardEntities = cardRepository.findAll();
+        List<CardSummeryDto> cardSummeryDtoList = new ArrayList<>();
+        for (CardEntity cardEntity : cardEntities) {
+            cardSummeryDtoList.add(new CardSummeryDto(cardEntity));
+        }
+        return cardSummeryDtoList;
+
     }
 }

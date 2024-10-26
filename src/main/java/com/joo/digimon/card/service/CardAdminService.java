@@ -1,6 +1,11 @@
 package com.joo.digimon.card.service;
 
-import com.joo.digimon.card.dto.*;
+import com.joo.digimon.card.dto.card.CardAdminPutDto;
+import com.joo.digimon.card.dto.card.CardSummeryDto;
+import com.joo.digimon.card.dto.note.CreateNoteDto;
+import com.joo.digimon.card.dto.note.ResponseNoteDto;
+import com.joo.digimon.card.dto.note.UpdateNoteDto;
+import com.joo.digimon.card.dto.type.TypeDto;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
@@ -19,4 +24,6 @@ public interface CardAdminService {
     List<TypeDto> putTypes(List<TypeDto> typeDtoList);
 
     List<ResponseNoteDto> getNotes();
+
+    List<CardSummeryDto> getAllCardSummery();
 }

@@ -1,10 +1,8 @@
-package com.joo.digimon.card.dto;
+package com.joo.digimon.card.dto.note;
 
-import com.joo.digimon.card.model.NoteEntity;
 import com.joo.digimon.global.enums.CardOrigin;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
-import lombok.RequiredArgsConstructor;
 
 import java.time.LocalDate;
 

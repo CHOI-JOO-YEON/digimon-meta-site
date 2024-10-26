@@ -1,6 +1,5 @@
 package com.joo.digimon.limit.controller;
 
-import com.joo.digimon.limit.dto.CreateLimitRequestDto;
 import com.joo.digimon.limit.service.LimitService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -16,11 +15,4 @@ public class LimitController {
     ResponseEntity<?> getLimitList(){
         return new ResponseEntity<>(limitService.findAll(),HttpStatus.OK);
     }
-
-    @PostMapping("")
-    ResponseEntity<?> postLimit(@RequestBody CreateLimitRequestDto createLimitRequestDto) {
-        limitService.create(createLimitRequestDto);
-        return new ResponseEntity<>(HttpStatus.CREATED);
-    }
-
 }

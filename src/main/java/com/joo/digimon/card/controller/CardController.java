@@ -1,8 +1,8 @@
 package com.joo.digimon.card.controller;
 
-import com.joo.digimon.card.dto.CardSearchRequestDto;
-import com.joo.digimon.card.dto.CardResponseDto;
-import com.joo.digimon.card.dto.ResponseNoteDto;
+import com.joo.digimon.card.dto.card.CardSearchRequestDto;
+import com.joo.digimon.card.dto.card.CardResponseDto;
+import com.joo.digimon.card.dto.note.ResponseNoteDto;
 import com.joo.digimon.card.service.CardService;
 import com.joo.digimon.card.service.UseCardService;
 import com.joo.digimon.deck.dto.FormatResponseDto;

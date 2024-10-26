@@ -1,4 +1,4 @@
-package com.joo.digimon.card.dto;
+package com.joo.digimon.card.dto.card;
 
 import com.joo.digimon.global.annotation.valid.OrderValid;
 import com.joo.digimon.global.enums.CardType;

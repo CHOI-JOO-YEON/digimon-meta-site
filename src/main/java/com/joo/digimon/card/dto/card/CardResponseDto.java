@@ -1,16 +1,10 @@
-package com.joo.digimon.card.dto;
+package com.joo.digimon.card.dto.card;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.joo.digimon.card.model.CardCombineTypeEntity;
 import com.joo.digimon.card.model.CardImgEntity;
-import com.joo.digimon.global.enums.CardType;
-import com.joo.digimon.global.enums.Color;
-import com.joo.digimon.global.enums.Form;
-import com.joo.digimon.global.enums.Rarity;
 import lombok.Data;
 import org.springframework.data.domain.Page;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 

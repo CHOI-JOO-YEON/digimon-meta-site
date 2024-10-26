@@ -1,6 +1,6 @@
 package com.joo.digimon.card.model;
 
-import com.joo.digimon.card.dto.CardAdminPutDto;
+import com.joo.digimon.card.dto.card.CardAdminPutDto;
 import jakarta.persistence.*;
 import lombok.*;
 

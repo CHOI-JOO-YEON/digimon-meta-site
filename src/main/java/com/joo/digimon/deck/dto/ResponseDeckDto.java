@@ -1,7 +1,7 @@
 package com.joo.digimon.deck.dto;
 
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
-import com.joo.digimon.card.dto.CardVo;
+import com.joo.digimon.card.dto.card.CardVo;
 import com.joo.digimon.card.model.CardImgEntity;
 import com.joo.digimon.global.enums.Color;
 import com.joo.digimon.deck.model.DeckCardEntity;

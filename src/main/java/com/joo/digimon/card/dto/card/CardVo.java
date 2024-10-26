@@ -1,4 +1,4 @@
-package com.joo.digimon.card.dto;
+package com.joo.digimon.card.dto.card;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.joo.digimon.card.model.CardCombineTypeEntity;
