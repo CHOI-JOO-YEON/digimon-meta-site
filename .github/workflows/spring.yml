@@ -10,6 +10,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # 0. EC2와의 네트워크 연결을 확인합니다.
+      - name: Test connection to EC2
+        run: |
+          ping -c 4 13.125.113.222
       # 1. GitHub 리포지토리에서 코드를 체크아웃합니다.
       - name: Checkout code
         uses: actions/checkout@v2
@@ -42,12 +46,12 @@ jobs:
         run: |
           scp -i ~/.ssh/id_rsa \
             build/libs/digimon-meta-site-0.0.1-SNAPSHOT.jar \
-            ubuntu@13.125.113.222:/home/ubuntu/
+            ubuntu@${{ secrets.EC2_IP }}:/home/ubuntu/
 
       # 7. EC2로 SSH 접속 후 Docker 컨테이너 실행
       - name: SSH into EC2 and deploy with Docker
         run: |
-          ssh -i ~/.ssh/id_rsa ubuntu@13.125.113.222 << 'EOF'
+          ssh -i ~/.ssh/id_rsa ubuntu@${{ secrets.EC2_IP }} << 'EOF'
           
           # 이미 실행 중인 컨테이너가 있으면 중지하고 제거
           sudo docker stop digimon-meta || true
