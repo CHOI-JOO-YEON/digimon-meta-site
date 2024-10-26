@@ -5,9 +5,10 @@ import com.joo.digimon.card.dto.*;
 import com.joo.digimon.card.service.CardAdminService;
 import com.joo.digimon.card.service.CardService;
 import com.joo.digimon.deck.dto.FormatRequestDto;
-import com.joo.digimon.deck.dto.FormatResponseDto;
 import com.joo.digimon.deck.dto.FormatUpdateRequestDto;
 import com.joo.digimon.deck.service.FormatService;
+import com.joo.digimon.limit.dto.CreateLimitRequestDto;
+import com.joo.digimon.limit.service.LimitService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,21 +24,16 @@ public class CardAdminController {
     private final CardAdminService cardAdminService;
     private final CardService cardService;
     private final FormatService formatService;
-
-    @GetMapping("/all")
-    public ResponseEntity<?> getAllCard() {
-        return new ResponseEntity<>(cardAdminService.getAllCard(), HttpStatus.OK);
-    }
-
+    private final LimitService limitService;
 
     @GetMapping("/")
-    public ResponseEntity<?> getCards(@ModelAttribute CardRequestDto cardRequestDto) {
-        return new ResponseEntity<>(cardService.searchAdminCards(cardRequestDto), HttpStatus.OK);
+    public ResponseEntity<?> getCards(@ModelAttribute CardSearchRequestDto cardSearchRequestDto) {
+        return new ResponseEntity<>(cardService.searchAdminCards(cardSearchRequestDto), HttpStatus.OK);
     }
 
     @PutMapping("/update")
-    public ResponseEntity<?> updateCard(@RequestBody List<CardAdminRequestDto> cardAdminRequestDtoList) {
-        cardAdminService.updateCards(cardAdminRequestDtoList);
+    public ResponseEntity<?> updateCard(@RequestBody List<CardAdminPutDto> cardAdminPutDtoList) {
+        cardAdminService.updateCards(cardAdminPutDtoList);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
@@ -98,4 +94,17 @@ public class CardAdminController {
         formatService.deleteFormat(formatId);
         return new ResponseEntity<>(HttpStatus.OK);
     }
+
+    @GetMapping("/limit")
+    ResponseEntity<?> getAllLimit() {
+        return new ResponseEntity<>(limitService.findAll(), HttpStatus.OK);
+    }
+
+    @PostMapping("limit")
+    ResponseEntity<?> createLimit(@RequestBody CreateLimitRequestDto createLimitRequestDto) {
+        limitService.create(createLimitRequestDto);
+        return new ResponseEntity<>(HttpStatus.CREATED);
+    }
+
+
 }

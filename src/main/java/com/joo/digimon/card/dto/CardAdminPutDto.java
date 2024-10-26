@@ -13,7 +13,7 @@ import java.util.*;
 
 @Data
 @JsonInclude(JsonInclude.Include.ALWAYS)
-public class CardAdminRequestDto {
+public class CardAdminPutDto {
     Integer cardId;
     String cardNo;
     String cardName;

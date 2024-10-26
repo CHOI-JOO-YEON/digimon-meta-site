@@ -5,9 +5,9 @@ import com.joo.digimon.card.dto.*;
 import java.util.List;
 
 public interface CardService {
-    CardResponseDto searchCards(CardRequestDto cardRequestDto);
+    CardResponseDto searchCards(CardSearchRequestDto cardSearchRequestDto);
 
-    AdminCardResponseDto searchAdminCards(CardRequestDto cardRequestDto);
+    CardResponseDto searchAdminCards(CardSearchRequestDto cardSearchRequestDto);
 
     List<ResponseNoteDto> getNotes();
 

@@ -22,7 +22,7 @@ public class CardResponseDto {
     Integer totalPages;
     Integer currentPage;
     Integer totalElements;
-    List<CardDto> cards;
+    List<CardVo> cards;
 
 
     public CardResponseDto(Page<CardImgEntity> page, String prefixUrl) {
@@ -31,7 +31,7 @@ public class CardResponseDto {
         this.currentPage = page.getNumber();
         cards = new ArrayList<>();
         for (CardImgEntity cardImgEntity : page) {
-            cards.add(new CardDto(cardImgEntity, prefixUrl));
+            cards.add(new CardVo(cardImgEntity, prefixUrl));
         }
     }
 
@@ -42,7 +42,7 @@ public class CardResponseDto {
         this.currentPage = currentPage;
         cards = new ArrayList<>();
         for (CardImgEntity cardImgEntity : entities) {
-            cards.add(new CardDto(cardImgEntity, prefixUrl));
+            cards.add(new CardVo(cardImgEntity, prefixUrl));
         }
     }
 

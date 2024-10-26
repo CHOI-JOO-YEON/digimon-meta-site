@@ -10,7 +10,7 @@ import lombok.Data;
 import java.util.Set;
 
 @Data
-public class CardRequestDto {
+public class CardSearchRequestDto {
     String searchString;
     Set<Integer> noteId;
     Set<Color> colors;

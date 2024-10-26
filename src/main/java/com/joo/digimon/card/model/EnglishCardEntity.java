@@ -1,6 +1,6 @@
 package com.joo.digimon.card.model;
 
-import com.joo.digimon.card.dto.CardAdminRequestDto;
+import com.joo.digimon.card.dto.CardAdminPutDto;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -28,7 +28,7 @@ public class EnglishCardEntity {
     @JoinColumn(name = "cards_tb_id")
     CardEntity cardEntity;
 
-    public void update(CardAdminRequestDto dto) {
+    public void update(CardAdminPutDto dto) {
         Optional.ofNullable(dto.getEngEffect()).ifPresent(value -> this.effect = value);
         Optional.ofNullable(dto.getEngSourceEffect()).ifPresent(value -> this.sourceEffect = value);
         Optional.ofNullable(dto.getCardEngName()).ifPresent(value -> this.cardName = value);

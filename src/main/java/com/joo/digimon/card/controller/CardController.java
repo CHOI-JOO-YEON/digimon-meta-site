@@ -1,6 +1,6 @@
 package com.joo.digimon.card.controller;
 
-import com.joo.digimon.card.dto.CardRequestDto;
+import com.joo.digimon.card.dto.CardSearchRequestDto;
 import com.joo.digimon.card.dto.CardResponseDto;
 import com.joo.digimon.card.dto.ResponseNoteDto;
 import com.joo.digimon.card.service.CardService;
@@ -23,9 +23,9 @@ public class CardController {
     private final FormatService formatService;
 
     @GetMapping("/search")
-    public ResponseEntity<CardResponseDto> getCards(@ModelAttribute CardRequestDto cardRequestDto){
+    public ResponseEntity<CardResponseDto> getCards(@ModelAttribute CardSearchRequestDto cardSearchRequestDto){
 
-        return new ResponseEntity<>(cardService.searchCards(cardRequestDto), HttpStatus.OK);
+        return new ResponseEntity<>(cardService.searchCards(cardSearchRequestDto), HttpStatus.OK);
     }
 
     @GetMapping("/note")
