@@ -47,7 +47,7 @@ jobs:
       # 7. 빌드된 JAR 파일을 EC2로 전송합니다.
       - name: Copy files to EC2
         run: |
-          scp -i ~/.ssh/id_rsa \
+            scp -v -i ~/.ssh/id_rsa \
             build/libs/digimon-meta-site-0.0.1-SNAPSHOT.jar \
             ubuntu@${{ secrets.EC2_IP }}:/home/ubuntu/
 
