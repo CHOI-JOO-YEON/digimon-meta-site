@@ -27,7 +27,10 @@ public class CardController {
 
         return new ResponseEntity<>(cardService.searchCards(cardSearchRequestDto), HttpStatus.OK);
     }
-
+    @GetMapping("/summary")
+    ResponseEntity<?> getAllCardSummary() {
+        return new ResponseEntity<>(cardService.getAllCardSummery(), HttpStatus.OK);
+    }
     @GetMapping("/note")
     public ResponseEntity<List<ResponseNoteDto>> getNotes() {
         return new ResponseEntity<>(cardService.getNotes(), HttpStatus.OK);

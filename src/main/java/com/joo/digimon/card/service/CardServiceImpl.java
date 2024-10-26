@@ -2,10 +2,12 @@ package com.joo.digimon.card.service;
 
 import com.joo.digimon.card.dto.card.CardResponseDto;
 import com.joo.digimon.card.dto.card.CardSearchRequestDto;
+import com.joo.digimon.card.dto.card.CardSummeryDto;
 import com.joo.digimon.card.dto.note.ResponseNoteDto;
 import com.joo.digimon.card.dto.type.CardTypeResponseDto;
 import com.joo.digimon.card.model.*;
 import com.joo.digimon.card.repository.CardImgRepository;
+import com.joo.digimon.card.repository.CardRepository;
 import com.joo.digimon.card.repository.NoteRepository;
 import com.joo.digimon.card.repository.TypeRepository;
 import com.joo.digimon.global.enums.CardType;
@@ -32,6 +34,7 @@ import java.util.Set;
 @RequiredArgsConstructor
 public class CardServiceImpl implements CardService {
     private final CardImgRepository cardImgRepository;
+    private final CardRepository cardRepository;
     private final NoteRepository noteRepository;
     private final EntityManager entityManager;
     private final TypeRepository typeRepository;
@@ -50,18 +53,6 @@ public class CardServiceImpl implements CardService {
         Page<CardImgEntity> pageableResult = getPageableResult(cardSearchRequestDto, builder, cardImg);
         return new CardResponseDto(pageableResult, prefixUrl);
 
-    }
-
-    @Override
-    public CardResponseDto searchAdminCards(CardSearchRequestDto cardSearchRequestDto){
-        QCardImgEntity cardImg = QCardImgEntity.cardImgEntity;
-        QCardEntity card = QCardEntity.cardEntity;
-        QCardCombineTypeEntity cardCombine = QCardCombineTypeEntity.cardCombineTypeEntity;
-        BooleanBuilder builder = new BooleanBuilder();
-
-        applySearchConditions(cardSearchRequestDto, builder, cardImg, card, cardCombine);
-        Page<CardImgEntity> pageableResult = getPageableResult(cardSearchRequestDto, builder, cardImg);
-        return new CardResponseDto(pageableResult, prefixUrl);
     }
 
     private Page<CardImgEntity> getPageableResult(CardSearchRequestDto cardSearchRequestDto, BooleanBuilder builder, QCardImgEntity cardImg) {
@@ -271,5 +262,14 @@ public class CardServiceImpl implements CardService {
         }
         return cardTypeResponseDtoList;
     }
+    @Override
+    public List<CardSummeryDto> getAllCardSummery(){
+        List<CardEntity> cardEntities = cardRepository.findAll();
+        List<CardSummeryDto> cardSummeryDtoList = new ArrayList<>();
+        for (CardEntity cardEntity : cardEntities) {
+            cardSummeryDtoList.add(new CardSummeryDto(cardEntity));
+        }
+        return cardSummeryDtoList;
 
+    }
 }

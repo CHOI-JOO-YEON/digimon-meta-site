@@ -32,12 +32,7 @@ public class CardAdminController {
 
     @GetMapping("/card")
     public ResponseEntity<?> getCards(@ModelAttribute CardSearchRequestDto cardSearchRequestDto) {
-        return new ResponseEntity<>(cardService.searchAdminCards(cardSearchRequestDto), HttpStatus.OK);
-    }
-
-    @GetMapping("/card/summary")
-    ResponseEntity<?> getAllCardSummary() {
-        return new ResponseEntity<>(cardAdminService.getAllCardSummery(), HttpStatus.OK);
+        return new ResponseEntity<>(cardService.searchCards(cardSearchRequestDto), HttpStatus.OK);
     }
 
     @PutMapping("/card/update")
