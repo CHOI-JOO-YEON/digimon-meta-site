@@ -1,9 +1,6 @@
 package com.joo.digimon.card.service;
 
-import com.joo.digimon.card.dto.UseCard;
-import com.joo.digimon.card.dto.UseCardResponseDto;
-
-import java.util.List;
+import com.joo.digimon.card.dto.use_card.UseCardResponseDto;
 
 public interface UseCardService {
     UseCardResponseDto findTopUsedCardsWithACard(Integer cardImgId, Integer formatId);

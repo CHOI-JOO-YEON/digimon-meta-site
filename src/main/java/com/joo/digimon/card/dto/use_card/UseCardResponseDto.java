@@ -1,4 +1,4 @@
-package com.joo.digimon.card.dto;
+package com.joo.digimon.card.dto.use_card;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

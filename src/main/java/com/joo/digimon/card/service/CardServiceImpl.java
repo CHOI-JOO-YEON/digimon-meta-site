@@ -1,6 +1,9 @@
 package com.joo.digimon.card.service;
 
-import com.joo.digimon.card.dto.*;
+import com.joo.digimon.card.dto.card.CardResponseDto;
+import com.joo.digimon.card.dto.card.CardSearchRequestDto;
+import com.joo.digimon.card.dto.note.ResponseNoteDto;
+import com.joo.digimon.card.dto.type.CardTypeResponseDto;
 import com.joo.digimon.card.model.*;
 import com.joo.digimon.card.repository.CardImgRepository;
 import com.joo.digimon.card.repository.NoteRepository;
@@ -37,33 +40,33 @@ public class CardServiceImpl implements CardService {
     private String prefixUrl;
 
     @Override
-    public CardResponseDto searchCards(CardRequestDto cardRequestDto) {
+    public CardResponseDto searchCards(CardSearchRequestDto cardSearchRequestDto) {
         QCardImgEntity cardImg = QCardImgEntity.cardImgEntity;
         QCardEntity card = QCardEntity.cardEntity;
         QCardCombineTypeEntity cardCombine = QCardCombineTypeEntity.cardCombineTypeEntity;
         BooleanBuilder builder = new BooleanBuilder();
 
-        applySearchConditions(cardRequestDto, builder, cardImg, card, cardCombine);
-        Page<CardImgEntity> pageableResult = getPageableResult(cardRequestDto, builder, cardImg);
+        applySearchConditions(cardSearchRequestDto, builder, cardImg, card, cardCombine);
+        Page<CardImgEntity> pageableResult = getPageableResult(cardSearchRequestDto, builder, cardImg);
         return new CardResponseDto(pageableResult, prefixUrl);
 
     }
 
     @Override
-    public AdminCardResponseDto searchAdminCards(CardRequestDto cardRequestDto){
+    public CardResponseDto searchAdminCards(CardSearchRequestDto cardSearchRequestDto){
         QCardImgEntity cardImg = QCardImgEntity.cardImgEntity;
         QCardEntity card = QCardEntity.cardEntity;
         QCardCombineTypeEntity cardCombine = QCardCombineTypeEntity.cardCombineTypeEntity;
         BooleanBuilder builder = new BooleanBuilder();
 
-        applySearchConditions(cardRequestDto, builder, cardImg, card, cardCombine);
-        Page<CardImgEntity> pageableResult = getPageableResult(cardRequestDto, builder, cardImg);
-        return new AdminCardResponseDto(pageableResult, prefixUrl);
+        applySearchConditions(cardSearchRequestDto, builder, cardImg, card, cardCombine);
+        Page<CardImgEntity> pageableResult = getPageableResult(cardSearchRequestDto, builder, cardImg);
+        return new CardResponseDto(pageableResult, prefixUrl);
     }
 
-    private Page<CardImgEntity> getPageableResult(CardRequestDto cardRequestDto, BooleanBuilder builder, QCardImgEntity cardImg) {
-        Sort sort = createSort(cardRequestDto);
-        Pageable pageable = PageRequest.of(cardRequestDto.getPage() - 1, cardRequestDto.getSize(), sort);
+    private Page<CardImgEntity> getPageableResult(CardSearchRequestDto cardSearchRequestDto, BooleanBuilder builder, QCardImgEntity cardImg) {
+        Sort sort = createSort(cardSearchRequestDto);
+        Pageable pageable = PageRequest.of(cardSearchRequestDto.getPage() - 1, cardSearchRequestDto.getSize(), sort);
 
         JPAQuery<Long> query = new JPAQuery<>(entityManager);
         int totalCount = query.select(cardImg.id)
@@ -83,16 +86,16 @@ public class CardServiceImpl implements CardService {
         return new PageImpl<>(cardImgEntities, pageable, totalCount);
     }
 
-    private Sort createSort(CardRequestDto cardRequestDto) {
+    private Sort createSort(CardSearchRequestDto cardSearchRequestDto) {
         List<Sort.Order> orders = new ArrayList<>();
-        if("modifiedAt".equals(cardRequestDto.getOrderOption())){
-            orders.add(new Sort.Order(cardRequestDto.getIsOrderDesc() ? Sort.Direction.DESC : Sort.Direction.ASC, cardRequestDto.getOrderOption()));
+        if("modifiedAt".equals(cardSearchRequestDto.getOrderOption())){
+            orders.add(new Sort.Order(cardSearchRequestDto.getIsOrderDesc() ? Sort.Direction.DESC : Sort.Direction.ASC, cardSearchRequestDto.getOrderOption()));
         }else{
-            orders.add(new Sort.Order(cardRequestDto.getIsOrderDesc() ? Sort.Direction.DESC : Sort.Direction.ASC, "cardEntity." + cardRequestDto.getOrderOption()));
+            orders.add(new Sort.Order(cardSearchRequestDto.getIsOrderDesc() ? Sort.Direction.DESC : Sort.Direction.ASC, "cardEntity." + cardSearchRequestDto.getOrderOption()));
         }
 
 
-        if (cardRequestDto.getParallelOption() == 0) {
+        if (cardSearchRequestDto.getParallelOption() == 0) {
             orders.add(new Sort.Order(Sort.Direction.ASC, "isParallel"));
         }
         orders.add(new Sort.Order(Sort.Direction.ASC, "noteEntity.releaseDate"));
@@ -100,20 +103,20 @@ public class CardServiceImpl implements CardService {
         return Sort.by(orders);
     }
 
-    private void applySearchConditions(CardRequestDto cardRequestDto, BooleanBuilder builder, QCardImgEntity cardImg, QCardEntity card, QCardCombineTypeEntity cardCombine) {
-        addEnglishCardCondition(cardRequestDto.getIsEnglishCardInclude(), builder, cardImg, card);
-        addSearchStringCondition(cardRequestDto.getSearchString(), builder, card);
-        addColorCondition(cardRequestDto, builder, card);
-        addLvCondition(cardRequestDto.getLvs(), builder, card);
-        addCardTypeCondition(cardRequestDto.getCardTypes(), builder, card);
-        addPlayCostCondition(cardRequestDto, builder, card);
-        addDpCondition(cardRequestDto, builder, card);
-        addDigivolveCostCondition(cardRequestDto, builder, card);
-        addRarityCondition(cardRequestDto.getRarities(), builder, card);
-        addParallelCondition(cardRequestDto.getParallelOption(), builder, cardImg);
-        addNoteCondition(cardRequestDto.getNoteId(), builder, cardImg);
-        addTypeCondition(cardRequestDto, cardCombine, builder, cardImg);
-        addFormCondition(cardRequestDto.getForms(),builder,card);
+    private void applySearchConditions(CardSearchRequestDto cardSearchRequestDto, BooleanBuilder builder, QCardImgEntity cardImg, QCardEntity card, QCardCombineTypeEntity cardCombine) {
+        addEnglishCardCondition(cardSearchRequestDto.getIsEnglishCardInclude(), builder, cardImg, card);
+        addSearchStringCondition(cardSearchRequestDto.getSearchString(), builder, card);
+        addColorCondition(cardSearchRequestDto, builder, card);
+        addLvCondition(cardSearchRequestDto.getLvs(), builder, card);
+        addCardTypeCondition(cardSearchRequestDto.getCardTypes(), builder, card);
+        addPlayCostCondition(cardSearchRequestDto, builder, card);
+        addDpCondition(cardSearchRequestDto, builder, card);
+        addDigivolveCostCondition(cardSearchRequestDto, builder, card);
+        addRarityCondition(cardSearchRequestDto.getRarities(), builder, card);
+        addParallelCondition(cardSearchRequestDto.getParallelOption(), builder, cardImg);
+        addNoteCondition(cardSearchRequestDto.getNoteId(), builder, cardImg);
+        addTypeCondition(cardSearchRequestDto, cardCombine, builder, cardImg);
+        addFormCondition(cardSearchRequestDto.getForms(),builder,card);
     }
 
     private void addFormCondition(Set<Form> forms, BooleanBuilder builder, QCardEntity card) {
@@ -122,19 +125,19 @@ public class CardServiceImpl implements CardService {
         }
     }
 
-    private void addTypeCondition(CardRequestDto cardRequestDto, QCardCombineTypeEntity cardCombine, BooleanBuilder builder, QCardImgEntity cardImg) {
-        if (cardRequestDto.getTypeIds() != null && !cardRequestDto.getTypeIds().isEmpty()) {
+    private void addTypeCondition(CardSearchRequestDto cardSearchRequestDto, QCardCombineTypeEntity cardCombine, BooleanBuilder builder, QCardImgEntity cardImg) {
+        if (cardSearchRequestDto.getTypeIds() != null && !cardSearchRequestDto.getTypeIds().isEmpty()) {
             JPQLQuery<Integer> jpqlQuery = null;
-            if (cardRequestDto.getTypeOperation() == 0) {
+            if (cardSearchRequestDto.getTypeOperation() == 0) {
                 jpqlQuery = JPAExpressions.select(cardCombine.cardEntity.id)
                         .from(cardCombine)
-                        .where(cardCombine.typeEntity.id.in(cardRequestDto.getTypeIds()))
+                        .where(cardCombine.typeEntity.id.in(cardSearchRequestDto.getTypeIds()))
                         .groupBy(cardCombine.cardEntity.id)
-                        .having(cardCombine.typeEntity.id.countDistinct().eq(Long.valueOf(cardRequestDto.getTypeIds().size())));
-            } else if (cardRequestDto.getTypeOperation() == 1) {
+                        .having(cardCombine.typeEntity.id.countDistinct().eq(Long.valueOf(cardSearchRequestDto.getTypeIds().size())));
+            } else if (cardSearchRequestDto.getTypeOperation() == 1) {
                 jpqlQuery = JPAExpressions.select(cardCombine.cardEntity.id)
                         .from(cardCombine)
-                        .where(cardCombine.typeEntity.id.in(cardRequestDto.getTypeIds()));
+                        .where(cardCombine.typeEntity.id.in(cardSearchRequestDto.getTypeIds()));
             }
             builder.and(cardImg.cardEntity.id.in(jpqlQuery));
         }
@@ -161,31 +164,31 @@ public class CardServiceImpl implements CardService {
         }
     }
 
-    private void addDigivolveCostCondition(CardRequestDto cardRequestDto, BooleanBuilder builder, QCardEntity card) {
-        if(cardRequestDto.getMinDigivolutionCost()==0&&cardRequestDto.getMaxDigivolutionCost() == 8)
+    private void addDigivolveCostCondition(CardSearchRequestDto cardSearchRequestDto, BooleanBuilder builder, QCardEntity card) {
+        if(cardSearchRequestDto.getMinDigivolutionCost()==0&& cardSearchRequestDto.getMaxDigivolutionCost() == 8)
         {
             return;
         }
         builder.and(card.digivolveCost1.between(
-                cardRequestDto.getMinDigivolutionCost(),
-                cardRequestDto.getMaxDigivolutionCost()).or(card.digivolveCost2.between(
-                cardRequestDto.getMinDigivolutionCost(),
-                cardRequestDto.getMaxDigivolutionCost())
+                cardSearchRequestDto.getMinDigivolutionCost(),
+                cardSearchRequestDto.getMaxDigivolutionCost()).or(card.digivolveCost2.between(
+                cardSearchRequestDto.getMinDigivolutionCost(),
+                cardSearchRequestDto.getMaxDigivolutionCost())
         ));
     }
 
-    private void addDpCondition(CardRequestDto cardRequestDto, BooleanBuilder builder, QCardEntity card) {
-        if (cardRequestDto.getMinDp() == 1000 && cardRequestDto.getMaxDp() == 17000) {
+    private void addDpCondition(CardSearchRequestDto cardSearchRequestDto, BooleanBuilder builder, QCardEntity card) {
+        if (cardSearchRequestDto.getMinDp() == 1000 && cardSearchRequestDto.getMaxDp() == 17000) {
             return;
         }
-        builder.and(card.dp.between(cardRequestDto.getMinDp(), cardRequestDto.getMaxDp()));
+        builder.and(card.dp.between(cardSearchRequestDto.getMinDp(), cardSearchRequestDto.getMaxDp()));
     }
 
-    private void addPlayCostCondition(CardRequestDto cardRequestDto, BooleanBuilder builder, QCardEntity card) {
-        if (cardRequestDto.getMinPlayCost() == 0 && cardRequestDto.getMaxPlayCost() == 20) {
+    private void addPlayCostCondition(CardSearchRequestDto cardSearchRequestDto, BooleanBuilder builder, QCardEntity card) {
+        if (cardSearchRequestDto.getMinPlayCost() == 0 && cardSearchRequestDto.getMaxPlayCost() == 20) {
             return;
         }
-        builder.and(card.playCost.between(cardRequestDto.getMinPlayCost(), cardRequestDto.getMaxPlayCost()));
+        builder.and(card.playCost.between(cardSearchRequestDto.getMinPlayCost(), cardSearchRequestDto.getMaxPlayCost()));
 
     }
 
@@ -201,15 +204,15 @@ public class CardServiceImpl implements CardService {
         }
     }
 
-    private void addColorCondition(CardRequestDto cardRequestDto, BooleanBuilder builder, QCardEntity card) {
-        if (cardRequestDto.getColors() == null) {
+    private void addColorCondition(CardSearchRequestDto cardSearchRequestDto, BooleanBuilder builder, QCardEntity card) {
+        if (cardSearchRequestDto.getColors() == null) {
             return;
         }
 
-        if (cardRequestDto.getColorOperation() == 0) {
-            builder.and(card.color1.in(cardRequestDto.getColors()).and(card.color2.in(cardRequestDto.getColors())).and(card.color3.in(cardRequestDto.getColors())));
-        } else if (cardRequestDto.getColorOperation() == 1) {
-            builder.and(card.color1.in(cardRequestDto.getColors()).or(card.color2.in(cardRequestDto.getColors())).or(card.color3.in(cardRequestDto.getColors())));
+        if (cardSearchRequestDto.getColorOperation() == 0) {
+            builder.and(card.color1.in(cardSearchRequestDto.getColors()).and(card.color2.in(cardSearchRequestDto.getColors())).and(card.color3.in(cardSearchRequestDto.getColors())));
+        } else if (cardSearchRequestDto.getColorOperation() == 1) {
+            builder.and(card.color1.in(cardSearchRequestDto.getColors()).or(card.color2.in(cardSearchRequestDto.getColors())).or(card.color3.in(cardSearchRequestDto.getColors())));
         }
 
     }

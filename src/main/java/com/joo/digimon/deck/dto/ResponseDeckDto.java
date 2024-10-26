@@ -1,6 +1,7 @@
 package com.joo.digimon.deck.dto;
 
-import com.joo.digimon.card.dto.CardDto;
+import com.fasterxml.jackson.annotation.JsonUnwrapped;
+import com.joo.digimon.card.dto.card.CardVo;
 import com.joo.digimon.card.model.CardImgEntity;
 import com.joo.digimon.global.enums.Color;
 import com.joo.digimon.deck.model.DeckCardEntity;
@@ -53,17 +54,19 @@ public class ResponseDeckDto {
 
 
     @Getter
-    private class Card extends CardDto {
+    private class Card {
         Integer cnt;
+        @JsonUnwrapped
+        CardVo cardVo;
 
         public Card(CardImgEntity card, Integer cnt, String prefixUrl) {
-            super(card, prefixUrl);
+            cardVo = new CardVo(card, prefixUrl);
             this.cnt = cnt;
         }
 
 
         public Card(DeckCardEntity deckCardEntity, String prefixUrl) {
-            super(deckCardEntity.getCardImgEntity(), prefixUrl);
+            cardVo = new CardVo(deckCardEntity.getCardImgEntity(), prefixUrl);
             this.cnt = deckCardEntity.getCnt();
         }
 

@@ -8,6 +8,7 @@ services:
     environment:
       - SERVICES=s3
       - DEBUG=1
+    restart: always
     volumes:
       - "./s3-buckets-init.sh:/etc/localstack/init/ready.d/s3-buckets-init.sh"
 
@@ -21,6 +22,7 @@ services:
       - ./wiremock:/home/wiremock
     environment:
       - WIREMOCK_PORT=8080
+    restart: always
     command: >
       /bin/sh -c "
       mkdir -p /home/wiremock/mappings && \

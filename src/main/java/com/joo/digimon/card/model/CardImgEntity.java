@@ -1,16 +1,11 @@
 package com.joo.digimon.card.model;
 
-import com.joo.digimon.card.dto.CardAdminRequestDto;
-import com.joo.digimon.card.dto.UpdateNoteDto;
+import com.joo.digimon.card.dto.card.CardAdminPutDto;
 import com.joo.digimon.crawling.model.CrawlingCardEntity;
 import jakarta.persistence.*;
 import lombok.*;
-import org.springframework.data.annotation.LastModifiedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -73,7 +68,7 @@ public class CardImgEntity {
         this.smallImgUrl = smallPrefix + url;
     }
 
-    public void update(CardAdminRequestDto dto) {
+    public void update(CardAdminPutDto dto) {
         this.cardEntity.cardNo = dto.getCardNo();
         this.cardEntity.cardName = dto.getCardName();
         this.cardEntity.lv = dto.getLv();

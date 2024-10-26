@@ -1,4 +1,4 @@
-package com.joo.digimon.card.dto;
+package com.joo.digimon.card.dto.card;
 
 
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -13,7 +13,7 @@ import java.util.*;
 
 @Data
 @JsonInclude(JsonInclude.Include.ALWAYS)
-public class CardAdminRequestDto {
+public class CardAdminPutDto {
     Integer cardId;
     String cardNo;
     String cardName;

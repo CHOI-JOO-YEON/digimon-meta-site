@@ -1,6 +1,11 @@
 package com.joo.digimon.card.service;
 
-import com.joo.digimon.card.dto.*;
+import com.joo.digimon.card.dto.card.CardAdminPutDto;
+import com.joo.digimon.card.dto.card.CardSummeryDto;
+import com.joo.digimon.card.dto.note.CreateNoteDto;
+import com.joo.digimon.card.dto.note.ResponseNoteDto;
+import com.joo.digimon.card.dto.note.UpdateNoteDto;
+import com.joo.digimon.card.dto.type.TypeDto;
 import com.joo.digimon.card.model.*;
 import com.joo.digimon.card.repository.*;
 import com.joo.digimon.global.exception.model.CanNotDeleteException;
@@ -19,23 +24,11 @@ public class CardAdminServiceImpl implements CardAdminService {
     private final EnglishCardRepository englishCardRepository;
     private final CardCombineTypeRepository cardCombineTypeRepository;
     private final TypeRepository typeRepository;
+    private final CardRepository cardRepository;
 
     @Value("${domain.url}")
     private String prefixUrl;
 
-    @Override
-    @Transactional
-    public List<AdminCardDto> getAllCard() {
-        List<CardImgEntity> cardImgRepositoryAll = cardImgRepository.findAll();
-
-        List<AdminCardDto> allCards = new ArrayList<>();
-
-        for (CardImgEntity cardImgEntity : cardImgRepositoryAll) {
-            allCards.add(new AdminCardDto(cardImgEntity, prefixUrl));
-        }
-
-        return allCards;
-    }
 
     @Override
     @Transactional
@@ -81,17 +74,16 @@ public class CardAdminServiceImpl implements CardAdminService {
 
     @Transactional
     @Override
-    public List<AdminCardDto> updateCards(List<CardAdminRequestDto> cardAdminRequestDtoList) {
-        for (CardAdminRequestDto cardAdminRequestDto : cardAdminRequestDtoList) {
-            CardImgEntity cardImgEntity = getCardImgEntity(cardAdminRequestDto);
+    public void updateCards(List<CardAdminPutDto> cardAdminPutDtoList) {
+        for (CardAdminPutDto cardAdminPutDto : cardAdminPutDtoList) {
+            CardImgEntity cardImgEntity = getCardImgEntity(cardAdminPutDto);
 
-            updateCardEnglishProperty(cardAdminRequestDto, cardImgEntity);
-            cardImgEntity.update(cardAdminRequestDto);
-            NoteEntity noteEntity = noteRepository.findById(cardAdminRequestDto.getNoteId()).orElseThrow();
+            updateCardEnglishProperty(cardAdminPutDto, cardImgEntity);
+            cardImgEntity.update(cardAdminPutDto);
+            NoteEntity noteEntity = noteRepository.findById(cardAdminPutDto.getNoteId()).orElseThrow();
             cardImgEntity.updateNote(noteEntity);
-            updateType(cardAdminRequestDto, cardImgEntity);
+            updateType(cardAdminPutDto, cardImgEntity);
         }
-        return getAllCard();
     }
 
     @Override
@@ -135,8 +127,8 @@ public class CardAdminServiceImpl implements CardAdminService {
 
 
     @Transactional
-    public CardImgEntity getCardImgEntity(CardAdminRequestDto cardAdminRequestDto) {
-        Optional<CardImgEntity> optionalCardImg = cardImgRepository.findById(cardAdminRequestDto.getCardId());
+    public CardImgEntity getCardImgEntity(CardAdminPutDto cardAdminPutDto) {
+        Optional<CardImgEntity> optionalCardImg = cardImgRepository.findById(cardAdminPutDto.getCardId());
         if (optionalCardImg.isEmpty()) {
             throw new NoSuchElementException();
         }
@@ -144,9 +136,9 @@ public class CardAdminServiceImpl implements CardAdminService {
     }
 
     @Transactional
-    public void updateType(CardAdminRequestDto cardAdminRequestDto, CardImgEntity cardImgEntity) {
-        if (cardAdminRequestDto.getTypes()!=null) {
-            Set<String> types = cardAdminRequestDto.getTypes();
+    public void updateType(CardAdminPutDto cardAdminPutDto, CardImgEntity cardImgEntity) {
+        if (cardAdminPutDto.getTypes()!=null) {
+            Set<String> types = cardAdminPutDto.getTypes();
             cardCombineTypeRepository.deleteAll(cardImgEntity.getCardEntity().getCardCombineTypeEntities());
             Set<CardCombineTypeEntity> cardCombineTypeEntities = new HashSet<>();
             for (String type : types) {
@@ -170,20 +162,20 @@ public class CardAdminServiceImpl implements CardAdminService {
     }
 
     @Transactional
-    public void updateCardEnglishProperty(CardAdminRequestDto cardAdminRequestDto, CardImgEntity cardImgEntity) {
-        if (!isEngPresent(cardAdminRequestDto)) {
+    public void updateCardEnglishProperty(CardAdminPutDto cardAdminPutDto, CardImgEntity cardImgEntity) {
+        if (!isEngPresent(cardAdminPutDto)) {
             return;
         }
         EnglishCardEntity englishCard = cardImgEntity.getCardEntity().getEnglishCard();
         if (englishCard == null) {
             englishCard = EnglishCardEntity.builder().cardEntity(cardImgEntity.getCardEntity()).build();
         }
-        englishCard.update(cardAdminRequestDto);
+        englishCard.update(cardAdminPutDto);
         englishCardRepository.save(englishCard);
     }
 
-    private boolean isEngPresent(CardAdminRequestDto cardAdminRequestDto) {
-        return cardAdminRequestDto.getCardEngName()!=null || cardAdminRequestDto.getEngEffect()!=null || cardAdminRequestDto.getEngSourceEffect()!=null;
+    private boolean isEngPresent(CardAdminPutDto cardAdminPutDto) {
+        return cardAdminPutDto.getCardEngName()!=null || cardAdminPutDto.getEngEffect()!=null || cardAdminPutDto.getEngSourceEffect()!=null;
     }
 
     private List<ResponseNoteDto> getAllResponseNoteDto() {
@@ -204,5 +196,16 @@ public class CardAdminServiceImpl implements CardAdminService {
         }
 
         return noteDtoList;
+    }
+
+    @Override
+    public List<CardSummeryDto> getAllCardSummery(){
+        List<CardEntity> cardEntities = cardRepository.findAll();
+        List<CardSummeryDto> cardSummeryDtoList = new ArrayList<>();
+        for (CardEntity cardEntity : cardEntities) {
+            cardSummeryDtoList.add(new CardSummeryDto(cardEntity));
+        }
+        return cardSummeryDtoList;
+
     }
 }

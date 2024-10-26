@@ -1,10 +1,9 @@
 package com.joo.digimon.card.service;
 
-import com.joo.digimon.card.dto.CardVo;
-import com.joo.digimon.card.dto.UseCard;
-import com.joo.digimon.card.dto.UseCardResponseDto;
+import com.joo.digimon.card.dto.card.CardVo;
+import com.joo.digimon.card.dto.use_card.UseCard;
+import com.joo.digimon.card.dto.use_card.UseCardResponseDto;
 import com.joo.digimon.card.model.CardEntity;
-import com.joo.digimon.card.model.CardImgEntity;
 import com.joo.digimon.card.model.QCardEntity;
 import com.joo.digimon.card.model.QCardImgEntity;
 import com.joo.digimon.card.repository.CardImgRepository;

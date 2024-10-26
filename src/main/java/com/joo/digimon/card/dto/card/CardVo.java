@@ -1,4 +1,4 @@
-package com.joo.digimon.card.dto;
+package com.joo.digimon.card.dto.card;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.joo.digimon.card.model.CardCombineTypeEntity;
@@ -10,6 +10,7 @@ import com.joo.digimon.global.enums.Rarity;
 import lombok.*;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -46,6 +47,8 @@ public class CardVo {
     String noteName;
     Integer noteId;
     LocalDate releaseDate;
+    Boolean isEn;
+    LocalDateTime modifiedAt;
 
     public CardVo(CardImgEntity card, String prefixUrl) {
         if (card.getCardEntity().getCardName() == null) {
@@ -69,7 +72,6 @@ public class CardVo {
         } else {
             this.sourceEffect = card.getCardEntity().getSourceEffect();
         }
-
         this.cardId = card.getId();
         this.cardNo = card.getCardEntity().getCardNo();
         this.lv = card.getCardEntity().getLv();
@@ -97,6 +99,9 @@ public class CardVo {
         this.releaseDate = card.getCardEntity().getReleaseDate();
         this.noteName = card.getNoteEntity().getName();
         this.noteId = card.getNoteEntity().getId();
+        this.isEn = card.getIsEnCard();
+        this.modifiedAt = card.getModifiedAt() == null ?
+                LocalDateTime.of(1998, 7, 15, 9, 30) : card.getModifiedAt();
     }
 
 

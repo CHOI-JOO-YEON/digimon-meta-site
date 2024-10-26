@@ -1,7 +1,6 @@
 package com.joo.digimon.card.model;
 
-import com.joo.digimon.card.dto.TypeDto;
-import com.joo.digimon.card.dto.UpdateNoteDto;
+import com.joo.digimon.card.dto.type.TypeDto;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

@@ -1,6 +1,5 @@
-package com.joo.digimon.card.dto;
+package com.joo.digimon.card.dto.type;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.joo.digimon.card.model.TypeEntity;
 import lombok.Data;
 import lombok.NoArgsConstructor;
