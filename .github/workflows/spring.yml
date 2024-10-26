@@ -10,10 +10,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 0. EC2와의 네트워크 연결을 확인합니다.
-      - name: Test connection to EC2
+      # 0. EC2와 SSH 연결을 확인합니다.
+      - name: Test SSH connection to EC2
         run: |
-          ping -c 4 13.125.113.222
+          ssh -i ~/.ssh/id_rsa ubuntu@${{ secrets.EC2_IP }} "echo SSH connection successful"
+
       # 1. GitHub 리포지토리에서 코드를 체크아웃합니다.
       - name: Checkout code
         uses: actions/checkout@v2
