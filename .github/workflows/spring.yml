@@ -10,10 +10,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 0. EC2와 SSH 연결을 확인합니다.
-      - name: Test SSH connection to EC2
-        run: |
-          ssh -i ~/.ssh/id_rsa ubuntu@${{ secrets.EC2_IP }} "echo SSH connection successful"
+
 
       # 1. GitHub 리포지토리에서 코드를 체크아웃합니다.
       - name: Checkout code
@@ -42,14 +39,19 @@ jobs:
           # SSH 호스트 키 검증 비활성화
           echo -e "Host *\n\tStrictHostKeyChecking no\n" > ~/.ssh/config
 
-      # 6. 빌드된 JAR 파일을 EC2로 전송합니다.
+      # 6. EC2와 SSH 연결을 확인합니다.
+      - name: Test SSH connection to EC2
+        run: |
+          ssh -i ~/.ssh/id_rsa ubuntu@${{ secrets.EC2_IP }} "echo SSH connection successful"
+
+      # 7. 빌드된 JAR 파일을 EC2로 전송합니다.
       - name: Copy files to EC2
         run: |
           scp -i ~/.ssh/id_rsa \
             build/libs/digimon-meta-site-0.0.1-SNAPSHOT.jar \
             ubuntu@${{ secrets.EC2_IP }}:/home/ubuntu/
 
-      # 7. EC2로 SSH 접속 후 Docker 컨테이너 실행
+      # 8. EC2로 SSH 접속 후 Docker 컨테이너 실행
       - name: SSH into EC2 and deploy with Docker
         run: |
           ssh -i ~/.ssh/id_rsa ubuntu@${{ secrets.EC2_IP }} << 'EOF'
