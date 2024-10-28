@@ -1,18 +1,39 @@
 version: '3.8'
 services:
-  localstack:
-    image: localstack/localstack:latest
-    container_name: localstack
+#  localstack:
+#    image: localstack/localstack:latest
+#    container_name: localstack
+#    ports:
+#      - "4566:4566"
+#    environment:
+#      - SERVICES=s3
+#      - DEBUG=1
+#    volumes:
+#      - "./s3-buckets-init.sh:/etc/localstack/init/ready.d/s3-buckets-init.sh"
+#      - "./localstack_data:/var/tmp/localstack"
+  minio:
+    image: minio/minio
+    container_name: minio
     ports:
-      - "4566:4566"
+      - "9000:9000"
+      - "9001:9001"
     environment:
-      - SERVICES=s3
-      - DEBUG=1
-    restart: always
+      - MINIO_ROOT_USER=dummy-key-id
+      - MINIO_ROOT_PASSWORD=dummy-key-secret
+    command: server /data --console-address ":9001"
     volumes:
-      - "./s3-buckets-init.sh:/etc/localstack/init/ready.d/s3-buckets-init.sh"
-
-
+      - ./minio_data:/data
+  createBucket:
+    image: minio/mc
+    depends_on:
+      - minio
+    entrypoint: >
+      /bin/sh -c "
+      /usr/bin/mc alias set myminio http://minio:9000 dummy-key-id dummy-key-secret;
+      /usr/bin/mc mb myminio/digimon-meta-dev-bucket;
+      /usr/bin/mc anonymous set public myminio/digimon-meta-dev-bucket;
+      exit 0;
+      "
   wiremock:
     image: wiremock/wiremock
     container_name: wiremock-kakao

@@ -48,13 +48,15 @@ img:
   small: test/small/images/
 aws:
   s3:
-    endpoint: http://127.0.0.1:4566
+    endpoint: http://127.0.0.1:9000
   access-key-id: dummy-key-id
   access-key-secret: dummy-key-secret
+
 s3:
   bucket-name: digimon-meta-dev-bucket
 back:
   digimon: https://digimon-meta.site/images/digimon_back.png
   digitama: https://digimon-meta.site/images/digitama_back.png
 domain:
-  url: http://127.0.0.1:4566/digimon-meta-dev-bucket/
+  url: http://127.0.0.1:9000/digimon-meta-dev-bucket/
+
