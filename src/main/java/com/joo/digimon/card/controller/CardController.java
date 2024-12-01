@@ -24,7 +24,7 @@ public class CardController {
 
     @GetMapping("/search")
     public ResponseEntity<CardResponseDto> getCards(@ModelAttribute CardSearchRequestDto cardSearchRequestDto){
-
+        System.out.println("!!");
         return new ResponseEntity<>(cardService.searchCards(cardSearchRequestDto), HttpStatus.OK);
     }
     @GetMapping("/summary")
