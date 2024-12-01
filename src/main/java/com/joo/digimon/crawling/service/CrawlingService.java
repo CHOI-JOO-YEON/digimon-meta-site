@@ -11,15 +11,6 @@ import java.util.List;
 
 public interface CrawlingService {
 
-    @Transactional
-    CrawlingResultDto updateCrawlingEntityAndSaveCard(List<UpdateCrawlingRequestDto> updateCrawlingRequestDtoList);
-
-    List<CrawlingCardDto> getUnreflectedCrawlingCardDtoList(Integer size);
-
-    @Transactional
-    List<ReflectCardResponseDto> saveCardByReflectCardRequestList(List<ReflectCardRequestDto> reflectCardRequestDtoList, String locale);
-
-
     CrawlingResultDto crawlAndSaveByUrl(String url, String locale, String note) throws IOException;
 
     List<Document> getDocumentListByFirstPageUrl(String url) throws IOException;

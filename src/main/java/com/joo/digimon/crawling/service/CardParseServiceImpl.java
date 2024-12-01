@@ -43,6 +43,7 @@ public class CardParseServiceImpl implements CardParseService {
             setDtoDigivolve(dto, crawlingCard);
         } else if (crawlingCard.getLocale().equals("ENG")) {
             dto.setOriginUrl(parseEnUrl(crawlingCard.getImgUrl()));
+            dto.setTypes(parseTypes(crawlingCard.getType(), dto.getCardType()));
         }
 
         return dto;

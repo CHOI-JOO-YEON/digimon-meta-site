@@ -24,16 +24,6 @@ public class CrawlingController {
         return new ResponseEntity<>(crawlingService.crawlAndSaveByUrl(pageUrl, locale, note), HttpStatus.CREATED);
     }
 
-    @PostMapping("/update")
-    public ResponseEntity<?> crawlingCard(@RequestBody List<UpdateCrawlingRequestDto> updateCrawlingRequestDtoList) {
-        return new ResponseEntity<>(crawlingService.updateCrawlingEntityAndSaveCard(updateCrawlingRequestDtoList), HttpStatus.OK);
-    }
-
-    @GetMapping("/list")
-    public ResponseEntity<?> getUnReflectCrawlingCardList(@RequestParam("size") Integer size) {
-        return new ResponseEntity<>(crawlingService.getUnreflectedCrawlingCardDtoList(size), HttpStatus.OK);
-    }
-
     @PostMapping("/upload-all")
     public ResponseEntity<?> uploadAll() {
         return new ResponseEntity<>(cardImageService.uploadAllImage(), HttpStatus.OK);
