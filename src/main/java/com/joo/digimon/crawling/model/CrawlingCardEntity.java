@@ -72,6 +72,7 @@ public class CrawlingCardEntity {
         this.note = dto.getNote();
         this.color1 = dto.getColor1();
         this.color2 = dto.getColor2();
+        this.color3 = dto.getColor3();
         this.imgUrl = dto.getImgUrl();
         this.isReflect = false;
         this.locale = dto.getLocale();

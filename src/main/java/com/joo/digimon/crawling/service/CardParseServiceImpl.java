@@ -34,6 +34,7 @@ public class CardParseServiceImpl implements CardParseService {
         dto.setNote(parseNote(crawlingCard.getNote()));
         dto.setColor1(parseColor(crawlingCard.getColor1()));
         dto.setColor2(parseColor(crawlingCard.getColor2()));
+        dto.setColor3(parseColor(crawlingCard.getColor3()));
 
         if (crawlingCard.getLocale().equals("KOR")) {
             dto.setOriginUrl(parseUrl(crawlingCard.getImgUrl()));

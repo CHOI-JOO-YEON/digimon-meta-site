@@ -80,13 +80,8 @@ public class KorCrawlingProcedure implements CrawlingProcedure {
     }
 
     private void extractCardInfoBottom(Element element, CrawlingCardDto crawlingCardDto) {
-        crawlingCardDto.setEffect(changeJapanMiddlePoint(parseElementToPlainText(element.select(".cardinfo_bottom dl:contains(상단 텍스트) dd"))));
-        crawlingCardDto.setSourceEffect(changeJapanMiddlePoint(parseElementToPlainText(element.select(".cardinfo_bottom dl:contains(하단 텍스트) dd"))));
+        crawlingCardDto.setEffect(changeJapanMiddlePoint(CrawlingProcedure.parseElementToPlainText(element.select(".cardinfo_bottom dl:contains(상단 텍스트) dd"))));
+        crawlingCardDto.setSourceEffect(changeJapanMiddlePoint(CrawlingProcedure.parseElementToPlainText(element.select(".cardinfo_bottom dl:contains(하단 텍스트) dd"))));
         crawlingCardDto.setNote(changeJapanMiddlePoint(element.select(".cardinfo_bottom dl:contains(입수 정보) dd").text()));
-    }
-
-
-    private String parseElementToPlainText(Elements select) {
-        return select.html().replace("<br>\n", "");
     }
 }

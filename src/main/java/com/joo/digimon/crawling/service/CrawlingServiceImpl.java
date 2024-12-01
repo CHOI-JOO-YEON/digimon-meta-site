@@ -51,7 +51,6 @@ public class CrawlingServiceImpl implements CrawlingService {
     public void saveCardByReflectCardRequest(ReflectCardRequestDto reflectCardRequestDto, String locale) throws CardParseException, CardImageException {
         CrawlingCardEntity crawlingCardEntity = crawlingCardRepository.findById(reflectCardRequestDto.getId()).orElseThrow();
 
-
         CardEntity cardEntity;
         if (locale.equals("ENG")) {
             cardEntity = getEnglishCardEntityOrInsert(reflectCardRequestDto);
@@ -238,7 +237,6 @@ public class CrawlingServiceImpl implements CrawlingService {
             }
         }
 
-
         List<CrawlingCardEntity> crawlingCardEntities = new ArrayList<>();
 
         for (CrawlingCardDto crawlingCardDto : crawlingCardDtoList) {
@@ -312,6 +310,7 @@ public class CrawlingServiceImpl implements CrawlingService {
                                     .rarity(reflectCardRequestDto.getRarity())
                                     .color1(reflectCardRequestDto.getColor1())
                                     .color2(reflectCardRequestDto.getColor2())
+                                    .color3(reflectCardRequestDto.getColor3())
                                     .isOnlyEnCard(true)
                                     .releaseDate(LocalDate.of(9999, 12, 31))
                                     .build());
