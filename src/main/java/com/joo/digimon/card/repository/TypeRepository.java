@@ -1,6 +1,7 @@
 package com.joo.digimon.card.repository;
 
 import com.joo.digimon.card.model.TypeEntity;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
@@ -16,6 +17,8 @@ public interface TypeRepository extends JpaRepository<TypeEntity,Integer> {
     @Override
     @EntityGraph("TypeEntity.detail")
     List<TypeEntity> findAll();
+
+    List<TypeEntity> findByNameIsNotNull(Sort sort);
 
     @Override
     @EntityGraph("TypeEntity.detail")

@@ -35,4 +35,7 @@ public class EnglishCardEntity {
     }
 
 
+    public void updateCardEntity(CardEntity cardEntity) {
+        this.cardEntity = cardEntity;
+    }
 }

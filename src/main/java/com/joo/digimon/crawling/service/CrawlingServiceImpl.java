@@ -334,6 +334,7 @@ public class CrawlingServiceImpl implements CrawlingService {
         }
 
         cardEntity.updateEnglishCard(englishCardEntity);
+        englishCardEntity.updateCardEntity(cardEntity);
         return cardEntity;
     }
 
