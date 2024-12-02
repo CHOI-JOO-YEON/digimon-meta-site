@@ -1,8 +1,6 @@
 package com.joo.digimon.crawling.service;
 
 import com.joo.digimon.crawling.dto.*;
-import com.joo.digimon.crawling.model.CrawlingCardEntity;
-import jakarta.transaction.Transactional;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 

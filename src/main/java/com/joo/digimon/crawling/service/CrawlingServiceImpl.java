@@ -5,7 +5,6 @@ import com.joo.digimon.card.repository.*;
 import com.joo.digimon.crawling.dto.*;
 import com.joo.digimon.crawling.model.CrawlingCardEntity;
 import com.joo.digimon.crawling.model.DeletedEnCardImg;
-import com.joo.digimon.crawling.procedure.CrawlingProcedure;
 import com.joo.digimon.crawling.procedure.EngCrawlingProcedure;
 import com.joo.digimon.crawling.procedure.KorCrawlingProcedure;
 import com.joo.digimon.crawling.repository.CrawlingCardRepository;
@@ -24,11 +23,7 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Nullable;
 import java.io.IOException;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -44,7 +39,6 @@ public class CrawlingServiceImpl implements CrawlingService {
     private final CardParseService cardParseService;
     private final DeletedEnCardImgRepository deletedEnCardImgRepository;
     private final EnglishCardRepository englishCardRepository;
-
 
 
     @Transactional
@@ -293,34 +287,53 @@ public class CrawlingServiceImpl implements CrawlingService {
                 .build());
 
         CardEntity cardEntity = cardRepository.findByCardNo(reflectCardRequestDto.getCardNo()).orElseGet(
-                () -> {
-                    CardEntity save = cardRepository.save(
-                            CardEntity.builder()
-                                    .sortString(generateSortString(reflectCardRequestDto.getCardNo()))
-                                    .cardNo(reflectCardRequestDto.getCardNo())
-                                    .dp(reflectCardRequestDto.getDp())
-                                    .playCost(reflectCardRequestDto.getPlayCost())
-                                    .digivolveCondition1(reflectCardRequestDto.getDigivolveCondition1())
-                                    .digivolveCondition2(reflectCardRequestDto.getDigivolveCondition2())
-                                    .digivolveCost1(reflectCardRequestDto.getDigivolveCost1())
-                                    .digivolveCost2(reflectCardRequestDto.getDigivolveCost2())
-                                    .lv(reflectCardRequestDto.getLv())
-                                    .cardType(reflectCardRequestDto.getCardType())
-                                    .form(reflectCardRequestDto.getForm())
-                                    .rarity(reflectCardRequestDto.getRarity())
-                                    .color1(reflectCardRequestDto.getColor1())
-                                    .color2(reflectCardRequestDto.getColor2())
-                                    .color3(reflectCardRequestDto.getColor3())
-                                    .isOnlyEnCard(true)
-                                    .releaseDate(LocalDate.of(9999, 12, 31))
-                                    .build());
-
-                    return save;
-                }
+                () -> cardRepository.save(
+                        CardEntity.builder()
+                                .sortString(generateSortString(reflectCardRequestDto.getCardNo()))
+                                .cardNo(reflectCardRequestDto.getCardNo())
+                                .dp(reflectCardRequestDto.getDp())
+                                .playCost(reflectCardRequestDto.getPlayCost())
+                                .digivolveCondition1(reflectCardRequestDto.getDigivolveCondition1())
+                                .digivolveCondition2(reflectCardRequestDto.getDigivolveCondition2())
+                                .digivolveCost1(reflectCardRequestDto.getDigivolveCost1())
+                                .digivolveCost2(reflectCardRequestDto.getDigivolveCost2())
+                                .lv(reflectCardRequestDto.getLv())
+                                .cardType(reflectCardRequestDto.getCardType())
+                                .form(reflectCardRequestDto.getForm())
+                                .rarity(reflectCardRequestDto.getRarity())
+                                .color1(reflectCardRequestDto.getColor1())
+                                .color2(reflectCardRequestDto.getColor2())
+                                .color3(reflectCardRequestDto.getColor3())
+                                .isOnlyEnCard(true)
+                                .releaseDate(LocalDate.of(9999, 12, 31))
+                                .build())
         );
 
-        cardEntity.updateEnglishCard(englishCardEntity);
 
+
+        Set<CardCombineTypeEntity> cardCombineTypeEntities = new HashSet<>();
+
+        if(cardEntity.getCardCombineTypeEntities() == null || cardEntity.getCardCombineTypeEntities().isEmpty()) {
+            for (String type : reflectCardRequestDto.getTypes()) {
+                TypeEntity typeEntity = typeRepository.findByEngName(type).orElseGet(() ->
+                        typeRepository.save(
+                                TypeEntity.builder()
+                                        .engName(type)
+                                        .build())
+                );
+
+                cardCombineTypeEntities.add(
+                        cardCombineTypeRepository.save(
+                                CardCombineTypeEntity.builder()
+                                        .cardEntity(cardEntity)
+                                        .typeEntity(typeEntity)
+                                        .build())
+                );
+            }
+            cardEntity.updateCardCombineTypes(cardCombineTypeEntities);
+        }
+
+        cardEntity.updateEnglishCard(englishCardEntity);
         return cardEntity;
     }
 

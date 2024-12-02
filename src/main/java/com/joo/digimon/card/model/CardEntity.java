@@ -73,4 +73,8 @@ public class CardEntity {
         this.englishCard = englishCard;
     }
 
+    public void updateCardCombineTypes(Set<CardCombineTypeEntity> cardCombineTypeEntities) {
+        this.cardCombineTypeEntities = cardCombineTypeEntities;
+    }
+
 }

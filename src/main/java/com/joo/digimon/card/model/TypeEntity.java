@@ -30,6 +30,7 @@ public class TypeEntity {
 
     String name;
     String engName;
+    String jpnName;
 
     @OneToMany(mappedBy = "typeEntity")
     List<CardCombineTypeEntity> cardCombineTypes;
