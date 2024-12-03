@@ -1,7 +1,7 @@
 package com.joo.digimon.card.service;
 
 import com.joo.digimon.card.dto.card.CardAdminPutDto;
-import com.joo.digimon.card.dto.card.CardSummeryDto;
+import com.joo.digimon.card.dto.card.TypeMergeRequestDto;
 import com.joo.digimon.card.dto.note.CreateNoteDto;
 import com.joo.digimon.card.dto.note.ResponseNoteDto;
 import com.joo.digimon.card.dto.note.UpdateNoteDto;
@@ -25,4 +25,5 @@ public interface CardAdminService {
 
     List<ResponseNoteDto> getNotes();
 
+    void mergeTypeToKorean(TypeMergeRequestDto dto);
 }

@@ -1,12 +1,14 @@
 package com.joo.digimon.card.service;
 
 import com.joo.digimon.card.dto.card.CardAdminPutDto;
+import com.joo.digimon.card.dto.card.TypeMergeRequestDto;
 import com.joo.digimon.card.dto.note.CreateNoteDto;
 import com.joo.digimon.card.dto.note.ResponseNoteDto;
 import com.joo.digimon.card.dto.note.UpdateNoteDto;
 import com.joo.digimon.card.dto.type.TypeDto;
 import com.joo.digimon.card.model.*;
 import com.joo.digimon.card.repository.*;
+import com.joo.digimon.global.enums.Locale;
 import com.joo.digimon.global.exception.model.CanNotDeleteException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -187,5 +189,24 @@ public class CardAdminServiceImpl implements CardAdminService {
         }
 
         return noteDtoList;
+    }
+
+    @Override
+    @Transactional
+    public void mergeTypeToKorean(TypeMergeRequestDto dto) {
+        TypeEntity baseType = typeRepository.findById(dto.getBaseTypeId()).orElseThrow();
+        TypeEntity targetType = typeRepository.findById(dto.getTargetTypeId()).orElseThrow();
+
+        baseType.getCardCombineTypes()
+                .forEach(cardCombineType -> cardCombineType.updateType(targetType));
+
+        if(dto.getLocale().equals(Locale.ENG)){
+            targetType.updateEngName(baseType.getEngName());
+        }
+        else if(dto.getLocale().equals(Locale.JPN)){
+            targetType.updateJpnName(baseType.getJpnName());
+        }
+
+        typeRepository.delete(baseType);
     }
 }

@@ -39,4 +39,12 @@ public class TypeEntity {
         this.name = dto.getName();
         this.engName = dto.getEngName();
     }
+
+    public void updateEngName(String engName) {
+        this.engName = engName;
+    }
+
+    public void updateJpnName(String jpnName) {
+        this.jpnName = jpnName;
+    }
 }

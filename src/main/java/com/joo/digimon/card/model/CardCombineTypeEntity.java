@@ -25,4 +25,8 @@ public class CardCombineTypeEntity {
     @ManyToOne
     @JoinColumn(name = "types_tb_id")
     TypeEntity typeEntity;
+
+    public void updateType(TypeEntity typeEntity) {
+        this.typeEntity = typeEntity;
+    }
 }
