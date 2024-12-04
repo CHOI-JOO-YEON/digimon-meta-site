@@ -2,7 +2,10 @@ package com.joo.digimon.card.model;
 
 import com.joo.digimon.card.dto.card.CardAdminPutDto;
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 import java.util.Optional;
@@ -12,8 +15,8 @@ import java.util.Optional;
 @AllArgsConstructor
 @Builder
 @Getter
-@Table(name = "ENG_CARDS_TB")
-public class EnglishCardEntity {
+@Table(name = "JPN_CARDS_TB")
+public class JapaneseCardEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Integer id;

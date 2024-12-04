@@ -11,5 +11,8 @@ public interface CardImageService {
     @Transactional
     int uploadNotUploadYetEnCardImages();
 
+    @Transactional
+    int uploadNotUploadYetJpCardImages();
+
     int getUploadYetCount();
 }

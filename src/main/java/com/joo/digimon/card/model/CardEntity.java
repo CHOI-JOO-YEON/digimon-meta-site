@@ -68,9 +68,18 @@ public class CardEntity {
     @OneToOne(mappedBy = "cardEntity")
     EnglishCardEntity englishCard;
 
+    @OneToOne(mappedBy = "cardEntity")
+    JapaneseCardEntity japaneseCardEntity;
 
     public void updateEnglishCard(EnglishCardEntity englishCard) {
         this.englishCard = englishCard;
+    }
+
+    public void updateJapaneseCard(JapaneseCardEntity japaneseCard) {
+        this.japaneseCardEntity = japaneseCard;
+    }
+    public void updateCardCombineTypes(Set<CardCombineTypeEntity> cardCombineTypeEntities) {
+        this.cardCombineTypeEntities = cardCombineTypeEntities;
     }
 
 }

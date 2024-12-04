@@ -3,6 +3,7 @@ package com.joo.digimon.card.controller;
 
 import com.joo.digimon.card.dto.card.CardAdminPutDto;
 import com.joo.digimon.card.dto.card.CardSearchRequestDto;
+import com.joo.digimon.card.dto.card.TypeMergeRequestDto;
 import com.joo.digimon.card.dto.note.CreateNoteDto;
 import com.joo.digimon.card.dto.note.UpdateNoteDto;
 import com.joo.digimon.card.dto.type.TypeDto;
@@ -69,6 +70,13 @@ public class CardAdminController {
     @DeleteMapping("/card/type/{type-id}")
     public ResponseEntity<?> deleteType(@PathVariable(name = "type-id") Integer typeId) {
         return new ResponseEntity<>(cardAdminService.deleteType(typeId), HttpStatus.OK);
+    }
+
+    @PostMapping("/card/type/merge")
+    public ResponseEntity<?> mergeTypeToKorean(@RequestBody TypeMergeRequestDto dto) {
+        cardAdminService.mergeTypeToKorean(dto);
+
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @PutMapping("/card/type/update")

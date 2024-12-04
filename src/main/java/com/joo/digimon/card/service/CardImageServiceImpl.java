@@ -24,6 +24,7 @@ public class CardImageServiceImpl implements CardImageService {
     private final ScalingClient scalingClient;
     private static final String KO_URL_PREFIX = "https://digimoncard.co.kr/";
     private static final String EN_URL_PREFIX = "https://world.digimoncard.com/";
+    private static final String JP_URL_PREFIX = "https://digimoncard.com/";
 
     @Value("${img.original}")
     private String originalUploadPrefix;
@@ -39,7 +40,7 @@ public class CardImageServiceImpl implements CardImageService {
     public int uploadNotUploadYetKorCardImages() {
         int cnt = 0;
 
-        List<CardImgEntity> cardImgEntityList = cardImgRepository.findByUploadUrlIsNullAndIsEnCardIsNull();
+        List<CardImgEntity> cardImgEntityList = cardImgRepository.findByUploadUrlIsNullAndIsEnCardIsNullAndIsJpnCardIsNull();
         cardImgEntityList.addAll(cardImgRepository.findByUploadUrlIsNullAndIsEnCardIsFalse());
 
         for (CardImgEntity cardImgEntity : cardImgEntityList) {
@@ -51,7 +52,6 @@ public class CardImageServiceImpl implements CardImageService {
             }
 
         }
-
         return cnt;
     }
 
@@ -62,6 +62,7 @@ public class CardImageServiceImpl implements CardImageService {
 
         cnt += uploadNotUploadYetEnCardImages();
         cnt += uploadNotUploadYetKorCardImages();
+        cnt += uploadNotUploadYetJpCardImages();
 
         return cnt;
     }
@@ -80,7 +81,24 @@ public class CardImageServiceImpl implements CardImageService {
             } catch (IOException ignore) {
 
             }
+        }
 
+        return cnt;
+    }
+    @Transactional
+    @Override
+    public int uploadNotUploadYetJpCardImages() {
+        int cnt = 0;
+
+        List<CardImgEntity> cardImgEntityList = cardImgRepository.findByUploadUrlIsNullAndIsJpnCardTrue();
+
+        for (CardImgEntity cardImgEntity : cardImgEntityList) {
+            try {
+                uploadImageJpn(cardImgEntity, JP_URL_PREFIX);
+                cnt++;
+            } catch (IOException ignore) {
+
+            }
         }
 
         return cnt;
@@ -117,6 +135,20 @@ public class CardImageServiceImpl implements CardImageService {
             keyNameBuilder.append("P").append(cardImgEntity.getId());
         }
         String uploadPrefix = originalUploadPrefix + "en/";
+        s3Util.uploadImageToS3(uploadPrefix + keyNameBuilder, image, "png");
+        cardImgEntity.updateUploadUrl(uploadPrefix, uploadPrefix, keyNameBuilder.toString());
+    }
+
+    private void uploadImageJpn(CardImgEntity cardImgEntity, String urlPrefix) throws IOException {
+
+        BufferedImage image = getImageData(urlPrefix + cardImgEntity.getOriginUrl());
+
+        StringBuilder keyNameBuilder = new StringBuilder();
+        keyNameBuilder.append(cardImgEntity.getCardEntity().getCardNo());
+        if (cardImgEntity.getIsParallel()) {
+            keyNameBuilder.append("P").append(cardImgEntity.getId());
+        }
+        String uploadPrefix = originalUploadPrefix + "jp/";
         s3Util.uploadImageToS3(uploadPrefix + keyNameBuilder, image, "png");
         cardImgEntity.updateUploadUrl(uploadPrefix, uploadPrefix, keyNameBuilder.toString());
     }

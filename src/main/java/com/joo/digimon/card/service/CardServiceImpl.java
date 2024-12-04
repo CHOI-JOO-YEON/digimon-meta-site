@@ -255,7 +255,7 @@ public class CardServiceImpl implements CardService {
     @Override
     public List<CardTypeResponseDto> getTypes() {
         Sort sort = Sort.by(Sort.Direction.ASC,"name");
-        List<TypeEntity> typeEntities = typeRepository.findAll(sort);
+        List<TypeEntity> typeEntities = typeRepository.findByNameIsNotNull(sort);
         List<CardTypeResponseDto> cardTypeResponseDtoList = new ArrayList<>();
         for (TypeEntity typeEntity : typeEntities) {
             cardTypeResponseDtoList.add(new CardTypeResponseDto(typeEntity));

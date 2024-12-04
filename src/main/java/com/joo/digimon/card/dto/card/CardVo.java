@@ -3,16 +3,16 @@ package com.joo.digimon.card.dto.card;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.joo.digimon.card.model.CardCombineTypeEntity;
 import com.joo.digimon.card.model.CardImgEntity;
-import com.joo.digimon.global.enums.CardType;
-import com.joo.digimon.global.enums.Color;
-import com.joo.digimon.global.enums.Form;
-import com.joo.digimon.global.enums.Rarity;
+import com.joo.digimon.card.model.TypeEntity;
+import com.joo.digimon.global.enums.*;
 import lombok.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Getter
 @Setter
@@ -22,7 +22,6 @@ import java.util.List;
 public class CardVo {
     Integer cardId;
     String cardNo;
-    String cardName;
     Integer lv;
     Integer dp;
     Integer playCost;
@@ -30,8 +29,6 @@ public class CardVo {
     Integer digivolveCondition1;
     Integer digivolveCost2;
     Integer digivolveCondition2;
-    String effect;
-    String sourceEffect;
     Color color1;
     Color color2;
     Color color3;
@@ -49,29 +46,10 @@ public class CardVo {
     LocalDate releaseDate;
     Boolean isEn;
     LocalDateTime modifiedAt;
+    List<LocaleCardData> localeCardDatas;
+
 
     public CardVo(CardImgEntity card, String prefixUrl) {
-        if (card.getCardEntity().getCardName() == null) {
-            if (card.getCardEntity().getEnglishCard() != null) {
-                this.cardName = card.getCardEntity().getEnglishCard().getCardName();
-            }
-        } else {
-            this.cardName = card.getCardEntity().getCardName();
-        }
-        if (card.getCardEntity().getEffect() == null) {
-            if (card.getCardEntity().getEnglishCard() != null) {
-                this.effect = card.getCardEntity().getEnglishCard().getEffect();
-            }
-        } else {
-            this.effect = card.getCardEntity().getEffect();
-        }
-        if (card.getCardEntity().getSourceEffect() == null) {
-            if (card.getCardEntity().getEnglishCard() != null) {
-                this.sourceEffect = card.getCardEntity().getEnglishCard().getSourceEffect();
-            }
-        } else {
-            this.sourceEffect = card.getCardEntity().getSourceEffect();
-        }
         this.cardId = card.getId();
         this.cardNo = card.getCardEntity().getCardNo();
         this.lv = card.getCardEntity().getLv();
@@ -88,10 +66,14 @@ public class CardVo {
         this.cardType = card.getCardEntity().getCardType();
         this.form = card.getCardEntity().getForm();
         this.attributes = card.getCardEntity().getAttribute();
-        this.types = new ArrayList<>();
-        for (CardCombineTypeEntity cardCombineTypeEntity : card.getCardEntity().getCardCombineTypeEntities()) {
-            types.add(cardCombineTypeEntity.getTypeEntity().getName());
-        }
+
+        types = card.getCardEntity().getCardCombineTypeEntities()
+                .stream()
+                .map(CardCombineTypeEntity::getTypeEntity)
+                .map(TypeEntity::getName)
+                .filter(Objects::nonNull)
+                .toList();
+
         this.imgUrl = prefixUrl + card.getUploadUrl();
         this.isParallel = card.getIsParallel();
         this.sortString = card.getCardEntity().getSortString();
@@ -102,6 +84,38 @@ public class CardVo {
         this.isEn = card.getIsEnCard();
         this.modifiedAt = card.getModifiedAt() == null ?
                 LocalDateTime.of(1998, 7, 15, 9, 30) : card.getModifiedAt();
+
+        localeCardDatas = new ArrayList<>();
+
+        if(card.getCardEntity().getCardName() !=null)
+        {
+            localeCardDatas.add(new LocaleCardData(
+                    card.getCardEntity().getCardName(),
+                    card.getCardEntity().getEffect(),
+                    card.getCardEntity().getSourceEffect(),
+                    Locale.KOR
+            ));
+        }
+
+        if(card.getCardEntity().getEnglishCard() !=null)
+        {
+            localeCardDatas.add(new LocaleCardData(
+                    card.getCardEntity().getEnglishCard().getCardName(),
+                    card.getCardEntity().getEnglishCard().getEffect(),
+                    card.getCardEntity().getEnglishCard().getSourceEffect(),
+                    Locale.ENG
+            ));
+        }
+
+        if (card.getCardEntity().getJapaneseCardEntity() != null) {
+            localeCardDatas.add(new LocaleCardData(
+                    card.getCardEntity().getJapaneseCardEntity().getCardName(),
+                    card.getCardEntity().getJapaneseCardEntity().getEffect(),
+                    card.getCardEntity().getJapaneseCardEntity().getSourceEffect(),
+                    Locale.JPN
+            ));
+        }
+
     }
 
 

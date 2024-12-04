@@ -1,7 +1,6 @@
 package com.joo.digimon.crawling.controller;
 
 import com.joo.digimon.card.service.CardImageService;
-import com.joo.digimon.crawling.dto.UpdateCrawlingRequestDto;
 import com.joo.digimon.crawling.service.CrawlingService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -9,7 +8,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/crawling")
@@ -24,16 +22,6 @@ public class CrawlingController {
         return new ResponseEntity<>(crawlingService.crawlAndSaveByUrl(pageUrl, locale, note), HttpStatus.CREATED);
     }
 
-    @PostMapping("/update")
-    public ResponseEntity<?> crawlingCard(@RequestBody List<UpdateCrawlingRequestDto> updateCrawlingRequestDtoList) {
-        return new ResponseEntity<>(crawlingService.updateCrawlingEntityAndSaveCard(updateCrawlingRequestDtoList), HttpStatus.OK);
-    }
-
-    @GetMapping("/list")
-    public ResponseEntity<?> getUnReflectCrawlingCardList(@RequestParam("size") Integer size) {
-        return new ResponseEntity<>(crawlingService.getUnreflectedCrawlingCardDtoList(size), HttpStatus.OK);
-    }
-
     @PostMapping("/upload-all")
     public ResponseEntity<?> uploadAll() {
         return new ResponseEntity<>(cardImageService.uploadAllImage(), HttpStatus.OK);
@@ -42,6 +30,11 @@ public class CrawlingController {
     @GetMapping("/upload-yet-count")
     public ResponseEntity<?> uploadYetCount() {
         return new ResponseEntity<>(cardImageService.getUploadYetCount(),HttpStatus.OK);
+    }
+
+    @PostMapping("/re")
+    public ResponseEntity<?> reCrawling(@RequestParam(name = "locale") String locale) throws IOException {
+        return new ResponseEntity<>(crawlingService.reCrawlingByLocale(locale), HttpStatus.OK);
     }
 
 }

@@ -4,15 +4,20 @@ import lombok.Getter;
 
 @Getter
 public enum CardType {
-    DIGITAMA("디지타마", "Digi-Egg"), DIGIMON("디지몬", "Digimon"), TAMER("테이머", "Tamer"), OPTION("옵션", "Option"), ERROR("에러", "Error");
+    DIGITAMA("디지타마", "Digi-Egg", "デジタマ"),
+    DIGIMON("디지몬", "Digimon", "デジモン"),
+    TAMER("테이머", "Tamer", "テイマー"),
+    OPTION("옵션", "Option", "オプション"),
+    ERROR("에러", "Error", "Error");
 
     final String kor;
     final String eng;
+    final String jpn;
 
-    CardType(String kor, String eng) {
+    CardType(String kor, String eng, String jpn) {
         this.kor = kor;
         this.eng = eng;
-
+        this.jpn = jpn;
     }
 
     public static CardType findByString(String cardType, String locale) {
@@ -23,6 +28,10 @@ public enum CardType {
                 }
             } else if (locale.equals("ENG")) {
                 if (value.eng.equals(cardType)) {
+                    return value;
+                }
+            } else if (locale.equals("JPN")) {
+                if (value.jpn.equals(cardType)) {
                     return value;
                 }
             }

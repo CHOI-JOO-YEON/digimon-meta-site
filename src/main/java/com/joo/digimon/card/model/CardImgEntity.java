@@ -25,6 +25,7 @@ import java.util.Set;
                         name = "cardEntitySubgraph",
                         attributeNodes = {
                                 @NamedAttributeNode(value = "englishCard"),
+                                @NamedAttributeNode(value = "japaneseCardEntity"),
                                 @NamedAttributeNode(value = "cardCombineTypeEntities", subgraph = "typeSubgraph"),
                         }
                 ),
@@ -60,6 +61,7 @@ public class CardImgEntity {
 
     Boolean isParallel;
     Boolean isEnCard;
+    Boolean isJpnCard;
 
     private LocalDateTime modifiedAt;
 

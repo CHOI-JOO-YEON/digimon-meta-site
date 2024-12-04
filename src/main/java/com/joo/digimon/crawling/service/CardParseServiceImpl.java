@@ -34,6 +34,7 @@ public class CardParseServiceImpl implements CardParseService {
         dto.setNote(parseNote(crawlingCard.getNote()));
         dto.setColor1(parseColor(crawlingCard.getColor1()));
         dto.setColor2(parseColor(crawlingCard.getColor2()));
+        dto.setColor3(parseColor(crawlingCard.getColor3()));
 
         if (crawlingCard.getLocale().equals("KOR")) {
             dto.setOriginUrl(parseUrl(crawlingCard.getImgUrl()));
@@ -43,6 +44,12 @@ public class CardParseServiceImpl implements CardParseService {
             setDtoDigivolve(dto, crawlingCard);
         } else if (crawlingCard.getLocale().equals("ENG")) {
             dto.setOriginUrl(parseEnUrl(crawlingCard.getImgUrl()));
+            dto.setForm(parseForm(crawlingCard.getForm(), dto.getCardType(), crawlingCard.getLocale()));
+            dto.setTypes(parseEngTypes(crawlingCard.getType(), dto.getCardType()));
+        } else if (crawlingCard.getLocale().equals("JPN")) {
+            dto.setOriginUrl(parseEnUrl(crawlingCard.getImgUrl()));
+            dto.setForm(parseForm(crawlingCard.getForm(), dto.getCardType(), crawlingCard.getLocale()));
+            dto.setTypes(parseEngTypes(crawlingCard.getType(), dto.getCardType()));
         }
 
         return dto;
@@ -56,11 +63,11 @@ public class CardParseServiceImpl implements CardParseService {
         return cardNo;
     }
 
-    private Rarity parseCardRarity(String rarity) throws CardParseException {
+    private Rarity parseCardRarity(String rarity) {
         return Rarity.parseRarity(rarity);
     }
 
-    private CardType parseCardType(String cardType, String locale) throws CardParseException {
+    private CardType parseCardType(String cardType, String locale) {
         return CardType.findByString(cardType, locale);
     }
 
@@ -79,7 +86,7 @@ public class CardParseServiceImpl implements CardParseService {
     }
 
     private String parseCardName(String cardName, String locale) throws CardParseException {
-        if (locale.equals("ENG")) {
+        if (!locale.equals("KOR")) {
             return cardName;
         }
 
@@ -122,6 +129,21 @@ public class CardParseServiceImpl implements CardParseService {
             return new ArrayList<>();
         }
         String[] types = type.split(",");
+        List<String> typeList = new ArrayList<>();
+        for (String s : types) {
+            typeList.add(s.trim());
+        }
+        return typeList;
+    }
+
+    private List<String> parseEngTypes(String type, CardType cardType) throws CardParseException {
+        if (cardType.equals(CardType.TAMER) || cardType.equals(CardType.OPTION)) {
+            return new ArrayList<>();
+        }
+        if (type == null) {
+            return new ArrayList<>();
+        }
+        String[] types = type.split("/");
         List<String> typeList = new ArrayList<>();
         for (String s : types) {
             typeList.add(s.trim());

@@ -13,7 +13,7 @@ spring:
     username: sa
     password:
     driver-class-name: org.h2.Driver
-    url: jdbc:h2:file:/data/demo
+    url: jdbc:h2:file:~/demo;AUTO_SERVER=TRUE
   application:
     name: Digimon-Meta-Dev
   cloud:

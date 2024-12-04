@@ -30,6 +30,7 @@ public class TypeEntity {
 
     String name;
     String engName;
+    String jpnName;
 
     @OneToMany(mappedBy = "typeEntity")
     List<CardCombineTypeEntity> cardCombineTypes;
@@ -37,5 +38,13 @@ public class TypeEntity {
     public void putType(TypeDto dto) {
         this.name = dto.getName();
         this.engName = dto.getEngName();
+    }
+
+    public void updateEngName(String engName) {
+        this.engName = engName;
+    }
+
+    public void updateJpnName(String jpnName) {
+        this.jpnName = jpnName;
     }
 }
