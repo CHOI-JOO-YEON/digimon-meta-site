@@ -13,4 +13,6 @@ public interface CrawlingCardRepository extends JpaRepository<CrawlingCardEntity
     List<CrawlingCardEntity> findByCardImgEntityIsNullAndParallelCardImgEntityIsNull(Pageable pageable);
 
     Optional<CrawlingCardEntity> findByImgUrl(String url);
+
+    Optional<CrawlingCardEntity> findByImgUrlAndLocale(String imgUrl, String locale);
 }

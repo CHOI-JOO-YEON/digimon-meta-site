@@ -107,6 +107,15 @@ public class CardVo {
             ));
         }
 
+        if (card.getCardEntity().getJapaneseCardEntity() != null) {
+            localeCardDatas.add(new LocaleCardData(
+                    card.getCardEntity().getJapaneseCardEntity().getCardName(),
+                    card.getCardEntity().getJapaneseCardEntity().getEffect(),
+                    card.getCardEntity().getJapaneseCardEntity().getSourceEffect(),
+                    Locale.JPN
+            ));
+        }
+
     }
 
 

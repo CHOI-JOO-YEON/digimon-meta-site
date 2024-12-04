@@ -13,6 +13,7 @@ import java.util.Optional;
 public interface TypeRepository extends JpaRepository<TypeEntity,Integer> {
     Optional<TypeEntity> findByName(String name);
     Optional<TypeEntity> findByEngName(String engName);
+    Optional<TypeEntity> findByJpnName(String engName);
 
     @Override
     @EntityGraph("TypeEntity.detail")

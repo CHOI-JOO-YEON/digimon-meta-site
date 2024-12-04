@@ -44,6 +44,11 @@ public class CardParseServiceImpl implements CardParseService {
             setDtoDigivolve(dto, crawlingCard);
         } else if (crawlingCard.getLocale().equals("ENG")) {
             dto.setOriginUrl(parseEnUrl(crawlingCard.getImgUrl()));
+            dto.setForm(parseForm(crawlingCard.getForm(), dto.getCardType(), crawlingCard.getLocale()));
+            dto.setTypes(parseEngTypes(crawlingCard.getType(), dto.getCardType()));
+        } else if (crawlingCard.getLocale().equals("JPN")) {
+            dto.setOriginUrl(parseEnUrl(crawlingCard.getImgUrl()));
+            dto.setForm(parseForm(crawlingCard.getForm(), dto.getCardType(), crawlingCard.getLocale()));
             dto.setTypes(parseEngTypes(crawlingCard.getType(), dto.getCardType()));
         }
 
@@ -81,7 +86,7 @@ public class CardParseServiceImpl implements CardParseService {
     }
 
     private String parseCardName(String cardName, String locale) throws CardParseException {
-        if (locale.equals("ENG")) {
+        if (!locale.equals("KOR")) {
             return cardName;
         }
 
@@ -130,6 +135,7 @@ public class CardParseServiceImpl implements CardParseService {
         }
         return typeList;
     }
+
     private List<String> parseEngTypes(String type, CardType cardType) throws CardParseException {
         if (cardType.equals(CardType.TAMER) || cardType.equals(CardType.OPTION)) {
             return new ArrayList<>();

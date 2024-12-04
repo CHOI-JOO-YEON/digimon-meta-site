@@ -6,6 +6,7 @@ import com.joo.digimon.crawling.dto.*;
 import com.joo.digimon.crawling.model.CrawlingCardEntity;
 import com.joo.digimon.crawling.model.DeletedEnCardImg;
 import com.joo.digimon.crawling.procedure.EngCrawlingProcedure;
+import com.joo.digimon.crawling.procedure.JpnCrawlingProcedure;
 import com.joo.digimon.crawling.procedure.KorCrawlingProcedure;
 import com.joo.digimon.crawling.repository.CrawlingCardRepository;
 import com.joo.digimon.crawling.repository.DeletedEnCardImgRepository;
@@ -39,6 +40,7 @@ public class CrawlingServiceImpl implements CrawlingService {
     private final CardParseService cardParseService;
     private final DeletedEnCardImgRepository deletedEnCardImgRepository;
     private final EnglishCardRepository englishCardRepository;
+    private final JapaneseCardRepository japaneseCardRepository;
 
 
     @Transactional
@@ -48,7 +50,9 @@ public class CrawlingServiceImpl implements CrawlingService {
         CardEntity cardEntity;
         if (locale.equals("ENG")) {
             cardEntity = getEnglishCardEntityOrInsert(reflectCardRequestDto);
-        } else {
+        }else if(locale.equals("JPN")){
+            cardEntity = getJapaneseCardEntityOrInsert(reflectCardRequestDto);
+        }else {
             cardEntity = getCardEntityOrInsert(reflectCardRequestDto);
         }
 
@@ -62,11 +66,37 @@ public class CrawlingServiceImpl implements CrawlingService {
             if (cardImgEntityList.size() == 1) {
                 CardImgEntity cardImgEntity = cardImgEntityList.getFirst();
 
-                if (!Boolean.TRUE.equals(cardImgEntity.getIsEnCard())) {
-                    throw new CardImageException("Non-parallel cards already reflected");
+                if(locale.equals("KOR")) {
+                    if(!Boolean.TRUE.equals(cardImgEntity.getIsEnCard()) && !Boolean.TRUE.equals(cardImgEntity.getIsJpnCard()))
+                    {
+                        throw new CardImageException("Non-parallel cards already reflected");
+                    }
+                    deletedEnCardImgRepository.save(DeletedEnCardImg.builder().cardEntity(cardEntity).crawlingCardEntity(cardImgEntity.getCrawlingCardEntity()).uploadUrl(cardImgEntity.getUploadUrl()).smallImgUrl(cardImgEntity.getSmallImgUrl()).originUrl(cardImgEntity.getOriginUrl()).noteEntity(cardImgEntity.getNoteEntity()).build());
+                    cardImgRepository.save(
+                            CardImgEntity.builder()
+                                    .id(cardImgEntity.getId())
+                                    .isParallel(reflectCardRequestDto.getIsParallel())
+                                    .noteEntity(noteEntity)
+                                    .crawlingCardEntity(crawlingCardEntity)
+                                    .cardEntity(cardEntity)
+                                    .originUrl(reflectCardRequestDto.getOriginUrl())
+                                    .build());
+
+                }else if(locale.equals("ENG")) {
+                    if(cardImgEntity.getIsJpnCard())
+                    {
+                        cardImgRepository.save(
+                                CardImgEntity.builder()
+                                        .id(cardImgEntity.getId())
+                                        .isParallel(reflectCardRequestDto.getIsParallel())
+                                        .noteEntity(noteEntity)
+                                        .crawlingCardEntity(crawlingCardEntity)
+                                        .cardEntity(cardEntity)
+                                        .originUrl(reflectCardRequestDto.getOriginUrl())
+                                        .isEnCard(true)
+                                        .build());
+                    }
                 }
-                deletedEnCardImgRepository.save(DeletedEnCardImg.builder().cardEntity(cardEntity).crawlingCardEntity(cardImgEntity.getCrawlingCardEntity()).uploadUrl(cardImgEntity.getUploadUrl()).smallImgUrl(cardImgEntity.getSmallImgUrl()).originUrl(cardImgEntity.getOriginUrl()).noteEntity(cardImgEntity.getNoteEntity()).build());
-                cardImgRepository.save(CardImgEntity.builder().id(cardImgEntity.getId()).isParallel(reflectCardRequestDto.getIsParallel()).noteEntity(noteEntity).crawlingCardEntity(crawlingCardEntity).cardEntity(cardEntity).originUrl(reflectCardRequestDto.getOriginUrl()).build());
                 return;
             }
         }
@@ -78,7 +108,70 @@ public class CrawlingServiceImpl implements CrawlingService {
                         .cardEntity(cardEntity)
                         .originUrl(reflectCardRequestDto.getOriginUrl())
                         .isEnCard(locale.equals("ENG"))
+                        .isJpnCard(locale.equals("JPN"))
                         .build());
+    }
+
+
+    @Transactional
+    public CardEntity getJapaneseCardEntityOrInsert(ReflectCardRequestDto reflectCardRequestDto) {
+        JapaneseCardEntity japaneseCardEntity = japaneseCardRepository.save(
+                JapaneseCardEntity.builder()
+                .effect(reflectCardRequestDto.getEffect())
+                .sourceEffect(reflectCardRequestDto.getSourceEffect())
+                .cardName(reflectCardRequestDto.getCardName())
+                .build());
+
+        CardEntity cardEntity = cardRepository.findByCardNo(reflectCardRequestDto.getCardNo()).orElseGet(
+                () -> cardRepository.save(
+                        CardEntity.builder()
+                                .sortString(generateSortString(reflectCardRequestDto.getCardNo()))
+                                .cardNo(reflectCardRequestDto.getCardNo())
+                                .dp(reflectCardRequestDto.getDp())
+                                .playCost(reflectCardRequestDto.getPlayCost())
+                                .digivolveCondition1(reflectCardRequestDto.getDigivolveCondition1())
+                                .digivolveCondition2(reflectCardRequestDto.getDigivolveCondition2())
+                                .digivolveCost1(reflectCardRequestDto.getDigivolveCost1())
+                                .digivolveCost2(reflectCardRequestDto.getDigivolveCost2())
+                                .lv(reflectCardRequestDto.getLv())
+                                .cardType(reflectCardRequestDto.getCardType())
+                                .form(reflectCardRequestDto.getForm())
+                                .rarity(reflectCardRequestDto.getRarity())
+                                .color1(reflectCardRequestDto.getColor1())
+                                .color2(reflectCardRequestDto.getColor2())
+                                .color3(reflectCardRequestDto.getColor3())
+                                .isOnlyEnCard(true)
+                                .releaseDate(LocalDate.of(9999, 12, 31))
+                                .build())
+        );
+
+
+
+        Set<CardCombineTypeEntity> cardCombineTypeEntities = new HashSet<>();
+
+        if(cardEntity.getCardCombineTypeEntities() == null || cardEntity.getCardCombineTypeEntities().isEmpty()) {
+            for (String type : reflectCardRequestDto.getTypes()) {
+                TypeEntity typeEntity = typeRepository.findByJpnName(type).orElseGet(() ->
+                        typeRepository.save(
+                                TypeEntity.builder()
+                                        .jpnName(type)
+                                        .build())
+                );
+
+                cardCombineTypeEntities.add(
+                        cardCombineTypeRepository.save(
+                                CardCombineTypeEntity.builder()
+                                        .cardEntity(cardEntity)
+                                        .typeEntity(typeEntity)
+                                        .build())
+                );
+            }
+            cardEntity.updateCardCombineTypes(cardCombineTypeEntities);
+        }
+
+        cardEntity.updateJapaneseCard(japaneseCardEntity);
+        japaneseCardEntity.updateCardEntity(cardEntity);
+        return cardEntity;
     }
 
     private CardEntity getCardEntityOrInsert(ReflectCardRequestDto reflectCardRequestDto) {
@@ -108,10 +201,11 @@ public class CrawlingServiceImpl implements CrawlingService {
                         .color3(reflectCardRequestDto.getColor3())
                         .isOnlyEnCard(false).build());
 
-
-                for (String type : reflectCardRequestDto.getTypes()) {
-                    TypeEntity typeEntity = typeRepository.findByName(type).orElseGet(() -> typeRepository.save(TypeEntity.builder().name(type).build()));
-                    cardCombineTypeRepository.save(CardCombineTypeEntity.builder().cardEntity(save).typeEntity(typeEntity).build());
+                if(save.getCardCombineTypeEntities() == null || save.getCardCombineTypeEntities().isEmpty()) {
+                    for (String type : reflectCardRequestDto.getTypes()) {
+                        TypeEntity typeEntity = typeRepository.findByName(type).orElseGet(() -> typeRepository.save(TypeEntity.builder().name(type).build()));
+                        cardCombineTypeRepository.save(CardCombineTypeEntity.builder().cardEntity(save).typeEntity(typeEntity).build());
+                    }
                 }
                 return save;
 
@@ -142,11 +236,11 @@ public class CrawlingServiceImpl implements CrawlingService {
                 .color3(reflectCardRequestDto.getColor3())
                 .build());
 
-
         for (String type : reflectCardRequestDto.getTypes()) {
             TypeEntity typeEntity = typeRepository.findByName(type).orElseGet(() -> typeRepository.save(TypeEntity.builder().name(type).build()));
             cardCombineTypeRepository.save(CardCombineTypeEntity.builder().cardEntity(save).typeEntity(typeEntity).build());
         }
+
         return save;
 
     }
@@ -226,7 +320,7 @@ public class CrawlingServiceImpl implements CrawlingService {
 
 
             if ((note == null || crawlingCardDto.getNote().equals(note))
-                    && (!locale.equals("ENG") || !crawlingCardDto.getIsParallel())) {
+                    && (locale.equals("KOR") || !crawlingCardDto.getIsParallel())) {
                 crawlingCardDtoList.add(crawlingCardDto);
             }
         }
@@ -242,7 +336,7 @@ public class CrawlingServiceImpl implements CrawlingService {
     }
 
     private CrawlingCardEntity createOrFindCrawlingCardEntity(CrawlingCardDto crawlingCardDto) {
-        return crawlingCardRepository.findByImgUrl(crawlingCardDto.getImgUrl()).orElseGet(() -> crawlingCardRepository.save(new CrawlingCardEntity(crawlingCardDto)));
+        return crawlingCardRepository.findByImgUrlAndLocale(crawlingCardDto.getImgUrl(), crawlingCardDto.getLocale()).orElseGet(() -> crawlingCardRepository.save(new CrawlingCardEntity(crawlingCardDto)));
     }
 
     @Override
@@ -274,6 +368,7 @@ public class CrawlingServiceImpl implements CrawlingService {
         return switch (locale) {
             case "KOR" -> new KorCrawlingProcedure(element).crawl();
             case "ENG" -> new EngCrawlingProcedure(element).crawl();
+            case "JPN" -> new JpnCrawlingProcedure(element).crawl();
             default -> null;
         };
     }
