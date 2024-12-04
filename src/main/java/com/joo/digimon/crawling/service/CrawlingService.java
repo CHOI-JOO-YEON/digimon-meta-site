@@ -17,4 +17,5 @@ public interface CrawlingService {
 
     CrawlingCardDto crawlingCardByElement(Element element, String locale);
 
+    CrawlingResultDto reCrawlingByLocale(String locale) throws IOException;
 }

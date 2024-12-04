@@ -32,4 +32,9 @@ public class CrawlingController {
         return new ResponseEntity<>(cardImageService.getUploadYetCount(),HttpStatus.OK);
     }
 
+    @PostMapping("/re")
+    public ResponseEntity<?> reCrawling(@RequestParam(name = "locale") String locale) throws IOException {
+        return new ResponseEntity<>(crawlingService.reCrawlingByLocale(locale), HttpStatus.OK);
+    }
+
 }

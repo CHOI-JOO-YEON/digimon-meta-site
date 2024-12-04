@@ -71,7 +71,15 @@ public class CrawlingServiceImpl implements CrawlingService {
                     {
                         throw new CardImageException("Non-parallel cards already reflected");
                     }
-                    deletedEnCardImgRepository.save(DeletedEnCardImg.builder().cardEntity(cardEntity).crawlingCardEntity(cardImgEntity.getCrawlingCardEntity()).uploadUrl(cardImgEntity.getUploadUrl()).smallImgUrl(cardImgEntity.getSmallImgUrl()).originUrl(cardImgEntity.getOriginUrl()).noteEntity(cardImgEntity.getNoteEntity()).build());
+                    deletedEnCardImgRepository.save(DeletedEnCardImg.builder()
+                            .cardEntity(cardEntity)
+                            .crawlingCardEntity(cardImgEntity.getCrawlingCardEntity())
+                            .uploadUrl(cardImgEntity.getUploadUrl())
+                            .smallImgUrl(cardImgEntity.getSmallImgUrl())
+                            .originUrl(cardImgEntity.getOriginUrl())
+                            .noteEntity(cardImgEntity.getNoteEntity())
+                            .build());
+
                     cardImgRepository.save(
                             CardImgEntity.builder()
                                     .id(cardImgEntity.getId())
@@ -433,4 +441,37 @@ public class CrawlingServiceImpl implements CrawlingService {
         return cardEntity;
     }
 
+
+    @Transactional
+    public CrawlingResultDto reCrawlingByLocale(String locale) {
+        CrawlingResultDto crawlingResultDto = new CrawlingResultDto();
+        List<CrawlingCardEntity> crawlingCardEntities = crawlingCardRepository.findByLocale(locale);
+
+        for (CrawlingCardEntity crawlingCardEntity : crawlingCardEntities) {
+            try {
+                ReflectCardRequestDto reflectCardRequestDto = cardParseService.crawlingCardParse(crawlingCardEntity);
+                CardEntity cardEntity = cardRepository.findByCardNo(crawlingCardEntity.getCardNo()).orElseThrow();
+
+                if(locale.equals("ENG")) {
+                    if(cardEntity.getEnglishCard()==null) {
+                        EnglishCardEntity englishCardEntity = englishCardRepository.save(
+                                EnglishCardEntity.builder()
+                                        .cardEntity(cardEntity)
+                                        .cardName(crawlingCardEntity.getCardName())
+                                        .effect(reflectCardRequestDto.getEffect())
+                                        .sourceEffect(reflectCardRequestDto.getSourceEffect())
+                                        .build());
+                        cardEntity.updateEnglishCard(englishCardEntity);
+                        crawlingResultDto.successCountIncrease();
+                    }
+                }
+            } catch (CardParseException e) {
+                crawlingCardEntity.updateErrorMessage(e.getMessage());
+                crawlingResultDto.addFailedCrawling(new CrawlingCardDto(crawlingCardEntity));
+            } catch (Exception e) {
+                log.error("{} 에서 발생 {} ", crawlingCardEntity, e);
+            }
+        }
+        return crawlingResultDto;
+    }
 }
