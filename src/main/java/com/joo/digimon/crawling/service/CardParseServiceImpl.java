@@ -178,6 +178,7 @@ public class CardParseServiceImpl implements CardParseService {
         if (effect.equals("-")) {
             return null;
         }
+        effect = effect.replace("<img src=\"../images/cardlist/evolution.png\">", "〔進化〕");
         return effect;
     }
 

@@ -32,9 +32,9 @@ public class JapaneseCardEntity {
     CardEntity cardEntity;
 
     public void update(CardAdminPutDto dto) {
-        Optional.ofNullable(dto.getEngEffect()).ifPresent(value -> this.effect = value);
-        Optional.ofNullable(dto.getEngSourceEffect()).ifPresent(value -> this.sourceEffect = value);
-        Optional.ofNullable(dto.getCardEngName()).ifPresent(value -> this.cardName = value);
+        Optional.ofNullable(dto.getJpnEffect()).ifPresent(value -> this.effect = value);
+        Optional.ofNullable(dto.getJpnSourceEffect()).ifPresent(value -> this.sourceEffect = value);
+        Optional.ofNullable(dto.getCardJpnName()).ifPresent(value -> this.cardName = value);
     }
 
 

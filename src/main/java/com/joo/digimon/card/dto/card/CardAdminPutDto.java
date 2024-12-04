@@ -18,6 +18,7 @@ public class CardAdminPutDto {
     String cardNo;
     String cardName;
     String cardEngName;
+    String cardJpnName;
     Integer lv;
     Integer dp;
     Integer playCost;
@@ -27,8 +28,10 @@ public class CardAdminPutDto {
     Integer digivolveCondition2;
     String effect;
     String engEffect;
+    String jpnEffect;
     String sourceEffect;
     String engSourceEffect;
+    String jpnSourceEffect;
     Color color1;
     Color color2;
     Color color3;
