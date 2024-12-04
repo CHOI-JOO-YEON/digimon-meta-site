@@ -32,9 +32,9 @@ public class CardParseServiceImpl implements CardParseService {
         dto.setEffect(parseEffect(crawlingCard.getEffect()));
         dto.setSourceEffect(parseSourceEffect(crawlingCard.getSourceEffect()));
         dto.setNote(parseNote(crawlingCard.getNote()));
-        dto.setColor1(parseColor(crawlingCard.getColor1()));
-        dto.setColor2(parseColor(crawlingCard.getColor2()));
-        dto.setColor3(parseColor(crawlingCard.getColor3()));
+        dto.setColor1(parseColor(crawlingCard.getColor1(),crawlingCard.getLocale()));
+        dto.setColor2(parseColor(crawlingCard.getColor2(),crawlingCard.getLocale()));
+        dto.setColor3(parseColor(crawlingCard.getColor3(),crawlingCard.getLocale()));
 
         if (crawlingCard.getLocale().equals("KOR")) {
             dto.setOriginUrl(parseUrl(crawlingCard.getImgUrl()));
@@ -192,12 +192,15 @@ public class CardParseServiceImpl implements CardParseService {
         return note.replace("▹", "");
     }
 
-    private Color parseColor(String color) throws CardParseException {
+    private Color parseColor(String color, String locale) throws CardParseException {
+
         if (color == null) {
             return null;
         }
-        return Color.getColorByString(color);
+        return locale.equals("JPN")?Color.getColorByJpn(color):Color.getColorByString(color);
     }
+
+
 
     private String parseUrl(String imgUrl) throws CardParseException {
         if (imgUrl == null) {
