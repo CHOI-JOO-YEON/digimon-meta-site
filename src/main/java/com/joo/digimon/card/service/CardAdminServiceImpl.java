@@ -24,6 +24,7 @@ public class CardAdminServiceImpl implements CardAdminService {
     private final EnglishCardRepository englishCardRepository;
     private final CardCombineTypeRepository cardCombineTypeRepository;
     private final TypeRepository typeRepository;
+    private final JapaneseCardRepository japaneseCardRepository;
 
     @Override
     @Transactional
@@ -72,14 +73,15 @@ public class CardAdminServiceImpl implements CardAdminService {
     public void updateCards(List<CardAdminPutDto> cardAdminPutDtoList) {
         for (CardAdminPutDto cardAdminPutDto : cardAdminPutDtoList) {
             CardImgEntity cardImgEntity = getCardImgEntity(cardAdminPutDto);
-
             updateCardEnglishProperty(cardAdminPutDto, cardImgEntity);
+            updateCardJapaneseProperty(cardAdminPutDto, cardImgEntity);
             cardImgEntity.update(cardAdminPutDto);
             NoteEntity noteEntity = noteRepository.findById(cardAdminPutDto.getNoteId()).orElseThrow();
             cardImgEntity.updateNote(noteEntity);
             updateType(cardAdminPutDto, cardImgEntity);
         }
     }
+
 
     @Override
     public List<TypeDto> getAllType() {
@@ -167,6 +169,22 @@ public class CardAdminServiceImpl implements CardAdminService {
         englishCardRepository.save(englishCard);
     }
 
+
+    @Transactional
+    public void updateCardJapaneseProperty(CardAdminPutDto cardAdminPutDto, CardImgEntity cardImgEntity) {
+        if (!isJpnPresent(cardAdminPutDto)) {
+            return;
+        }
+        JapaneseCardEntity japaneseCardEntity = cardImgEntity.getCardEntity().getJapaneseCardEntity();
+        if (japaneseCardEntity == null) {
+            japaneseCardEntity = JapaneseCardEntity.builder().cardEntity(cardImgEntity.getCardEntity()).build();
+        }
+        japaneseCardEntity.update(cardAdminPutDto);
+        japaneseCardRepository.save(japaneseCardEntity);
+    }
+    private boolean isJpnPresent(CardAdminPutDto cardAdminPutDto) {
+        return cardAdminPutDto.getCardJpnName()!=null || cardAdminPutDto.getJpnEffect()!=null || cardAdminPutDto.getJpnSourceEffect()!=null;
+    }
     private boolean isEngPresent(CardAdminPutDto cardAdminPutDto) {
         return cardAdminPutDto.getCardEngName()!=null || cardAdminPutDto.getEngEffect()!=null || cardAdminPutDto.getEngSourceEffect()!=null;
     }
