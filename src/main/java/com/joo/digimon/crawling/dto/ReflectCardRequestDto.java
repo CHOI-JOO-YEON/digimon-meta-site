@@ -1,9 +1,6 @@
 package com.joo.digimon.crawling.dto;
 
-import com.joo.digimon.global.enums.CardType;
-import com.joo.digimon.global.enums.Color;
-import com.joo.digimon.global.enums.Form;
-import com.joo.digimon.global.enums.Rarity;
+import com.joo.digimon.global.enums.*;
 import lombok.Data;
 
 import java.util.List;
@@ -33,4 +30,5 @@ public class ReflectCardRequestDto {
     Color color2;
     Color color3;
     String originUrl;
+    Locale locale;
 }

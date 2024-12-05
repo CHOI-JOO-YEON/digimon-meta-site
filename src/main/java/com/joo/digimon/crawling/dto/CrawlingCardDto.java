@@ -1,6 +1,7 @@
 package com.joo.digimon.crawling.dto;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.joo.digimon.crawling.model.CrawlingCardEntity;
+import com.joo.digimon.global.enums.Locale;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -30,7 +31,7 @@ public class CrawlingCardDto {
         String color3;
         String imgUrl;
         String errorMessage;
-        String locale;
+        Locale locale;
 
     public CrawlingCardDto(CrawlingCardEntity crawlingCardEntity) {
         this.id = crawlingCardEntity.getId();

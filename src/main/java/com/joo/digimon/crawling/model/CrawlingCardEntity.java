@@ -4,6 +4,7 @@ package com.joo.digimon.crawling.model;
 import com.joo.digimon.card.model.CardImgEntity;
 import com.joo.digimon.card.model.ParallelCardImgEntity;
 import com.joo.digimon.crawling.dto.CrawlingCardDto;
+import com.joo.digimon.global.enums.Locale;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -50,7 +51,8 @@ public class CrawlingCardEntity {
     Boolean isReflect;
     Boolean isEnCard;
 
-    String locale;
+    @Enumerated(EnumType.STRING)
+    Locale locale;
 
     public CrawlingCardEntity(CrawlingCardDto dto) {
         this.cardNo = dto.getCardNo();

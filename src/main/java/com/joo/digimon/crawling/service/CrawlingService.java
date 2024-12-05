@@ -1,6 +1,7 @@
 package com.joo.digimon.crawling.service;
 
 import com.joo.digimon.crawling.dto.*;
+import com.joo.digimon.global.enums.Locale;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 
@@ -17,5 +18,5 @@ public interface CrawlingService {
 
     CrawlingCardDto crawlingCardByElement(Element element, String locale);
 
-    CrawlingResultDto reCrawlingByLocale(String locale) throws IOException;
+    CrawlingResultDto reCrawlingByLocale(Locale locale) throws IOException;
 }

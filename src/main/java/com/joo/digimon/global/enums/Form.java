@@ -28,17 +28,17 @@ public enum Form {
         this.jpn = jpn;
     }
 
-    public static Form findForm(String form, String locale) {
+    public static Form findForm(String form, Locale locale) {
         for (Form value : Form.values()) {
-            if (locale.equals("ENG")) {
+            if (locale == Locale.ENG) {
                 if (value.eng.equals(form)) {
                     return value;
                 }
-            } else if (locale.equals("KOR")) {
+            } else if (locale == Locale.KOR) {
                 if (value.kor.equals(form)) {
                     return value;
                 }
-            } else if (locale.equals("JPN")) {
+            } else if (locale == Locale.JPN) {
                 if (value.jpn.equals(form)) {
                     return value;
                 }

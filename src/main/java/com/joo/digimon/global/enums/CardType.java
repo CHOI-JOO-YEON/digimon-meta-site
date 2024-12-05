@@ -20,17 +20,17 @@ public enum CardType {
         this.jpn = jpn;
     }
 
-    public static CardType findByString(String cardType, String locale) {
+    public static CardType findByString(String cardType, Locale locale) {
         for (CardType value : CardType.values()) {
-            if (locale.equals("KOR")) {
+            if (locale == Locale.KOR) {
                 if (value.kor.equals(cardType)) {
                     return value;
                 }
-            } else if (locale.equals("ENG")) {
+            } else if (locale == Locale.ENG) {
                 if (value.eng.equals(cardType)) {
                     return value;
                 }
-            } else if (locale.equals("JPN")) {
+            } else if (locale == Locale.JPN) {
                 if (value.jpn.equals(cardType)) {
                     return value;
                 }

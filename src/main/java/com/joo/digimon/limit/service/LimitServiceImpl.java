@@ -69,7 +69,6 @@ public class LimitServiceImpl implements LimitService {
         }
     }
 
-
     @Override
     @Transactional
     public void updateLimit(LimitPutRequestDto limitPutRequestDto) {

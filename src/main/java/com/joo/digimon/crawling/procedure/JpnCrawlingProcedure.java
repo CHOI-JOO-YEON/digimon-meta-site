@@ -1,8 +1,12 @@
 package com.joo.digimon.crawling.procedure;
 
-import com.joo.digimon.crawling.dto.CrawlingCardDto;
+import com.joo.digimon.global.enums.Locale;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 
 public class JpnCrawlingProcedure implements CrawlingProcedure {
 
@@ -13,61 +17,108 @@ public class JpnCrawlingProcedure implements CrawlingProcedure {
     }
 
     @Override
-    public CrawlingCardDto crawl() {
-        CrawlingCardDto crawlingCardDto = new CrawlingCardDto();
-
-        crawlingCardDto.setLocale("JPN");
-        crawlingCardDto.setIsParallel(!element.select(".cardParallel").isEmpty());
-
-        extractCardInfoHead(element, crawlingCardDto);
-        extractEngCardInfoBottom(element, crawlingCardDto);
-        extractEngCardInfoTop(element, crawlingCardDto);
-        return crawlingCardDto;
+    public String getCardNo() {
+        return Objects.requireNonNull(element.selectFirst(".cardno")).text();
     }
 
-    private static void extractCardInfoHead(Element element, CrawlingCardDto crawlingCardDto) {
-        crawlingCardDto.setCardNo(element.selectFirst(".cardno").text());
-        crawlingCardDto.setRarity(element.select(".cardinfo_head>li").get(1).text());
-        crawlingCardDto.setCardType(element.selectFirst(".cardtype").text());
-    }
-    private static void extractEngCardInfoBottom(Element element, CrawlingCardDto crawlingCardDto) {
-        crawlingCardDto.setEffect(CrawlingProcedure.parseElementToPlainText(element.select(".cardinfo_bottom dl:contains(上段テキスト) dd")));
-        crawlingCardDto.setSourceEffect(CrawlingProcedure.parseElementToPlainText(element.select(".cardinfo_bottom dl:contains(下段テキスト) dd")));
-        crawlingCardDto.setNote(element.select(".cardinfo_bottom dl:contains(入手情報) dd").text());
+    @Override
+    public String getRarity() {
+        return element.select(".cardinfo_head>li").get(1).text();
     }
 
-    private static void extractEngCardInfoTop(Element element, CrawlingCardDto crawlingCardDto) {
+    @Override
+    public String getCardType() {
+        return Objects.requireNonNull(element.selectFirst(".cardtype")).text();
+    }
+
+    @Override
+    public String getLv() {
         Element lvElement = element.selectFirst(".cardlv");
         if (lvElement != null) {
-            crawlingCardDto.setLv(lvElement.text());
+            return lvElement.text();
         }
-        extractColor(element, crawlingCardDto);
-
-        crawlingCardDto.setCardName(element.selectFirst(".card_name").text());
-        crawlingCardDto.setImgUrl(element.select(".card_img>img").attr("src"));
-        crawlingCardDto.setForm(element.select(".cardinfo_top_body dl:contains(形態) dd").text());
-        crawlingCardDto.setAttribute(element.select(".cardinfo_top_body dl:contains(属性) dd").text());
-        crawlingCardDto.setType(element.select(".cardinfo_top_body dl:contains(タイプ) dd").text());
-        crawlingCardDto.setDP(element.select(".cardinfo_top_body dl:contains(DP) dd").text());
-        crawlingCardDto.setPlayCost(element.select(".cardinfo_top_body dl:contains(登場コスト) dd").text());
-        crawlingCardDto.setDigivolveCost1(element.select(".cardinfo_top_body dl:contains(進化コスト1) dd").text());
-        crawlingCardDto.setDigivolveCost2(element.select(".cardinfo_top_body dl:contains(進化コスト2) dd").text());
+        return null;
     }
 
-    private static void extractColor(Element element, CrawlingCardDto crawlingCardDto) {
+    @Override
+    public Boolean isParallel() {
+        return !element.select(".cardParallel").isEmpty();
+    }
+
+    @Override
+    public String getCardName() {
+        return Objects.requireNonNull(element.selectFirst(".card_name")).text();
+    }
+
+    @Override
+    public String getForm() {
+        return element.select(".cardinfo_top_body dl:contains(形態) dd").text();
+    }
+
+    @Override
+    public String getAttribute() {
+        return element.select(".cardinfo_top_body dl:contains(属性) dd").text();
+    }
+
+    @Override
+    public String getType() {
+        return element.select(".cardinfo_top_body dl:contains(タイプ) dd").text();
+    }
+
+    @Override
+    public String getDP() {
+        return element.select(".cardinfo_top_body dl:contains(DP) dd").text();
+    }
+
+    @Override
+    public String getPlayCost() {
+        return element.select(".cardinfo_top_body dl:contains(登場コスト) dd").text();
+    }
+
+    @Override
+    public String getDigivolveCost1() {
+        return element.select(".cardinfo_top_body dl:contains(進化コスト1) dd").text();
+    }
+
+    @Override
+    public String getDigivolveCost2() {
+        return element.select(".cardinfo_top_body dl:contains(進化コスト2) dd").text();
+    }
+
+    @Override
+    public String getEffect() {
+        return CrawlingProcedure.parseElementToPlainText(element.select(".cardinfo_bottom dl:contains(上段テキスト) dd"));
+    }
+
+    @Override
+    public String getSourceEffect() {
+        return CrawlingProcedure.parseElementToPlainText(element.select(".cardinfo_bottom dl:contains(下段テキスト) dd"));
+    }
+
+    @Override
+    public String getNote() {
+        return element.select(".cardinfo_bottom dl:contains(入手情報) dd").text();
+    }
+
+    @Override
+    public String getImgUrl() {
+        return element.select(".card_img>img").attr("src");
+    }
+
+    @Override
+    public Locale getLocale() {
+        return Locale.JPN;
+    }
+
+    @Override
+    public List<String> getColors() {
+        List<String> colors = new ArrayList<>();
         Elements colorSpans = element.select("dd.cardColor span");
-        int index = 0;
         for (Element span : colorSpans) {
             String color = span.text();
-            if (index == 0) {
-                crawlingCardDto.setColor1(color);
-            } else if (index == 1) {
-                crawlingCardDto.setColor2(color);
-            } else if (index == 2) {
-                crawlingCardDto.setColor3(color);
-            }
-            index++;
-        }
-    }
 
+            colors.add(color);
+        }
+        return colors;
+    }
 }

@@ -2,6 +2,7 @@ package com.joo.digimon.crawling.controller;
 
 import com.joo.digimon.card.service.CardImageService;
 import com.joo.digimon.crawling.service.CrawlingService;
+import com.joo.digimon.global.enums.Locale;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -33,7 +34,7 @@ public class CrawlingController {
     }
 
     @PostMapping("/re")
-    public ResponseEntity<?> reCrawling(@RequestParam(name = "locale") String locale) throws IOException {
+    public ResponseEntity<?> reCrawling(@RequestParam(name = "locale") Locale locale) throws IOException {
         return new ResponseEntity<>(crawlingService.reCrawlingByLocale(locale), HttpStatus.OK);
     }
 

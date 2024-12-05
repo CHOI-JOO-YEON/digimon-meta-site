@@ -10,6 +10,7 @@ import com.joo.digimon.crawling.procedure.JpnCrawlingProcedure;
 import com.joo.digimon.crawling.procedure.KorCrawlingProcedure;
 import com.joo.digimon.crawling.repository.CrawlingCardRepository;
 import com.joo.digimon.crawling.repository.DeletedEnCardImgRepository;
+import com.joo.digimon.global.enums.Locale;
 import com.joo.digimon.global.exception.model.CardImageException;
 import com.joo.digimon.global.exception.model.CardParseException;
 import jakarta.transaction.Transactional;
@@ -44,13 +45,13 @@ public class CrawlingServiceImpl implements CrawlingService {
 
 
     @Transactional
-    public void saveCardByReflectCardRequest(ReflectCardRequestDto reflectCardRequestDto, String locale) throws CardParseException, CardImageException {
+    public void saveCardByReflectCardRequest(ReflectCardRequestDto reflectCardRequestDto) throws CardParseException, CardImageException {
         CrawlingCardEntity crawlingCardEntity = crawlingCardRepository.findById(reflectCardRequestDto.getId()).orElseThrow();
 
         CardEntity cardEntity;
-        if (locale.equals("ENG")) {
+        if (reflectCardRequestDto.getLocale() == Locale.ENG) {
             cardEntity = getEnglishCardEntityOrInsert(reflectCardRequestDto);
-        } else if (locale.equals("JPN")) {
+        } else if (reflectCardRequestDto.getLocale() == Locale.JPN) {
             cardEntity = getJapaneseCardEntityOrInsert(reflectCardRequestDto);
         } else {
             cardEntity = getCardEntityOrInsert(reflectCardRequestDto);
@@ -66,7 +67,7 @@ public class CrawlingServiceImpl implements CrawlingService {
             if (cardImgEntityList.size() == 1) {
                 CardImgEntity cardImgEntity = cardImgEntityList.getFirst();
 
-                if (locale.equals("KOR")) {
+                if (reflectCardRequestDto.getLocale() == Locale.KOR) {
                     if (!Boolean.TRUE.equals(cardImgEntity.getIsEnCard()) && !Boolean.TRUE.equals(cardImgEntity.getIsJpnCard())) {
                         throw new CardImageException("Non-parallel cards already reflected");
                     }
@@ -89,7 +90,7 @@ public class CrawlingServiceImpl implements CrawlingService {
                                     .originUrl(reflectCardRequestDto.getOriginUrl())
                                     .build());
 
-                } else if (locale.equals("ENG")) {
+                } else if (reflectCardRequestDto.getLocale() == Locale.ENG) {
                     if (cardImgEntity.getIsJpnCard()) {
                         cardImgRepository.save(
                                 CardImgEntity.builder()
@@ -113,8 +114,8 @@ public class CrawlingServiceImpl implements CrawlingService {
                         .crawlingCardEntity(crawlingCardEntity)
                         .cardEntity(cardEntity)
                         .originUrl(reflectCardRequestDto.getOriginUrl())
-                        .isEnCard(locale.equals("ENG"))
-                        .isJpnCard(locale.equals("JPN"))
+                        .isEnCard(reflectCardRequestDto.getLocale() == Locale.ENG)
+                        .isJpnCard(reflectCardRequestDto.getLocale() == Locale.JPN)
                         .build());
     }
 
@@ -303,7 +304,7 @@ public class CrawlingServiceImpl implements CrawlingService {
                 continue;
             }
             try {
-                saveCardByReflectCardRequest(cardParseService.crawlingCardParse(crawlingCardEntity), crawlingCardEntity.getLocale());
+                saveCardByReflectCardRequest(cardParseService.crawlingCardParse(crawlingCardEntity));
                 crawlingResultDto.successCountIncrease();
                 crawlingCardEntity.setIsReflect(true);
             } catch (CardParseException e) {
@@ -376,9 +377,9 @@ public class CrawlingServiceImpl implements CrawlingService {
     @Override
     public CrawlingCardDto crawlingCardByElement(Element element, String locale) {
         return switch (locale) {
-            case "KOR" -> new KorCrawlingProcedure(element).crawl();
-            case "ENG" -> new EngCrawlingProcedure(element).crawl();
-            case "JPN" -> new JpnCrawlingProcedure(element).crawl();
+            case "KOR" -> new KorCrawlingProcedure(element).execute();
+            case "ENG" -> new EngCrawlingProcedure(element).execute();
+            case "JPN" -> new JpnCrawlingProcedure(element).execute();
             default -> null;
         };
     }
@@ -444,7 +445,39 @@ public class CrawlingServiceImpl implements CrawlingService {
 
 
     @Transactional
-    public CrawlingResultDto reCrawlingByLocale(String locale) {
+    public CrawlingResultDto reCrawlingByLocale(Locale locale) {
+        CrawlingResultDto crawlingResultDto = new CrawlingResultDto();
+        List<CrawlingCardEntity> crawlingCardEntities = crawlingCardRepository.findByLocale(locale);
+
+        for (CrawlingCardEntity crawlingCardEntity : crawlingCardEntities) {
+            try {
+                ReflectCardRequestDto reflectCardRequestDto = cardParseService.crawlingCardParse(crawlingCardEntity);
+                CardEntity cardEntity = cardRepository.findByCardNo(crawlingCardEntity.getCardNo()).orElseThrow();
+
+                if (locale.equals("ENG")) {
+                    if (cardEntity.getEnglishCard() == null) {
+                        EnglishCardEntity englishCardEntity = englishCardRepository.save(
+                                EnglishCardEntity.builder()
+                                        .cardEntity(cardEntity)
+                                        .cardName(crawlingCardEntity.getCardName())
+                                        .effect(reflectCardRequestDto.getEffect())
+                                        .sourceEffect(reflectCardRequestDto.getSourceEffect())
+                                        .build());
+                        cardEntity.updateEnglishCard(englishCardEntity);
+                        crawlingResultDto.successCountIncrease();
+                    }
+                }
+            } catch (CardParseException e) {
+                crawlingCardEntity.updateErrorMessage(e.getMessage());
+                crawlingResultDto.addFailedCrawling(new CrawlingCardDto(crawlingCardEntity));
+            } catch (Exception e) {
+                log.error("{} 에서 발생 {} ", crawlingCardEntity, e);
+            }
+        }
+        return crawlingResultDto;
+    }
+    @Transactional
+    public CrawlingResultDto reCrawlingHardByLocale(Locale locale) {
         CrawlingResultDto crawlingResultDto = new CrawlingResultDto();
         List<CrawlingCardEntity> crawlingCardEntities = crawlingCardRepository.findByLocale(locale);
 

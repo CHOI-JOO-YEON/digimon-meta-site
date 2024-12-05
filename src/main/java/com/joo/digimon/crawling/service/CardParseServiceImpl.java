@@ -1,10 +1,7 @@
 package com.joo.digimon.crawling.service;
 
 import com.joo.digimon.crawling.dto.ReflectCardRequestDto;
-import com.joo.digimon.global.enums.CardType;
-import com.joo.digimon.global.enums.Color;
-import com.joo.digimon.global.enums.Form;
-import com.joo.digimon.global.enums.Rarity;
+import com.joo.digimon.global.enums.*;
 import com.joo.digimon.crawling.model.CrawlingCardEntity;
 import com.joo.digimon.global.exception.message.CardParseExceptionMessage;
 import com.joo.digimon.global.exception.model.CardParseException;
@@ -67,7 +64,7 @@ public class CardParseServiceImpl implements CardParseService {
         return Rarity.parseRarity(rarity);
     }
 
-    private CardType parseCardType(String cardType, String locale) {
+    private CardType parseCardType(String cardType, Locale locale) {
         return CardType.findByString(cardType, locale);
     }
 
@@ -85,7 +82,7 @@ public class CardParseServiceImpl implements CardParseService {
         return Integer.parseInt(replace);
     }
 
-    private String parseCardName(String cardName, String locale) throws CardParseException {
+    private String parseCardName(String cardName, Locale locale) throws CardParseException {
         if (!locale.equals("KOR")) {
             return cardName;
         }
@@ -107,7 +104,7 @@ public class CardParseServiceImpl implements CardParseService {
         return cardNameStringBuilder.toString();
     }
 
-    private Form parseForm(String form, CardType cardType, String locale) throws CardParseException {
+    private Form parseForm(String form, CardType cardType, Locale locale) throws CardParseException {
         if (cardType.equals(CardType.OPTION) || cardType.equals(CardType.TAMER)) {
             return null;
         }
@@ -193,7 +190,7 @@ public class CardParseServiceImpl implements CardParseService {
         return note.replace("▹", "");
     }
 
-    private Color parseColor(String color, String locale) throws CardParseException {
+    private Color parseColor(String color, Locale locale) throws CardParseException {
 
         if (color == null) {
             return null;
