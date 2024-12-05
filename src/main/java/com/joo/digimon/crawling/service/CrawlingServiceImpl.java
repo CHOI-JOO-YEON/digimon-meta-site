@@ -5,9 +5,7 @@ import com.joo.digimon.card.repository.*;
 import com.joo.digimon.crawling.dto.*;
 import com.joo.digimon.crawling.model.CrawlingCardEntity;
 import com.joo.digimon.crawling.model.DeletedEnCardImg;
-import com.joo.digimon.crawling.procedure.EngCrawlingProcedure;
-import com.joo.digimon.crawling.procedure.JpnCrawlingProcedure;
-import com.joo.digimon.crawling.procedure.KorCrawlingProcedure;
+import com.joo.digimon.crawling.procedure.*;
 import com.joo.digimon.crawling.repository.CrawlingCardRepository;
 import com.joo.digimon.crawling.repository.DeletedEnCardImgRepository;
 import com.joo.digimon.global.enums.Locale;
@@ -24,6 +22,7 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Nullable;
 import java.io.IOException;
+import java.sql.Ref;
 import java.time.LocalDate;
 import java.util.*;
 
@@ -38,11 +37,37 @@ public class CrawlingServiceImpl implements CrawlingService {
     private final CardCombineTypeRepository cardCombineTypeRepository;
     private final TypeRepository typeRepository;
     private final NoteRepository noteRepository;
-    private final CardParseService cardParseService;
     private final DeletedEnCardImgRepository deletedEnCardImgRepository;
     private final EnglishCardRepository englishCardRepository;
     private final JapaneseCardRepository japaneseCardRepository;
 
+    @Override
+    public CrawlingResultDto crawlAndSaveByUrl(String url, String locale, @Nullable String note) throws IOException {
+        List<CrawlingCardEntity> crawlingCardEntities = crawlUrlAndBuildEntityList(url, locale, note);
+        CrawlingResultDto crawlingResultDto = new CrawlingResultDto();
+
+        for (CrawlingCardEntity crawlingCardEntity : crawlingCardEntities) {
+            if (cardImgRepository.findByCrawlingCardEntity(crawlingCardEntity).isPresent()) {
+                crawlingResultDto.alreadyReflectCountIncrease();
+                continue;
+            }
+            try {
+                ReflectCardRequestDto reflectCardRequestDto = createReflectCardRequestDto(crawlingCardEntity);
+
+                if(reflectCardRequestDto != null) {
+                    saveCardByReflectCardRequest(reflectCardRequestDto);
+                    crawlingResultDto.successCountIncrease();
+                    crawlingCardEntity.setIsReflect(true);
+                }
+            } catch (CardParseException e) {
+                crawlingCardEntity.updateErrorMessage(e.getMessage());
+                crawlingResultDto.addFailedCrawling(new CrawlingCardDto(crawlingCardEntity));
+            } catch (Exception e) {
+                log.error("{} 에서 {} 발생 {}", crawlingCardEntity, e.getMessage(), e);
+            }
+        }
+        return crawlingResultDto;
+    }
 
     @Transactional
     public void saveCardByReflectCardRequest(ReflectCardRequestDto reflectCardRequestDto) throws CardParseException, CardImageException {
@@ -293,29 +318,7 @@ public class CrawlingServiceImpl implements CrawlingService {
     }
 
 
-    @Override
-    public CrawlingResultDto crawlAndSaveByUrl(String url, String locale, @Nullable String note) throws IOException {
-        List<CrawlingCardEntity> crawlingCardEntities = crawlUrlAndBuildEntityList(url, locale, note);
-        CrawlingResultDto crawlingResultDto = new CrawlingResultDto();
 
-        for (CrawlingCardEntity crawlingCardEntity : crawlingCardEntities) {
-            if (cardImgRepository.findByCrawlingCardEntity(crawlingCardEntity).isPresent()) {
-                crawlingResultDto.alreadyReflectCountIncrease();
-                continue;
-            }
-            try {
-                saveCardByReflectCardRequest(cardParseService.crawlingCardParse(crawlingCardEntity));
-                crawlingResultDto.successCountIncrease();
-                crawlingCardEntity.setIsReflect(true);
-            } catch (CardParseException e) {
-                crawlingCardEntity.updateErrorMessage(e.getMessage());
-                crawlingResultDto.addFailedCrawling(new CrawlingCardDto(crawlingCardEntity));
-            } catch (Exception e) {
-                log.error("{} 에서 {} 발생 {}", crawlingCardEntity, e.getMessage(), e);
-            }
-        }
-        return crawlingResultDto;
-    }
 
     public List<CrawlingCardEntity> crawlUrlAndBuildEntityList(String url, String locale, @Nullable String note) throws IOException {
         List<Document> documentListByFirstPageUrl = getDocumentListByFirstPageUrl(url);
@@ -381,6 +384,14 @@ public class CrawlingServiceImpl implements CrawlingService {
             case "ENG" -> new EngCrawlingProcedure(element).execute();
             case "JPN" -> new JpnCrawlingProcedure(element).execute();
             default -> null;
+        };
+    }
+
+    private ReflectCardRequestDto createReflectCardRequestDto(CrawlingCardEntity crawlingCardEntity) {
+        return switch (crawlingCardEntity.getLocale()) {
+            case Locale.KOR -> new KorCardParseProcedure(crawlingCardEntity).execute();
+            case Locale.ENG -> new EngCardParseProcedure(crawlingCardEntity).execute();
+            case Locale.JPN -> new JpnCardParseProcedure(crawlingCardEntity).execute();
         };
     }
 
@@ -451,7 +462,7 @@ public class CrawlingServiceImpl implements CrawlingService {
 
         for (CrawlingCardEntity crawlingCardEntity : crawlingCardEntities) {
             try {
-                ReflectCardRequestDto reflectCardRequestDto = cardParseService.crawlingCardParse(crawlingCardEntity);
+                ReflectCardRequestDto reflectCardRequestDto = createReflectCardRequestDto(crawlingCardEntity);
                 CardEntity cardEntity = cardRepository.findByCardNo(crawlingCardEntity.getCardNo()).orElseThrow();
 
                 if (locale.equals("ENG")) {
@@ -467,10 +478,9 @@ public class CrawlingServiceImpl implements CrawlingService {
                         crawlingResultDto.successCountIncrease();
                     }
                 }
-            } catch (CardParseException e) {
+            } catch (Exception e) {
                 crawlingCardEntity.updateErrorMessage(e.getMessage());
                 crawlingResultDto.addFailedCrawling(new CrawlingCardDto(crawlingCardEntity));
-            } catch (Exception e) {
                 log.error("{} 에서 발생 {} ", crawlingCardEntity, e);
             }
         }
@@ -483,7 +493,7 @@ public class CrawlingServiceImpl implements CrawlingService {
 
         for (CrawlingCardEntity crawlingCardEntity : crawlingCardEntities) {
             try {
-                ReflectCardRequestDto reflectCardRequestDto = cardParseService.crawlingCardParse(crawlingCardEntity);
+                ReflectCardRequestDto reflectCardRequestDto = createReflectCardRequestDto(crawlingCardEntity);
                 CardEntity cardEntity = cardRepository.findByCardNo(crawlingCardEntity.getCardNo()).orElseThrow();
 
                 if (locale.equals("ENG")) {
@@ -499,10 +509,9 @@ public class CrawlingServiceImpl implements CrawlingService {
                         crawlingResultDto.successCountIncrease();
                     }
                 }
-            } catch (CardParseException e) {
+            } catch (Exception e) {
                 crawlingCardEntity.updateErrorMessage(e.getMessage());
                 crawlingResultDto.addFailedCrawling(new CrawlingCardDto(crawlingCardEntity));
-            } catch (Exception e) {
                 log.error("{} 에서 발생 {} ", crawlingCardEntity, e);
             }
         }
