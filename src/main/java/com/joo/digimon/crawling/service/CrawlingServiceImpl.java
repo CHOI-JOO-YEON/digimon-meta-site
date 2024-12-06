@@ -221,27 +221,4 @@ public class CrawlingServiceImpl implements CrawlingService {
         }
         return crawlingResultDto;
     }
-
-    @Transactional
-    @Override
-    public void imageMove()
-    {
-        List<CardImgEntity> cardImgEntities = cardImgRepository.findByIsEnCardTrueOrIsJpnCardTrue();
-        cardImgEntities.forEach(
-                cardImgEntity -> {
-                    if(Boolean.TRUE.equals(cardImgEntity.getIsEnCard())) {
-                        cardImgEntity.getCardEntity().getEnglishCard().updateUploadUrl(cardImgEntity.getUploadUrl());
-                        cardImgEntity.getCardEntity().getEnglishCard().updateOriginUrl(cardImgEntity.getOriginUrl());
-
-
-                    }else if(Boolean.TRUE.equals(cardImgEntity.getIsJpnCard())) {
-                        cardImgEntity.getCardEntity().getJapaneseCardEntity().updateUploadUrl(cardImgEntity.getUploadUrl());
-                        cardImgEntity.getCardEntity().getJapaneseCardEntity().updateOriginUrl(cardImgEntity.getOriginUrl());
-                    }
-
-                    cardImgEntity.updateUploadUrl(null);
-                    cardImgEntity.updateOriginUrl(null);
-                }
-        );
-    }
 }

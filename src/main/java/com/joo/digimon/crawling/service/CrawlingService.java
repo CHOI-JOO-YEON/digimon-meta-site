@@ -13,7 +13,4 @@ public interface CrawlingService {
 
     int crawlAndSaveByUrl(String url, Locale locale, String note) throws IOException;
     CrawlingResultDto reCrawlingByLocale(Locale locale) throws IOException;
-
-    @Transactional
-    void imageMove();
 }

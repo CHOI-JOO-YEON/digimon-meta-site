@@ -38,10 +38,4 @@ public class CrawlingController {
         return new ResponseEntity<>(crawlingService.reCrawlingByLocale(locale), HttpStatus.OK);
     }
 
-    @PostMapping("/move")
-    public ResponseEntity<?> move() throws IOException {
-        crawlingService.imageMove();
-        return new ResponseEntity<>(HttpStatus.OK);
-    }
-
 }
