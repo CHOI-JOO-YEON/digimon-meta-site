@@ -204,7 +204,7 @@ public class DeckServiceImpl implements DeckService {
                     continue;
                 }
                 for (int i = 0; i < integerEntry.getValue(); i++) {
-                    ttsDeckFileDto.addCard(index++, prefixUrl + cardImgEntity.getUploadUrl(), backDigimonUrl);
+                    ttsDeckFileDto.addCard(index++, prefixUrl + cardImgEntity.getDisplayImage(), backDigimonUrl);
                 }
             } catch (Exception ignore) {
             }
@@ -212,7 +212,7 @@ public class DeckServiceImpl implements DeckService {
 
         for (CardImgEntity digitama : digitamas) {
             try {
-                ttsDeckFileDto.addCard(index++, prefixUrl + digitama.getUploadUrl(), backDigitamaUrl);
+                ttsDeckFileDto.addCard(index++, prefixUrl + digitama.getDisplayImage(), backDigitamaUrl);
             } catch (Exception ignore) {
 
             }

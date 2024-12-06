@@ -116,4 +116,17 @@ public class CardImgEntity {
     public void updateIsJpnCard(boolean b) {
         this.isJpnCard = b;
     }
+
+    public String getDisplayImage() {
+        if (this.getUploadUrl() != null) {
+            return this.getUploadUrl();
+        }
+        if(this.cardEntity.getEnglishCard() != null) {
+            return this.cardEntity.getEnglishCard().getUploadUrl();
+        }
+        if(this.cardEntity.getJapaneseCardEntity() != null) {
+            return this.cardEntity.getJapaneseCardEntity().getUploadUrl();
+        }
+        return "";
+    }
 }
