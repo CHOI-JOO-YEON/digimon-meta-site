@@ -46,26 +46,38 @@ public class CardServiceImpl implements CardService {
     public CardResponseDto searchCards(CardSearchRequestDto cardSearchRequestDto) {
         QCardImgEntity cardImg = QCardImgEntity.cardImgEntity;
         QCardEntity card = QCardEntity.cardEntity;
+        QEnglishCardEntity englishCard = QEnglishCardEntity.englishCardEntity;
+        QJapaneseCardEntity japaneseCard = QJapaneseCardEntity.japaneseCardEntity;
         QCardCombineTypeEntity cardCombine = QCardCombineTypeEntity.cardCombineTypeEntity;
+
+        JPAQuery<CardImgEntity> query = new JPAQuery<>(entityManager);
+        query.from(cardImg)
+                .leftJoin(cardImg.cardEntity, card)
+                .leftJoin(card.englishCard, englishCard)
+                .leftJoin(card.japaneseCardEntity, japaneseCard);
+
         BooleanBuilder builder = new BooleanBuilder();
 
-        applySearchConditions(cardSearchRequestDto, builder, cardImg, card, cardCombine);
-        Page<CardImgEntity> pageableResult = getPageableResult(cardSearchRequestDto, builder, cardImg);
-        return new CardResponseDto(pageableResult, prefixUrl);
+        applySearchConditions(cardSearchRequestDto, builder, cardImg, card, cardCombine, englishCard, japaneseCard);
 
+        Page<CardImgEntity> pageableResult = getPageableResult(cardSearchRequestDto, builder, cardImg, card, englishCard, japaneseCard);
+        return new CardResponseDto(pageableResult, prefixUrl);
     }
 
-    private Page<CardImgEntity> getPageableResult(CardSearchRequestDto cardSearchRequestDto, BooleanBuilder builder, QCardImgEntity cardImg) {
+    private Page<CardImgEntity> getPageableResult(CardSearchRequestDto cardSearchRequestDto, BooleanBuilder builder, QCardImgEntity cardImg, QCardEntity card, QEnglishCardEntity englishCard, QJapaneseCardEntity japaneseCard) {
         Sort sort = createSort(cardSearchRequestDto);
         Pageable pageable = PageRequest.of(cardSearchRequestDto.getPage() - 1, cardSearchRequestDto.getSize(), sort);
 
         JPAQuery<Long> query = new JPAQuery<>(entityManager);
+        query.from(cardImg)
+                .leftJoin(cardImg.cardEntity, card)
+                .leftJoin(card.englishCard, englishCard)
+                .leftJoin(card.japaneseCardEntity, japaneseCard);
+
         int totalCount = query.select(cardImg.id)
-                .from(cardImg)
                 .where(builder)
                 .fetch().size();
         List<Integer> cardIds = query.select(cardImg.id)
-                .from(cardImg)
                 .where(builder)
                 .orderBy(convertSortToOrderSpecifiers(sort))
                 .offset(pageable.getOffset())
@@ -76,7 +88,6 @@ public class CardServiceImpl implements CardService {
 
         return new PageImpl<>(cardImgEntities, pageable, totalCount);
     }
-
     private Sort createSort(CardSearchRequestDto cardSearchRequestDto) {
         List<Sort.Order> orders = new ArrayList<>();
         if("modifiedAt".equals(cardSearchRequestDto.getOrderOption())){
@@ -94,9 +105,9 @@ public class CardServiceImpl implements CardService {
         return Sort.by(orders);
     }
 
-    private void applySearchConditions(CardSearchRequestDto cardSearchRequestDto, BooleanBuilder builder, QCardImgEntity cardImg, QCardEntity card, QCardCombineTypeEntity cardCombine) {
+    private void applySearchConditions(CardSearchRequestDto cardSearchRequestDto, BooleanBuilder builder, QCardImgEntity cardImg, QCardEntity card, QCardCombineTypeEntity cardCombine, QEnglishCardEntity englishCard, QJapaneseCardEntity japaneseCard) {
         addEnglishCardCondition(cardSearchRequestDto.getIsEnglishCardInclude(), builder, cardImg, card);
-        addSearchStringCondition(cardSearchRequestDto.getSearchString(), builder, card);
+        addSearchStringCondition(cardSearchRequestDto.getSearchString(), builder, card, englishCard, japaneseCard);
         addColorCondition(cardSearchRequestDto, builder, card);
         addLvCondition(cardSearchRequestDto.getLvs(), builder, card);
         addCardTypeCondition(cardSearchRequestDto.getCardTypes(), builder, card);
@@ -137,7 +148,6 @@ public class CardServiceImpl implements CardService {
     private void addNoteCondition(Set<Integer> noteIds, BooleanBuilder builder, QCardImgEntity cardImg) {
         if (noteIds != null) {
             builder.and(cardImg.noteEntity.id.in(noteIds));
-//            builder.and(cardImg.noteEntity.id.eq(noteId));
         }
     }
 
@@ -208,13 +218,19 @@ public class CardServiceImpl implements CardService {
 
     }
 
-    private void addSearchStringCondition(String searchString, BooleanBuilder builder, QCardEntity card) {
+    private void addSearchStringCondition(String searchString, BooleanBuilder builder, QCardEntity card, QEnglishCardEntity englishCard, QJapaneseCardEntity japaneseCard) {
         if (searchString != null && !searchString.isEmpty()) {
             builder.and(
                     card.cardName.containsIgnoreCase(searchString)
                             .or(card.cardNo.containsIgnoreCase(searchString))
                             .or(card.effect.containsIgnoreCase(searchString))
                             .or(card.sourceEffect.containsIgnoreCase(searchString))
+                            .or(englishCard.cardName.containsIgnoreCase(searchString))
+                            .or(englishCard.effect.containsIgnoreCase(searchString))
+                            .or(englishCard.sourceEffect.containsIgnoreCase(searchString))
+                            .or(japaneseCard.cardName.containsIgnoreCase(searchString))
+                            .or(japaneseCard.effect.containsIgnoreCase(searchString))
+                            .or(japaneseCard.sourceEffect.containsIgnoreCase(searchString))
             );
         }
     }

@@ -243,9 +243,5 @@ public class CrawlingServiceImpl implements CrawlingService {
                     cardImgEntity.updateOriginUrl(null);
                 }
         );
-
-
-
-
     }
 }
