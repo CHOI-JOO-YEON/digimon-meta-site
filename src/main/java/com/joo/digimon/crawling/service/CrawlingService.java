@@ -10,7 +10,7 @@ import java.util.List;
 
 public interface CrawlingService {
 
-    CrawlingResultDto crawlAndSaveByUrl(String url, String locale, String note) throws IOException;
+    int crawlAndSaveByUrl(String url, String locale, String note) throws IOException;
 
     List<Document> getDocumentListByFirstPageUrl(String url) throws IOException;
 

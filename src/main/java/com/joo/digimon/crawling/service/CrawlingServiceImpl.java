@@ -42,59 +42,37 @@ public class CrawlingServiceImpl implements CrawlingService {
     private final JapaneseCardRepository japaneseCardRepository;
 
     @Override
-    public CrawlingResultDto crawlAndSaveByUrl(String url, String locale, @Nullable String note) throws IOException {
+    @Transactional
+    public int crawlAndSaveByUrl(String url, String locale, @Nullable String note) throws IOException {
         List<CrawlingCardEntity> crawlingCardEntities = crawlUrlAndBuildEntityList(url, locale, note);
-        CrawlingResultDto crawlingResultDto = new CrawlingResultDto();
 
-        for (CrawlingCardEntity crawlingCardEntity : crawlingCardEntities) {
-            if (cardImgRepository.findByCrawlingCardEntity(crawlingCardEntity).isPresent()) {
-                crawlingResultDto.alreadyReflectCountIncrease();
-                continue;
-            }
-            try {
-                ReflectCardRequestDto reflectCardRequestDto = createReflectCardRequestDto(crawlingCardEntity);
-
-                if(reflectCardRequestDto != null) {
+        crawlingCardEntities
+                .forEach(crawlingCardEntity -> {
+                    ReflectCardRequestDto reflectCardRequestDto = createReflectCardRequestDto(crawlingCardEntity);
                     saveCardByReflectCardRequest(reflectCardRequestDto);
-                    crawlingResultDto.successCountIncrease();
                     crawlingCardEntity.setIsReflect(true);
-                }
-            } catch (CardParseException e) {
-                crawlingCardEntity.updateErrorMessage(e.getMessage());
-                crawlingResultDto.addFailedCrawling(new CrawlingCardDto(crawlingCardEntity));
-            } catch (Exception e) {
-                log.error("{} 에서 {} 발생 {}", crawlingCardEntity, e.getMessage(), e);
-            }
-        }
-        return crawlingResultDto;
+                });
+        return crawlingCardEntities.size();
     }
 
+
     @Transactional
-    public void saveCardByReflectCardRequest(ReflectCardRequestDto reflectCardRequestDto) throws CardParseException, CardImageException {
-        CrawlingCardEntity crawlingCardEntity = crawlingCardRepository.findById(reflectCardRequestDto.getId()).orElseThrow();
+    public void saveCardByReflectCardRequest(ReflectCardRequestDto reflectCardRequestDto) {
 
-        CardEntity cardEntity;
-        if (reflectCardRequestDto.getLocale() == Locale.ENG) {
-            cardEntity = getEnglishCardEntityOrInsert(reflectCardRequestDto);
-        } else if (reflectCardRequestDto.getLocale() == Locale.JPN) {
-            cardEntity = getJapaneseCardEntityOrInsert(reflectCardRequestDto);
-        } else {
-            cardEntity = getCardEntityOrInsert(reflectCardRequestDto);
-        }
-
+        CardEntity cardEntity = getCardEntity(reflectCardRequestDto);
         NoteEntity noteEntity = noteRepository.findByName(reflectCardRequestDto.getNote()).orElseGet(() -> noteRepository.save(NoteEntity.builder().name(reflectCardRequestDto.getNote()).build()));
 
         if (Boolean.FALSE.equals(reflectCardRequestDto.getIsParallel())) {
             List<CardImgEntity> cardImgEntityList = cardImgRepository.findByCardEntity(cardEntity);
             if (cardImgEntityList.size() > 1) {
-                throw new CardImageException("Duplicate non-parallel card image");
+//                throw new CardImageException("Duplicate non-parallel card image");
             }
             if (cardImgEntityList.size() == 1) {
                 CardImgEntity cardImgEntity = cardImgEntityList.getFirst();
 
                 if (reflectCardRequestDto.getLocale() == Locale.KOR) {
                     if (!Boolean.TRUE.equals(cardImgEntity.getIsEnCard()) && !Boolean.TRUE.equals(cardImgEntity.getIsJpnCard())) {
-                        throw new CardImageException("Non-parallel cards already reflected");
+//                        throw new CardImageException("Non-parallel cards already reflected");
                     }
                     deletedEnCardImgRepository.save(DeletedEnCardImg.builder()
                             .cardEntity(cardEntity)
@@ -110,7 +88,7 @@ public class CrawlingServiceImpl implements CrawlingService {
                                     .id(cardImgEntity.getId())
                                     .isParallel(reflectCardRequestDto.getIsParallel())
                                     .noteEntity(noteEntity)
-                                    .crawlingCardEntity(crawlingCardEntity)
+                                    .crawlingCardEntity(reflectCardRequestDto.getCrawlingCardEntity())
                                     .cardEntity(cardEntity)
                                     .originUrl(reflectCardRequestDto.getOriginUrl())
                                     .build());
@@ -122,7 +100,7 @@ public class CrawlingServiceImpl implements CrawlingService {
                                         .id(cardImgEntity.getId())
                                         .isParallel(reflectCardRequestDto.getIsParallel())
                                         .noteEntity(noteEntity)
-                                        .crawlingCardEntity(crawlingCardEntity)
+                                        .crawlingCardEntity(reflectCardRequestDto.getCrawlingCardEntity())
                                         .cardEntity(cardEntity)
                                         .originUrl(reflectCardRequestDto.getOriginUrl())
                                         .isEnCard(true)
@@ -136,7 +114,7 @@ public class CrawlingServiceImpl implements CrawlingService {
                 CardImgEntity.builder()
                         .isParallel(reflectCardRequestDto.getIsParallel())
                         .noteEntity(noteEntity)
-                        .crawlingCardEntity(crawlingCardEntity)
+                        .crawlingCardEntity(reflectCardRequestDto.getCrawlingCardEntity())
                         .cardEntity(cardEntity)
                         .originUrl(reflectCardRequestDto.getOriginUrl())
                         .isEnCard(reflectCardRequestDto.getLocale() == Locale.ENG)
@@ -144,136 +122,13 @@ public class CrawlingServiceImpl implements CrawlingService {
                         .build());
     }
 
+    private CardEntity getCardEntity(ReflectCardRequestDto reflectCardRequestDto) {
 
-    @Transactional
-    public CardEntity getJapaneseCardEntityOrInsert(ReflectCardRequestDto reflectCardRequestDto) {
-        JapaneseCardEntity japaneseCardEntity = japaneseCardRepository.save(
-                JapaneseCardEntity.builder()
-                        .effect(reflectCardRequestDto.getEffect())
-                        .sourceEffect(reflectCardRequestDto.getSourceEffect())
-                        .cardName(reflectCardRequestDto.getCardName())
-                        .build());
-
-        CardEntity cardEntity = cardRepository.findByCardNo(reflectCardRequestDto.getCardNo()).orElseGet(
-                () -> cardRepository.save(
-                        CardEntity.builder()
-                                .sortString(generateSortString(reflectCardRequestDto.getCardNo()))
-                                .cardNo(reflectCardRequestDto.getCardNo())
-                                .dp(reflectCardRequestDto.getDp())
-                                .playCost(reflectCardRequestDto.getPlayCost())
-                                .digivolveCondition1(reflectCardRequestDto.getDigivolveCondition1())
-                                .digivolveCondition2(reflectCardRequestDto.getDigivolveCondition2())
-                                .digivolveCost1(reflectCardRequestDto.getDigivolveCost1())
-                                .digivolveCost2(reflectCardRequestDto.getDigivolveCost2())
-                                .lv(reflectCardRequestDto.getLv())
-                                .cardType(reflectCardRequestDto.getCardType())
-                                .form(reflectCardRequestDto.getForm())
-                                .rarity(reflectCardRequestDto.getRarity())
-                                .color1(reflectCardRequestDto.getColor1())
-                                .color2(reflectCardRequestDto.getColor2())
-                                .color3(reflectCardRequestDto.getColor3())
-                                .isOnlyEnCard(true)
-                                .releaseDate(LocalDate.of(9999, 12, 31))
-                                .build())
-        );
-
-
-        Set<CardCombineTypeEntity> cardCombineTypeEntities = new HashSet<>();
-
-        if (cardEntity.getCardCombineTypeEntities() == null || cardEntity.getCardCombineTypeEntities().isEmpty()) {
-            for (String type : reflectCardRequestDto.getTypes()) {
-                TypeEntity typeEntity = typeRepository.findByJpnName(type).orElseGet(() ->
-                        typeRepository.save(
-                                TypeEntity.builder()
-                                        .jpnName(type)
-                                        .build())
-                );
-
-                cardCombineTypeEntities.add(
-                        cardCombineTypeRepository.save(
-                                CardCombineTypeEntity.builder()
-                                        .cardEntity(cardEntity)
-                                        .typeEntity(typeEntity)
-                                        .build())
-                );
-            }
-            cardEntity.updateCardCombineTypes(cardCombineTypeEntities);
-        }
-
-        cardEntity.updateJapaneseCard(japaneseCardEntity);
-        japaneseCardEntity.updateCardEntity(cardEntity);
-        return cardEntity;
-    }
-
-    private CardEntity getCardEntityOrInsert(ReflectCardRequestDto reflectCardRequestDto) {
-        Optional<CardEntity> cardEntity = cardRepository.findByCardNo(reflectCardRequestDto.getCardNo());
-        if (cardEntity.isPresent()) {
-            CardEntity card = cardEntity.get();
-            if (Boolean.TRUE.equals(card.getIsOnlyEnCard())) {
-                CardEntity save = cardRepository.save(CardEntity.builder().id(card.getId())
-                        .sortString(generateSortString(reflectCardRequestDto.getCardNo()))
-                        .cardNo(reflectCardRequestDto.getCardNo())
-                        .cardName(reflectCardRequestDto.getCardName())
-                        .attribute(reflectCardRequestDto.getAttribute())
-                        .dp(reflectCardRequestDto.getDp())
-                        .playCost(reflectCardRequestDto.getPlayCost())
-                        .digivolveCondition1(reflectCardRequestDto.getDigivolveCondition1())
-                        .digivolveCondition2(reflectCardRequestDto.getDigivolveCondition2())
-                        .digivolveCost1(reflectCardRequestDto.getDigivolveCost1())
-                        .digivolveCost2(reflectCardRequestDto.getDigivolveCost2())
-                        .lv(reflectCardRequestDto.getLv())
-                        .effect(reflectCardRequestDto.getEffect())
-                        .sourceEffect(reflectCardRequestDto.getSourceEffect())
-                        .cardType(reflectCardRequestDto.getCardType())
-                        .form(reflectCardRequestDto.getForm())
-                        .rarity(reflectCardRequestDto.getRarity())
-                        .color1(reflectCardRequestDto.getColor1())
-                        .color2(reflectCardRequestDto.getColor2())
-                        .color3(reflectCardRequestDto.getColor3())
-                        .isOnlyEnCard(false).build());
-
-                if (save.getCardCombineTypeEntities() == null || save.getCardCombineTypeEntities().isEmpty()) {
-                    for (String type : reflectCardRequestDto.getTypes()) {
-                        TypeEntity typeEntity = typeRepository.findByName(type).orElseGet(() -> typeRepository.save(TypeEntity.builder().name(type).build()));
-                        cardCombineTypeRepository.save(CardCombineTypeEntity.builder().cardEntity(save).typeEntity(typeEntity).build());
-                    }
-                }
-                return save;
-
-            }
-            return cardEntity.get();
-        }
-
-
-        CardEntity save = cardRepository.save(CardEntity.builder()
-                .sortString(generateSortString(reflectCardRequestDto.getCardNo()))
-                .cardNo(reflectCardRequestDto.getCardNo())
-                .cardName(reflectCardRequestDto.getCardName())
-                .attribute(reflectCardRequestDto.getAttribute())
-                .dp(reflectCardRequestDto.getDp())
-                .playCost(reflectCardRequestDto.getPlayCost())
-                .digivolveCondition1(reflectCardRequestDto.getDigivolveCondition1())
-                .digivolveCondition2(reflectCardRequestDto.getDigivolveCondition2())
-                .digivolveCost1(reflectCardRequestDto.getDigivolveCost1())
-                .digivolveCost2(reflectCardRequestDto.getDigivolveCost2())
-                .lv(reflectCardRequestDto.getLv())
-                .effect(reflectCardRequestDto.getEffect())
-                .sourceEffect(reflectCardRequestDto.getSourceEffect())
-                .cardType(reflectCardRequestDto.getCardType())
-                .form(reflectCardRequestDto.getForm())
-                .rarity(reflectCardRequestDto.getRarity())
-                .color1(reflectCardRequestDto.getColor1())
-                .color2(reflectCardRequestDto.getColor2())
-                .color3(reflectCardRequestDto.getColor3())
-                .build());
-
-        for (String type : reflectCardRequestDto.getTypes()) {
-            TypeEntity typeEntity = typeRepository.findByName(type).orElseGet(() -> typeRepository.save(TypeEntity.builder().name(type).build()));
-            cardCombineTypeRepository.save(CardCombineTypeEntity.builder().cardEntity(save).typeEntity(typeEntity).build());
-        }
-
-        return save;
-
+        return switch (reflectCardRequestDto.getLocale()) {
+            case KOR -> new KorSaveCardProcedure(cardRepository, cardCombineTypeRepository, typeRepository, noteRepository, reflectCardRequestDto).execute();
+            case ENG -> new EngSaveCardProcedure(cardRepository, englishCardRepository, cardCombineTypeRepository, typeRepository, noteRepository, reflectCardRequestDto).execute();
+            case JPN -> new JpnSaveCardProcedure(cardRepository, japaneseCardRepository, cardCombineTypeRepository, typeRepository, noteRepository, reflectCardRequestDto).execute();
+        };
     }
 
     private String generateSortString(String cardNo) {
@@ -286,14 +141,13 @@ public class CrawlingServiceImpl implements CrawlingService {
             stringBuilder.append("C");
         } else if (cardNo.startsWith("RB")) {
             stringBuilder.append("D");
-        } else if(cardNo.startsWith("LM")) {
+        } else if (cardNo.startsWith("LM")) {
             stringBuilder.append("E");
             String[] parts = cardNo.split("-");
             String firstNumberPart = String.format("%03d", Integer.parseInt(parts[1].replaceAll("\\D", "")));
             stringBuilder.append(firstNumberPart);
             return stringBuilder.toString();
-        }
-        else if (cardNo.startsWith("P")) {
+        } else if (cardNo.startsWith("P")) {
             stringBuilder.append("Z");
             String[] parts = cardNo.split("-");
             String firstNumberPart = String.format("%03d", Integer.parseInt(parts[1].replaceAll("\\D", "")));
@@ -318,9 +172,12 @@ public class CrawlingServiceImpl implements CrawlingService {
     }
 
 
-
-
     public List<CrawlingCardEntity> crawlUrlAndBuildEntityList(String url, String locale, @Nullable String note) throws IOException {
+        List<CrawlingCardDto> crawlingCardDtoList = createCrawlingCardDtos(url, locale, note);
+        return createCrawlingCardEntities(crawlingCardDtoList);
+    }
+
+    private List<CrawlingCardDto> createCrawlingCardDtos(String url, String locale, String note) throws IOException {
         List<Document> documentListByFirstPageUrl = getDocumentListByFirstPageUrl(url);
 
         List<Element> cardElement = new ArrayList<>();
@@ -329,28 +186,26 @@ public class CrawlingServiceImpl implements CrawlingService {
         }
         List<CrawlingCardDto> crawlingCardDtoList = new ArrayList<>();
         for (Element element : cardElement) {
-
             CrawlingCardDto crawlingCardDto = crawlingCardByElement(element, locale);
-
 
             if ((note == null || crawlingCardDto.getNote().equals(note))
                     && (locale.equals("KOR") || !crawlingCardDto.getIsParallel())) {
                 crawlingCardDtoList.add(crawlingCardDto);
             }
         }
+        return crawlingCardDtoList;
+    }
 
+    private List<CrawlingCardEntity> createCrawlingCardEntities(List<CrawlingCardDto> crawlingCardDtoList) {
         List<CrawlingCardEntity> crawlingCardEntities = new ArrayList<>();
 
         for (CrawlingCardDto crawlingCardDto : crawlingCardDtoList) {
-            crawlingCardEntities.add(createOrFindCrawlingCardEntity(crawlingCardDto));
+            Optional<CrawlingCardEntity> crawlingCardEntity = crawlingCardRepository.findByImgUrlAndLocale(crawlingCardDto.getImgUrl(), crawlingCardDto.getLocale());
+            if (crawlingCardEntity.isEmpty()) {
+                crawlingCardEntities.add(crawlingCardRepository.save(CrawlingCardEntity.buildCrawlingCardEntity(crawlingCardDto)));
+            }
         }
-
-
         return crawlingCardEntities;
-    }
-
-    private CrawlingCardEntity createOrFindCrawlingCardEntity(CrawlingCardDto crawlingCardDto) {
-        return crawlingCardRepository.findByImgUrlAndLocale(crawlingCardDto.getImgUrl(), crawlingCardDto.getLocale()).orElseGet(() -> crawlingCardRepository.save(new CrawlingCardEntity(crawlingCardDto)));
     }
 
     @Override
@@ -396,66 +251,6 @@ public class CrawlingServiceImpl implements CrawlingService {
     }
 
     @Transactional
-    public CardEntity getEnglishCardEntityOrInsert(ReflectCardRequestDto reflectCardRequestDto) {
-        EnglishCardEntity englishCardEntity = englishCardRepository.save(EnglishCardEntity.builder()
-                .effect(reflectCardRequestDto.getEffect())
-                .sourceEffect(reflectCardRequestDto.getSourceEffect())
-                .cardName(reflectCardRequestDto.getCardName())
-                .build());
-
-        CardEntity cardEntity = cardRepository.findByCardNo(reflectCardRequestDto.getCardNo()).orElseGet(
-                () -> cardRepository.save(
-                        CardEntity.builder()
-                                .sortString(generateSortString(reflectCardRequestDto.getCardNo()))
-                                .cardNo(reflectCardRequestDto.getCardNo())
-                                .dp(reflectCardRequestDto.getDp())
-                                .playCost(reflectCardRequestDto.getPlayCost())
-                                .digivolveCondition1(reflectCardRequestDto.getDigivolveCondition1())
-                                .digivolveCondition2(reflectCardRequestDto.getDigivolveCondition2())
-                                .digivolveCost1(reflectCardRequestDto.getDigivolveCost1())
-                                .digivolveCost2(reflectCardRequestDto.getDigivolveCost2())
-                                .lv(reflectCardRequestDto.getLv())
-                                .cardType(reflectCardRequestDto.getCardType())
-                                .form(reflectCardRequestDto.getForm())
-                                .rarity(reflectCardRequestDto.getRarity())
-                                .color1(reflectCardRequestDto.getColor1())
-                                .color2(reflectCardRequestDto.getColor2())
-                                .color3(reflectCardRequestDto.getColor3())
-                                .isOnlyEnCard(true)
-                                .releaseDate(LocalDate.of(9999, 12, 31))
-                                .build())
-        );
-
-
-        Set<CardCombineTypeEntity> cardCombineTypeEntities = new HashSet<>();
-
-        if (cardEntity.getCardCombineTypeEntities() == null || cardEntity.getCardCombineTypeEntities().isEmpty()) {
-            for (String type : reflectCardRequestDto.getTypes()) {
-                TypeEntity typeEntity = typeRepository.findByEngName(type).orElseGet(() ->
-                        typeRepository.save(
-                                TypeEntity.builder()
-                                        .engName(type)
-                                        .build())
-                );
-
-                cardCombineTypeEntities.add(
-                        cardCombineTypeRepository.save(
-                                CardCombineTypeEntity.builder()
-                                        .cardEntity(cardEntity)
-                                        .typeEntity(typeEntity)
-                                        .build())
-                );
-            }
-            cardEntity.updateCardCombineTypes(cardCombineTypeEntities);
-        }
-
-        cardEntity.updateEnglishCard(englishCardEntity);
-        englishCardEntity.updateCardEntity(cardEntity);
-        return cardEntity;
-    }
-
-
-    @Transactional
     public CrawlingResultDto reCrawlingByLocale(Locale locale) {
         CrawlingResultDto crawlingResultDto = new CrawlingResultDto();
         List<CrawlingCardEntity> crawlingCardEntities = crawlingCardRepository.findByLocale(locale);
@@ -486,6 +281,7 @@ public class CrawlingServiceImpl implements CrawlingService {
         }
         return crawlingResultDto;
     }
+
     @Transactional
     public CrawlingResultDto reCrawlingHardByLocale(Locale locale) {
         CrawlingResultDto crawlingResultDto = new CrawlingResultDto();

@@ -10,7 +10,12 @@ public enum Color {
     Color(String jpn) {
         this.jpn = jpn;
     }
+
     public static Color getColorByString(String colorString) {
+        if(colorString == null) {
+            return null;
+        }
+
         for (Color value : Color.values()) {
             if(colorString.toUpperCase().equals(value.name())){
                 return value;
@@ -20,6 +25,9 @@ public enum Color {
     }
 
     public static Color getColorByJpn(String jpn) {
+        if(jpn == null) {
+            return null;
+        }
         for (Color value : Color.values()) {
             if(jpn.equals(value.jpn)){
                 return value;

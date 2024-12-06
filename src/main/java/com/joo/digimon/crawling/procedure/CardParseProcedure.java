@@ -1,6 +1,7 @@
 package com.joo.digimon.crawling.procedure;
 
 import com.joo.digimon.crawling.dto.ReflectCardRequestDto;
+import com.joo.digimon.crawling.model.CrawlingCardEntity;
 import com.joo.digimon.global.enums.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -31,7 +32,7 @@ public interface CardParseProcedure {
         dto.setColor3(getColor3());
         dto.setOriginUrl(getOriginUrl());
         dto.setLocale(getLocale());
-
+        dto.setCrawlingCardEntity(getCrawlingCardEntity());
 
         Digivolve digivolve1 = getDigivolve1();
 
@@ -63,7 +64,7 @@ public interface CardParseProcedure {
 
     Form getForm();
 
-    String getAttribute();
+    Attribute getAttribute();
 
     List<String> getTypes();
 
@@ -91,6 +92,7 @@ public interface CardParseProcedure {
 
     Digivolve getDigivolve2();
 
+    CrawlingCardEntity getCrawlingCardEntity();
     @Getter
     @AllArgsConstructor
     class Digivolve {

@@ -22,7 +22,8 @@ public class EnglishCardEntity {
     String effect;
     @Column(length = 1000)
     String sourceEffect;
-    LocalDate releaseDate;
+    String originUrl;
+    String uploadUrl;
 
     @OneToOne
     @JoinColumn(name = "cards_tb_id")

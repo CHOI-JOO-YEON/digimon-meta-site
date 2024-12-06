@@ -76,8 +76,11 @@ public class EngCardParseProcedure implements CardParseProcedure {
     }
 
     @Override
-    public String getAttribute() {
-        return null;
+    public Attribute getAttribute() {
+        if (card.getAttribute().equals("-")) {
+            return null;
+        }
+        return Attribute.findByString(card.getAttribute(), card.getLocale());
     }
 
     @Override
@@ -176,6 +179,11 @@ public class EngCardParseProcedure implements CardParseProcedure {
     @Override
     public Digivolve getDigivolve2() {
         return getDigivolve(card.getDigivolveCost2());
+    }
+
+    @Override
+    public CrawlingCardEntity getCrawlingCardEntity() {
+        return card;
     }
 
     private Digivolve getDigivolve(String digivolve) {

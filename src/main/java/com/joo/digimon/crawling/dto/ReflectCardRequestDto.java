@@ -1,5 +1,6 @@
 package com.joo.digimon.crawling.dto;
 
+import com.joo.digimon.crawling.model.CrawlingCardEntity;
 import com.joo.digimon.global.enums.*;
 import lombok.Data;
 
@@ -15,7 +16,7 @@ public class ReflectCardRequestDto {
     Boolean isParallel;
     String cardName;
     Form form;
-    String attribute;
+    Attribute attribute;
     List<String> types;
     Integer dp;
     Integer playCost;
@@ -31,4 +32,6 @@ public class ReflectCardRequestDto {
     Color color3;
     String originUrl;
     Locale locale;
+
+    CrawlingCardEntity crawlingCardEntity;
 }

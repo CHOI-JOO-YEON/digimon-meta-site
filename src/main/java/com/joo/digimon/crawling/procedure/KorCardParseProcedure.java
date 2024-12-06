@@ -76,11 +76,11 @@ public class KorCardParseProcedure implements CardParseProcedure{
     }
 
     @Override
-    public String getAttribute() {
+    public Attribute getAttribute() {
         if (card.getAttribute().equals("-")) {
             return null;
         }
-        return card.getAttribute();
+        return Attribute.findByString(card.getAttribute(), card.getLocale());
     }
 
     @Override
@@ -179,6 +179,11 @@ public class KorCardParseProcedure implements CardParseProcedure{
     @Override
     public Digivolve getDigivolve2() {
         return getDigivolve(card.getDigivolveCost2());
+    }
+
+    @Override
+    public CrawlingCardEntity getCrawlingCardEntity() {
+        return card;
     }
 
     private Digivolve getDigivolve(String digivolve)

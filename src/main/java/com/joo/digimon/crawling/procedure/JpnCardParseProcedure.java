@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class JpnCardParseProcedure implements CardParseProcedure{
+public class JpnCardParseProcedure implements CardParseProcedure {
 
     CrawlingCardEntity card;
 
@@ -76,8 +76,11 @@ public class JpnCardParseProcedure implements CardParseProcedure{
     }
 
     @Override
-    public String getAttribute() {
-        return null;
+    public Attribute getAttribute() {
+        if (card.getAttribute().equals("-")) {
+            return null;
+        }
+        return Attribute.findByString(card.getAttribute(), card.getLocale());
     }
 
     @Override
@@ -145,22 +148,20 @@ public class JpnCardParseProcedure implements CardParseProcedure{
 
     @Override
     public Color getColor1() {
-        return Color.getColorByString(card.getColor1());
+        return Color.getColorByJpn(card.getColor1());
     }
 
     @Override
-    public Color getColor2() {
-        return Color.getColorByString(card.getColor2());
-    }
+    public Color getColor2() { return Color.getColorByJpn(card.getColor2()); }
 
     @Override
     public Color getColor3() {
-        return Color.getColorByString(card.getColor3());
+        return Color.getColorByJpn(card.getColor3());
     }
 
     @Override
     public String getOriginUrl() {
-        return  card.getImgUrl().substring(2);
+        return card.getImgUrl().substring(2);
     }
 
     @Override
@@ -178,8 +179,12 @@ public class JpnCardParseProcedure implements CardParseProcedure{
         return getDigivolve(card.getDigivolveCost2());
     }
 
-    private Digivolve getDigivolve(String digivolve)
-    {
+    @Override
+    public CrawlingCardEntity getCrawlingCardEntity() {
+        return card;
+    }
+
+    private Digivolve getDigivolve(String digivolve) {
 //        return new Digivolve(null, null);
         if (digivolve == null || digivolve.equals("-")) {
             return new Digivolve(null, null);

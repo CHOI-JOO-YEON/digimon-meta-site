@@ -2,10 +2,7 @@ package com.joo.digimon.card.dto.card;
 
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.joo.digimon.global.enums.CardType;
-import com.joo.digimon.global.enums.Color;
-import com.joo.digimon.global.enums.Form;
-import com.joo.digimon.global.enums.Rarity;
+import com.joo.digimon.global.enums.*;
 import lombok.Data;
 
 import java.time.LocalDate;
@@ -38,7 +35,7 @@ public class CardAdminPutDto {
     Rarity rarity;
     CardType cardType;
     Form form;
-    String attribute;
+    Attribute attribute;
     Set<String> types = new HashSet<>();
     String imgUrl;
     String smallImgUrl;

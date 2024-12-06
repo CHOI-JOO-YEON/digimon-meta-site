@@ -35,7 +35,7 @@ public class CardVo {
     Rarity rarity;
     CardType cardType;
     Form form;
-    String attributes;
+    Attribute attributes;
     List<String> types;
     String imgUrl;
     String smallImgUrl;

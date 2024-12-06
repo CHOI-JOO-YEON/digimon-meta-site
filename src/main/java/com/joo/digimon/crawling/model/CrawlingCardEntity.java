@@ -54,6 +54,33 @@ public class CrawlingCardEntity {
     @Enumerated(EnumType.STRING)
     Locale locale;
 
+    public static CrawlingCardEntity buildCrawlingCardEntity(CrawlingCardDto dto) {
+        return CrawlingCardEntity.builder()
+                .cardNo(dto.getCardNo())
+                .rarity(dto.getRarity())
+                .cardType(dto.getCardType())
+                .lv(dto.getLv())
+                .isParallel(dto.getIsParallel())
+                .cardName(dto.getCardName())
+                .form(dto.getForm())
+                .attribute(dto.getAttribute())
+                .type(dto.getType())
+                .dP(dto.getDP())
+                .playCost(dto.getPlayCost())
+                .digivolveCost1(dto.getDigivolveCost1())
+                .digivolveCost2(dto.getDigivolveCost2())
+                .effect(dto.getEffect())
+                .sourceEffect(dto.getSourceEffect())
+                .note(dto.getNote())
+                .color1(dto.getColor1())
+                .color2(dto.getColor2())
+                .color3(dto.getColor3())
+                .imgUrl(dto.getImgUrl())
+                .isReflect(false)
+                .locale(dto.getLocale())
+                .build();
+    }
+
     public CrawlingCardEntity(CrawlingCardDto dto) {
         this.cardNo = dto.getCardNo();
         this.rarity = dto.getRarity();

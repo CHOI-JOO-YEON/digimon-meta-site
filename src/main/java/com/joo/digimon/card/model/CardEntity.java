@@ -1,9 +1,6 @@
 package com.joo.digimon.card.model;
 
-import com.joo.digimon.global.enums.CardType;
-import com.joo.digimon.global.enums.Color;
-import com.joo.digimon.global.enums.Form;
-import com.joo.digimon.global.enums.Rarity;
+import com.joo.digimon.global.enums.*;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -26,7 +23,6 @@ public class CardEntity {
 
     Integer lv;
     String cardName;
-    String attribute;
 
     Integer dp;
     Integer playCost;
@@ -52,6 +48,9 @@ public class CardEntity {
     CardType cardType;
     @Enumerated(EnumType.STRING)
     Form form;
+
+    @Enumerated(EnumType.STRING)
+    Attribute attribute;
 
     @OneToMany(mappedBy = "cardEntity")
     Set<CardImgEntity> cardImgEntity;
@@ -80,6 +79,18 @@ public class CardEntity {
     }
     public void updateCardCombineTypes(Set<CardCombineTypeEntity> cardCombineTypeEntities) {
         this.cardCombineTypeEntities = cardCombineTypeEntities;
+    }
+
+    public void updateCardName(String cardName) {
+        this.cardName = cardName;
+    }
+
+    public void updateEffect(String effect) {
+        this.effect = effect;
+    }
+
+    public void updateSourceEffect(String sourceEffect) {
+        this.sourceEffect = sourceEffect;
     }
 
 }
