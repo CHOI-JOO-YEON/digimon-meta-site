@@ -31,8 +31,6 @@ public class EngSaveCardProcedure implements SaveCardProcedure {
     @Override
     @Transactional
     public CardEntity getOrCreateCardEntity() {
-
-
         CardEntity cardEntity = cardRepository.findByCardNo(dto.getCardNo())
                 .orElseGet(() -> {
                     CardEntity newEntity = CardEntity.builder()

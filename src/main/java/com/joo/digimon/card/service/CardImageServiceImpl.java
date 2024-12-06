@@ -58,7 +58,7 @@ public class CardImageServiceImpl implements CardImageService {
 
     @Transactional
     public int uploadNotUploadYetEnCardImages() {
-        List<EnglishCardEntity> englishCardEntities = englishCardRepository.findByUploadUrlIsNull();
+        List<EnglishCardEntity> englishCardEntities = englishCardRepository.findByOriginUrlIsNotNullAndUploadUrlIsNull();
 
         englishCardEntities.forEach(this::uploadImageEn);
 
@@ -67,7 +67,7 @@ public class CardImageServiceImpl implements CardImageService {
 
     @Transactional
     public int uploadNotUploadYetJpCardImages() {
-        List<JapaneseCardEntity> japaneseCardEntities = japaneseCardRepository.findByUploadUrlIsNull();
+        List<JapaneseCardEntity> japaneseCardEntities = japaneseCardRepository.findByOriginUrlIsNotNullAndUploadUrlIsNull();
 
         japaneseCardEntities.forEach(this::uploadImageJpn);
 
@@ -78,8 +78,8 @@ public class CardImageServiceImpl implements CardImageService {
     public int getUploadYetCount() {
         int cnt = 0;
         cnt += cardImgRepository.findByOriginUrlIsNotNullAndUploadUrlIsNull().size();
-        cnt += englishCardRepository.findByUploadUrlIsNull().size();
-        cnt += englishCardRepository.findByUploadUrlIsNull().size();
+        cnt += englishCardRepository.findByOriginUrlIsNotNullAndUploadUrlIsNull().size();
+        cnt += japaneseCardRepository.findByOriginUrlIsNotNullAndUploadUrlIsNull().size();
         return cnt;
     }
 

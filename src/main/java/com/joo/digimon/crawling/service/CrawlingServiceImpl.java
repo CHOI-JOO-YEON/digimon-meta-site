@@ -159,66 +159,18 @@ public class CrawlingServiceImpl implements CrawlingService {
     }
 
     @Transactional
-    public CrawlingResultDto reCrawlingByLocale(Locale locale) {
-        CrawlingResultDto crawlingResultDto = new CrawlingResultDto();
+    public int reCrawlingByLocale(Locale locale) {
         List<CrawlingCardEntity> crawlingCardEntities = crawlingCardRepository.findByLocale(locale);
 
-        for (CrawlingCardEntity crawlingCardEntity : crawlingCardEntities) {
-            try {
-                ReflectCardRequestDto reflectCardRequestDto = createReflectCardRequestDto(crawlingCardEntity);
-                CardEntity cardEntity = cardRepository.findByCardNo(crawlingCardEntity.getCardNo()).orElseThrow();
-
-                if (locale.equals("ENG")) {
-                    if (cardEntity.getEnglishCard() == null) {
-                        EnglishCardEntity englishCardEntity = englishCardRepository.save(
-                                EnglishCardEntity.builder()
-                                        .cardEntity(cardEntity)
-                                        .cardName(crawlingCardEntity.getCardName())
-                                        .effect(reflectCardRequestDto.getEffect())
-                                        .sourceEffect(reflectCardRequestDto.getSourceEffect())
-                                        .build());
-                        cardEntity.updateEnglishCard(englishCardEntity);
-                        crawlingResultDto.successCountIncrease();
-                    }
-                }
-            } catch (Exception e) {
-                crawlingCardEntity.updateErrorMessage(e.getMessage());
-                crawlingResultDto.addFailedCrawling(new CrawlingCardDto(crawlingCardEntity));
-                log.error("{} 에서 발생 {} ", crawlingCardEntity, e);
-            }
-        }
-        return crawlingResultDto;
-    }
-
-    @Transactional
-    public CrawlingResultDto reCrawlingHardByLocale(Locale locale) {
-        CrawlingResultDto crawlingResultDto = new CrawlingResultDto();
-        List<CrawlingCardEntity> crawlingCardEntities = crawlingCardRepository.findByLocale(locale);
-
-        for (CrawlingCardEntity crawlingCardEntity : crawlingCardEntities) {
-            try {
-                ReflectCardRequestDto reflectCardRequestDto = createReflectCardRequestDto(crawlingCardEntity);
-                CardEntity cardEntity = cardRepository.findByCardNo(crawlingCardEntity.getCardNo()).orElseThrow();
-
-                if (locale.equals("ENG")) {
-                    if (cardEntity.getEnglishCard() == null) {
-                        EnglishCardEntity englishCardEntity = englishCardRepository.save(
-                                EnglishCardEntity.builder()
-                                        .cardEntity(cardEntity)
-                                        .cardName(crawlingCardEntity.getCardName())
-                                        .effect(reflectCardRequestDto.getEffect())
-                                        .sourceEffect(reflectCardRequestDto.getSourceEffect())
-                                        .build());
-                        cardEntity.updateEnglishCard(englishCardEntity);
-                        crawlingResultDto.successCountIncrease();
-                    }
-                }
-            } catch (Exception e) {
-                crawlingCardEntity.updateErrorMessage(e.getMessage());
-                crawlingResultDto.addFailedCrawling(new CrawlingCardDto(crawlingCardEntity));
-                log.error("{} 에서 발생 {} ", crawlingCardEntity, e);
-            }
-        }
-        return crawlingResultDto;
+        crawlingCardEntities.forEach(crawlingCardEntity -> {
+            ReflectCardRequestDto reflectCardRequestDto = createReflectCardRequestDto(crawlingCardEntity);
+            switch (locale) {
+                case ENG ->
+                        new EngSaveCardProcedure(cardRepository, englishCardRepository, cardCombineTypeRepository, typeRepository, noteRepository, reflectCardRequestDto).execute();
+                case JPN ->
+                        new JpnSaveCardProcedure(cardRepository, japaneseCardRepository, cardCombineTypeRepository, typeRepository, noteRepository, reflectCardRequestDto).execute();
+            };
+        });
+        return crawlingCardEntities.size();
     }
 }
