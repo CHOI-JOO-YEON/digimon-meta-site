@@ -70,6 +70,10 @@ public class CardImgEntity {
         this.smallImgUrl = smallPrefix + url;
     }
 
+    public void updateUploadUrl(String url) {
+        this.uploadUrl = url;
+    }
+
     public void update(CardAdminPutDto dto) {
         this.cardEntity.cardNo = dto.getCardNo();
         this.cardEntity.cardName = dto.getCardName();
@@ -129,4 +133,6 @@ public class CardImgEntity {
         }
         return "";
     }
+
+
 }

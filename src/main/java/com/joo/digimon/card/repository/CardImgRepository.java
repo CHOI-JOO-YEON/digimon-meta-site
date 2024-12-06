@@ -21,27 +21,10 @@ public interface CardImgRepository extends JpaRepository<CardImgEntity, Integer>
     @EntityGraph("CardImgEntity.detail")
     List<CardImgEntity> findByOriginUrlIsNotNullAndUploadUrlIsNull();
 
-    @EntityGraph("CardImgEntity.detail")
-    List<CardImgEntity> findByUploadUrlIsNullAndIsEnCardIsNullAndIsJpnCardIsNull();
-
-    @EntityGraph("CardImgEntity.detail")
-    List<CardImgEntity> findByUploadUrlIsNullAndIsEnCardIsFalse();
-
-    @EntityGraph("CardImgEntity.detail")
-    List<CardImgEntity> findByUploadUrlIsNullAndIsEnCardTrue();
-
-    @EntityGraph("CardImgEntity.detail")
-    List<CardImgEntity> findByUploadUrlIsNullAndIsJpnCardTrue();
-    @EntityGraph("CardImgEntity.detail")
-    List<CardImgEntity> findByUploadUrlIsNull();
-
     @Override
     @EntityGraph("CardImgEntity.detail")
     List<CardImgEntity> findAll();
 
-
-//    @EntityGraph("CardImgEntity.detail")
-    List<CardImgEntity> findByCardEntity(CardEntity cardEntity);
 
     @EntityGraph("CardImgEntity.detail")
     List<CardImgEntity> findByIdIn(List<Integer> ids, Sort sort);
@@ -51,8 +34,6 @@ public interface CardImgRepository extends JpaRepository<CardImgEntity, Integer>
     Optional<CardImgEntity> findById(Integer id);
 
     List<CardImgEntity> findByIdIn(List<Integer> ids);
-
-    Optional<CardImgEntity> findByCrawlingCardEntity(CrawlingCardEntity crawlingCardEntity);
 
     @Override
     @EntityGraph(value = "CardImgEntity.detail", type = EntityGraph.EntityGraphType.LOAD)
@@ -64,4 +45,8 @@ public interface CardImgRepository extends JpaRepository<CardImgEntity, Integer>
 
     @EntityGraph(value = "CardImgEntity.detail")
     List<CardImgEntity> findByCardEntityAndIsParallelFalse(CardEntity cardEntity);
+
+    @EntityGraph(value = "CardImgEntity.detail")
+    List<CardImgEntity> findByIsEnCardTrueOrIsJpnCardTrue();
+
 }

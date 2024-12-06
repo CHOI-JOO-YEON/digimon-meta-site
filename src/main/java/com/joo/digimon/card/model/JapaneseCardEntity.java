@@ -46,4 +46,11 @@ public class JapaneseCardEntity {
     public void updateUploadUrl(String originalPrefix, String url) {
         this.uploadUrl = originalPrefix + url;
     }
+
+    public void updateUploadUrl(String url) {
+        this.uploadUrl = url;
+    }
+    public void updateOriginUrl(String url) {
+        this.originUrl = url;
+    }
 }
