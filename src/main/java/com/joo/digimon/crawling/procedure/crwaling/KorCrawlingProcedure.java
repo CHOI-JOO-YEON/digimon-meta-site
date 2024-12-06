@@ -1,4 +1,4 @@
-package com.joo.digimon.crawling.procedure;
+package com.joo.digimon.crawling.procedure.crwaling;
 
 import com.joo.digimon.global.enums.Locale;
 import org.jsoup.nodes.Element;

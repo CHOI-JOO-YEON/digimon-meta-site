@@ -1,4 +1,4 @@
-package com.joo.digimon.crawling.procedure;
+package com.joo.digimon.crawling.procedure.save;
 
 import com.joo.digimon.card.model.CardCombineTypeEntity;
 import com.joo.digimon.card.model.CardEntity;
@@ -6,6 +6,7 @@ import com.joo.digimon.card.model.EnglishCardEntity;
 import com.joo.digimon.card.model.TypeEntity;
 import com.joo.digimon.card.repository.*;
 import com.joo.digimon.crawling.dto.ReflectCardRequestDto;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -28,16 +29,13 @@ public class EngSaveCardProcedure implements SaveCardProcedure {
     }
 
     @Override
+    @Transactional
     public CardEntity getOrCreateCardEntity() {
-
 
 
         CardEntity cardEntity = cardRepository.findByCardNo(dto.getCardNo())
                 .orElseGet(() -> {
                     CardEntity newEntity = CardEntity.builder()
-                            .cardName(dto.getCardName())
-                            .effect(dto.getEffect())
-                            .sourceEffect(dto.getSourceEffect())
                             .cardNo(dto.getCardNo())
                             .rarity(dto.getRarity())
                             .cardType(dto.getCardType())
@@ -53,6 +51,8 @@ public class EngSaveCardProcedure implements SaveCardProcedure {
                             .color1(dto.getColor1())
                             .color2(dto.getColor2())
                             .color3(dto.getColor3())
+                            .sortString(SaveCardProcedure.generateSortString(dto.getCardNo()))
+                            .isOnlyEnCard(true)
                             .build();
                     return cardRepository.save(newEntity);
                 });
@@ -62,6 +62,8 @@ public class EngSaveCardProcedure implements SaveCardProcedure {
                     .effect(dto.getEffect())
                     .sourceEffect(dto.getSourceEffect())
                     .cardName(dto.getCardName())
+                    .originUrl(dto.getOriginUrl())
+                    .cardEntity(cardEntity)
                     .build());
             cardEntity.updateEnglishCard(englishCardEntity);
         }
@@ -70,6 +72,8 @@ public class EngSaveCardProcedure implements SaveCardProcedure {
     }
 
     @Override
+    @jakarta.transaction.Transactional
+
     public Set<CardCombineTypeEntity> getCardCombineTypes(CardEntity cardEntity) {
         return dto.getTypes().stream()
                 .map(type -> {

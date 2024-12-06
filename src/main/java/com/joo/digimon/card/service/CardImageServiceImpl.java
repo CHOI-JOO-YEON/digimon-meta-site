@@ -1,8 +1,11 @@
 package com.joo.digimon.card.service;
 
-import com.joo.digimon.card.externel.ScalingClient;
 import com.joo.digimon.card.model.CardImgEntity;
+import com.joo.digimon.card.model.EnglishCardEntity;
+import com.joo.digimon.card.model.JapaneseCardEntity;
 import com.joo.digimon.card.repository.CardImgRepository;
+import com.joo.digimon.card.repository.EnglishCardRepository;
+import com.joo.digimon.card.repository.JapaneseCardRepository;
 import com.joo.digimon.util.S3Util;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -21,7 +24,9 @@ import java.util.List;
 public class CardImageServiceImpl implements CardImageService {
     private final S3Util s3Util;
     private final CardImgRepository cardImgRepository;
-    private final ScalingClient scalingClient;
+    private final EnglishCardRepository englishCardRepository;
+    private final JapaneseCardRepository japaneseCardRepository;
+
     private static final String KO_URL_PREFIX = "https://digimoncard.co.kr/";
     private static final String EN_URL_PREFIX = "https://world.digimoncard.com/";
     private static final String JP_URL_PREFIX = "https://digimoncard.com/";
@@ -31,29 +36,6 @@ public class CardImageServiceImpl implements CardImageService {
 
     @Value("${img.small}")
     private String smallUploadPrefix;
-
-    private final static Integer MIN_WIDTH = 600;
-    private final static Integer MIN_HEIGHT = 900;
-
-    @Override
-    @Transactional
-    public int uploadNotUploadYetKorCardImages() {
-        int cnt = 0;
-
-        List<CardImgEntity> cardImgEntityList = cardImgRepository.findByUploadUrlIsNullAndIsEnCardIsNullAndIsJpnCardIsNull();
-        cardImgEntityList.addAll(cardImgRepository.findByUploadUrlIsNullAndIsEnCardIsFalse());
-
-        for (CardImgEntity cardImgEntity : cardImgEntityList) {
-            try {
-                uploadImage(cardImgEntity, KO_URL_PREFIX);
-                cnt++;
-            } catch (IOException ignore) {
-
-            }
-
-        }
-        return cnt;
-    }
 
     @Transactional
     @Override
@@ -67,103 +49,85 @@ public class CardImageServiceImpl implements CardImageService {
         return cnt;
     }
 
-    @Override
+    @Transactional
+    public int uploadNotUploadYetKorCardImages() {
+        List<CardImgEntity> cardImgEntityList = cardImgRepository.findByOriginUrlIsNotNullAndUploadUrlIsNull();
+        cardImgEntityList.forEach(this::uploadImage);
+        return cardImgEntityList.size();
+    }
+
     @Transactional
     public int uploadNotUploadYetEnCardImages() {
-        int cnt = 0;
+        List<EnglishCardEntity> englishCardEntities = englishCardRepository.findByUploadUrlIsNull();
 
-        List<CardImgEntity> cardImgEntityList = cardImgRepository.findByUploadUrlIsNullAndIsEnCardTrue();
+        englishCardEntities.forEach(this::uploadImageEn);
 
-        for (CardImgEntity cardImgEntity : cardImgEntityList) {
-            try {
-                uploadImageEn(cardImgEntity, EN_URL_PREFIX);
-                cnt++;
-            } catch (IOException ignore) {
-
-            }
-        }
-
-        return cnt;
+        return englishCardEntities.size();
     }
+
     @Transactional
-    @Override
     public int uploadNotUploadYetJpCardImages() {
-        int cnt = 0;
+        List<JapaneseCardEntity> japaneseCardEntities = japaneseCardRepository.findByUploadUrlIsNull();
 
-        List<CardImgEntity> cardImgEntityList = cardImgRepository.findByUploadUrlIsNullAndIsJpnCardTrue();
+        japaneseCardEntities.forEach(this::uploadImageJpn);
 
-        for (CardImgEntity cardImgEntity : cardImgEntityList) {
-            try {
-                uploadImageJpn(cardImgEntity, JP_URL_PREFIX);
-                cnt++;
-            } catch (IOException ignore) {
-
-            }
-        }
-
-        return cnt;
+        return japaneseCardEntities.size();
     }
 
     @Override
     public int getUploadYetCount() {
-        return cardImgRepository.findByUploadUrlIsNull().size();
+        int cnt = 0;
+        cnt += cardImgRepository.findByOriginUrlIsNotNullAndUploadUrlIsNull().size();
+        cnt += englishCardRepository.findByUploadUrlIsNull().size();
+        cnt += englishCardRepository.findByUploadUrlIsNull().size();
+        return cnt;
     }
 
-    private void uploadImage(CardImgEntity cardImgEntity, String urlPrefix) throws IOException {
-
-        BufferedImage image = getImageData(urlPrefix + cardImgEntity.getOriginUrl());
-        BufferedImage compressedImage = Thumbnails.of(image)
-                .size(200, 280)
-                .asBufferedImage();
-        StringBuilder keyNameBuilder = new StringBuilder();
-        keyNameBuilder.append(cardImgEntity.getCardEntity().getCardNo());
-        if (cardImgEntity.getIsParallel()) {
-            keyNameBuilder.append("P").append(cardImgEntity.getId());
+    private void uploadImage(CardImgEntity cardImgEntity) {
+        try {
+            BufferedImage image = getImageData(KO_URL_PREFIX + cardImgEntity.getOriginUrl());
+            BufferedImage compressedImage = Thumbnails.of(image)
+                    .size(200, 280)
+                    .asBufferedImage();
+            StringBuilder keyNameBuilder = new StringBuilder();
+            keyNameBuilder.append(cardImgEntity.getCardEntity().getCardNo());
+            if (cardImgEntity.getIsParallel()) {
+                keyNameBuilder.append("P").append(cardImgEntity.getId());
+            }
+            s3Util.uploadImageToS3(originalUploadPrefix + keyNameBuilder, image, "png");
+            s3Util.uploadImageToS3(smallUploadPrefix + keyNameBuilder, compressedImage, "png");
+            cardImgEntity.updateUploadUrl(originalUploadPrefix, smallUploadPrefix, keyNameBuilder.toString());
+        } catch (Exception ignored) {
         }
-        s3Util.uploadImageToS3(originalUploadPrefix + keyNameBuilder, image, "png");
-        s3Util.uploadImageToS3(smallUploadPrefix + keyNameBuilder, compressedImage, "png");
-        cardImgEntity.updateUploadUrl(originalUploadPrefix, smallUploadPrefix, keyNameBuilder.toString());
     }
 
-    private void uploadImageEn(CardImgEntity cardImgEntity, String urlPrefix) throws IOException {
-
-        BufferedImage image = getImageData(urlPrefix + cardImgEntity.getOriginUrl());
-
-        StringBuilder keyNameBuilder = new StringBuilder();
-        keyNameBuilder.append(cardImgEntity.getCardEntity().getCardNo());
-        if (cardImgEntity.getIsParallel()) {
-            keyNameBuilder.append("P").append(cardImgEntity.getId());
+    private void uploadImageEn(EnglishCardEntity englishCardEntity) {
+        try {
+            BufferedImage image = getImageData(EN_URL_PREFIX + englishCardEntity.getOriginUrl());
+            StringBuilder keyNameBuilder = new StringBuilder();
+            keyNameBuilder.append(englishCardEntity.getCardEntity().getCardNo());
+            String uploadPrefix = originalUploadPrefix + "en/";
+            s3Util.uploadImageToS3(uploadPrefix + keyNameBuilder, image, "png");
+            englishCardEntity.updateUploadUrl(uploadPrefix, keyNameBuilder.toString());
+        } catch (Exception ignored) {
         }
-        String uploadPrefix = originalUploadPrefix + "en/";
-        s3Util.uploadImageToS3(uploadPrefix + keyNameBuilder, image, "png");
-        cardImgEntity.updateUploadUrl(uploadPrefix, uploadPrefix, keyNameBuilder.toString());
     }
 
-    private void uploadImageJpn(CardImgEntity cardImgEntity, String urlPrefix) throws IOException {
-
-        BufferedImage image = getImageData(urlPrefix + cardImgEntity.getOriginUrl());
-
-        StringBuilder keyNameBuilder = new StringBuilder();
-        keyNameBuilder.append(cardImgEntity.getCardEntity().getCardNo());
-        if (cardImgEntity.getIsParallel()) {
-            keyNameBuilder.append("P").append(cardImgEntity.getId());
+    private void uploadImageJpn(JapaneseCardEntity japaneseCardEntity) {
+        try {
+            BufferedImage image = getImageData(JP_URL_PREFIX + japaneseCardEntity.getOriginUrl());
+            StringBuilder keyNameBuilder = new StringBuilder();
+            keyNameBuilder.append(japaneseCardEntity.getCardEntity().getCardNo());
+            String uploadPrefix = originalUploadPrefix + "jp/";
+            s3Util.uploadImageToS3(uploadPrefix + keyNameBuilder, image, "png");
+            japaneseCardEntity.updateUploadUrl(uploadPrefix, keyNameBuilder.toString());
+        } catch (Exception ignored) {
         }
-        String uploadPrefix = originalUploadPrefix + "jp/";
-        s3Util.uploadImageToS3(uploadPrefix + keyNameBuilder, image, "png");
-        cardImgEntity.updateUploadUrl(uploadPrefix, uploadPrefix, keyNameBuilder.toString());
     }
 
     private BufferedImage getImageData(String imageUrl) throws IOException {
         BufferedImage image = ImageIO.read(new URL(imageUrl));
-
-//        if (image.getWidth() < MIN_WIDTH || image.getHeight() < MIN_HEIGHT) {
-//            byte[] scaledImageData = scaleImageUsingWaifu2x(imageUrl);
-//            if (scaledImageData != null) {
-//                image = ImageIO.read(new ByteArrayInputStream(scaledImageData));
-//            }
-//        }
-        BufferedImage trimmedImage = trimImageTransparent(image);
-        return trimmedImage;
+        return trimImageTransparent(image);
     }
 
     public BufferedImage trimImageTransparent(BufferedImage image) {
@@ -171,7 +135,6 @@ public class CardImageServiceImpl implements CardImageService {
         int height = image.getHeight();
         int top = 0, left = 0, right = width - 1, bottom = height - 1;
 
-        // Find top
         while (top < bottom) {
             int[] pixels = new int[width];
             image.getRGB(0, top, width, 1, pixels, 0, width);
@@ -181,7 +144,6 @@ public class CardImageServiceImpl implements CardImageService {
             top++;
         }
 
-        // Find bottom
         while (bottom > top) {
             int[] pixels = new int[width];
             image.getRGB(0, bottom, width, 1, pixels, 0, width);
@@ -191,7 +153,6 @@ public class CardImageServiceImpl implements CardImageService {
             bottom--;
         }
 
-        // Find left
         while (left < right) {
             int[] pixels = new int[height];
             image.getRGB(left, 0, 1, height, pixels, 0, 1);
@@ -201,7 +162,6 @@ public class CardImageServiceImpl implements CardImageService {
             left++;
         }
 
-        // Find right
         while (right > left) {
             int[] pixels = new int[height];
             image.getRGB(right, 0, 1, height, pixels, 0, 1);
@@ -222,10 +182,5 @@ public class CardImageServiceImpl implements CardImageService {
             }
         }
         return false;
-    }
-
-    private byte[] scaleImageUsingWaifu2x(String imageUrl) {
-        return scalingClient.upscaleImage(imageUrl, 2, 3, "art");
-
     }
 }

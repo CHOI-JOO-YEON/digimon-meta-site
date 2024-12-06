@@ -11,4 +11,6 @@ public class LocaleCardData {
     private String effect;
     private String sourceEffect;
     private Locale locale;
+    private String imgUrl;
+    private String smallImgUrl;
 }

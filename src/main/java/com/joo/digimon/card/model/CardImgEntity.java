@@ -100,4 +100,20 @@ public class CardImgEntity {
     public void updateNote(NoteEntity noteEntity) {
         this.noteEntity=noteEntity;
     }
+
+    public void updateCrawlingCardEntity(CrawlingCardEntity crawlingCardEntity) {
+        this.crawlingCardEntity = crawlingCardEntity;
+    }
+
+    public void updateOriginUrl(String originUrl) {
+        this.originUrl = originUrl;
+    }
+
+    public void updateIsEnCard(boolean b) {
+        this.isEnCard = b;
+    }
+
+    public void updateIsJpnCard(boolean b) {
+        this.isJpnCard = b;
+    }
 }

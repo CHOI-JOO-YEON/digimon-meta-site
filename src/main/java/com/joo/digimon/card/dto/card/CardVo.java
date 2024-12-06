@@ -12,7 +12,6 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 @Getter
 @Setter
@@ -37,8 +36,6 @@ public class CardVo {
     Form form;
     Attribute attributes;
     List<String> types;
-    String imgUrl;
-    String smallImgUrl;
     Boolean isParallel;
     String sortString;
     String noteName;
@@ -46,8 +43,7 @@ public class CardVo {
     LocalDate releaseDate;
     Boolean isEn;
     LocalDateTime modifiedAt;
-    List<LocaleCardData> localeCardDatas;
-
+    List<LocaleCardData> localeCardData;
 
     public CardVo(CardImgEntity card, String prefixUrl) {
         this.cardId = card.getId();
@@ -74,10 +70,8 @@ public class CardVo {
                 .filter(Objects::nonNull)
                 .toList();
 
-        this.imgUrl = prefixUrl + card.getUploadUrl();
         this.isParallel = card.getIsParallel();
         this.sortString = card.getCardEntity().getSortString();
-        this.smallImgUrl = prefixUrl + card.getSmallImgUrl();
         this.releaseDate = card.getCardEntity().getReleaseDate();
         this.noteName = card.getNoteEntity().getName();
         this.noteId = card.getNoteEntity().getId();
@@ -85,34 +79,38 @@ public class CardVo {
         this.modifiedAt = card.getModifiedAt() == null ?
                 LocalDateTime.of(1998, 7, 15, 9, 30) : card.getModifiedAt();
 
-        localeCardDatas = new ArrayList<>();
+        localeCardData = new ArrayList<>();
 
-        if(card.getCardEntity().getCardName() !=null)
-        {
-            localeCardDatas.add(new LocaleCardData(
+        if (card.getCardEntity().getCardName() != null) {
+            localeCardData.add(new LocaleCardData(
                     card.getCardEntity().getCardName(),
                     card.getCardEntity().getEffect(),
                     card.getCardEntity().getSourceEffect(),
-                    Locale.KOR
+                    Locale.KOR,
+                    prefixUrl + card.getUploadUrl(),
+                    prefixUrl + card.getSmallImgUrl()
             ));
         }
 
-        if(card.getCardEntity().getEnglishCard() !=null)
-        {
-            localeCardDatas.add(new LocaleCardData(
+        if (card.getCardEntity().getEnglishCard() != null) {
+            localeCardData.add(new LocaleCardData(
                     card.getCardEntity().getEnglishCard().getCardName(),
                     card.getCardEntity().getEnglishCard().getEffect(),
                     card.getCardEntity().getEnglishCard().getSourceEffect(),
-                    Locale.ENG
+                    Locale.ENG,
+                    prefixUrl + card.getCardEntity().getEnglishCard().getUploadUrl(),
+                    prefixUrl + card.getCardEntity().getEnglishCard().getUploadUrl()
             ));
         }
 
         if (card.getCardEntity().getJapaneseCardEntity() != null) {
-            localeCardDatas.add(new LocaleCardData(
+            localeCardData.add(new LocaleCardData(
                     card.getCardEntity().getJapaneseCardEntity().getCardName(),
                     card.getCardEntity().getJapaneseCardEntity().getEffect(),
                     card.getCardEntity().getJapaneseCardEntity().getSourceEffect(),
-                    Locale.JPN
+                    Locale.JPN,
+                    prefixUrl + card.getCardEntity().getJapaneseCardEntity().getUploadUrl(),
+                    prefixUrl + card.getCardEntity().getJapaneseCardEntity().getUploadUrl()
             ));
         }
 

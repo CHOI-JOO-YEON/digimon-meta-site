@@ -17,6 +17,10 @@ import java.util.Optional;
 
 @Repository
 public interface CardImgRepository extends JpaRepository<CardImgEntity, Integer>, QuerydslPredicateExecutor<CardImgEntity> {
+
+    @EntityGraph("CardImgEntity.detail")
+    List<CardImgEntity> findByOriginUrlIsNotNullAndUploadUrlIsNull();
+
     @EntityGraph("CardImgEntity.detail")
     List<CardImgEntity> findByUploadUrlIsNullAndIsEnCardIsNullAndIsJpnCardIsNull();
 
@@ -57,4 +61,7 @@ public interface CardImgRepository extends JpaRepository<CardImgEntity, Integer>
 
     @EntityGraph(value = "CardImgEntity.detail")
     Optional<CardImgEntity> findByCardEntityCardNoAndIsParallelFalse(String cardNo);
+
+    @EntityGraph(value = "CardImgEntity.detail")
+    List<CardImgEntity> findByCardEntityAndIsParallelFalse(CardEntity cardEntity);
 }

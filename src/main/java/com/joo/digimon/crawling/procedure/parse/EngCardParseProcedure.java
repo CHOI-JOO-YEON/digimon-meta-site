@@ -1,4 +1,4 @@
-package com.joo.digimon.crawling.procedure;
+package com.joo.digimon.crawling.procedure.parse;
 
 import com.joo.digimon.crawling.model.CrawlingCardEntity;
 import com.joo.digimon.global.enums.*;
@@ -7,11 +7,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class KorCardParseProcedure implements CardParseProcedure{
+public class EngCardParseProcedure implements CardParseProcedure {
 
     CrawlingCardEntity card;
 
-    public KorCardParseProcedure(CrawlingCardEntity card) {
+    public EngCardParseProcedure(CrawlingCardEntity card) {
         this.card = card;
     }
 
@@ -58,12 +58,7 @@ public class KorCardParseProcedure implements CardParseProcedure{
 
     @Override
     public String getCardName() {
-        String[] cardNameStrings = card.getCardName().split(" ");
-        if (cardNameStrings.length <= 1) {
-            return card.getCardName();
-        }
-
-        return String.join(" ", Arrays.copyOfRange(cardNameStrings, 1, cardNameStrings.length));
+        return card.getCardName();
     }
 
     @Override
@@ -92,7 +87,7 @@ public class KorCardParseProcedure implements CardParseProcedure{
         if (card.getType() == null) {
             return new ArrayList<>();
         }
-        String[] types = card.getType().split(",");
+        String[] types = card.getType().split("/");
         List<String> typeList = new ArrayList<>();
         for (String s : types) {
             typeList.add(s.trim());
@@ -163,12 +158,12 @@ public class KorCardParseProcedure implements CardParseProcedure{
 
     @Override
     public String getOriginUrl() {
-        return card.getImgUrl();
+        return card.getImgUrl().substring(2);
     }
 
     @Override
     public Locale getLocale() {
-        return Locale.KOR;
+        return Locale.ENG;
     }
 
     @Override
@@ -186,18 +181,17 @@ public class KorCardParseProcedure implements CardParseProcedure{
         return card;
     }
 
-    private Digivolve getDigivolve(String digivolve)
-    {
+    private Digivolve getDigivolve(String digivolve) {
         if (digivolve == null || digivolve.equals("-")) {
             return new Digivolve(null, null);
         }
-        String[] digivolveStrings = digivolve.split("~");
+        String[] digivolveStrings = digivolve.split(" from ");
         if (digivolveStrings.length < 2) {
             return new Digivolve(null, null);
         }
         try {
-            int digivolveCondition = Integer.parseInt(digivolveStrings[0].replace("Lv.", ""));
-            double digivolveDoubleCost = Double.parseDouble(digivolveStrings[1]);
+            int digivolveCondition = Integer.parseInt(digivolveStrings[1].replace("Lv.", ""));
+            double digivolveDoubleCost = Double.parseDouble(digivolveStrings[0]);
             int digivolveCost = (int) digivolveDoubleCost;
             return new Digivolve(digivolveCost, digivolveCondition);
         } catch (NumberFormatException e) {

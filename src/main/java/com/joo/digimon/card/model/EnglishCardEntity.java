@@ -39,4 +39,8 @@ public class EnglishCardEntity {
     public void updateCardEntity(CardEntity cardEntity) {
         this.cardEntity = cardEntity;
     }
+
+    public void updateUploadUrl(String originalPrefix, String url) {
+        this.uploadUrl = originalPrefix + url;
+    }
 }

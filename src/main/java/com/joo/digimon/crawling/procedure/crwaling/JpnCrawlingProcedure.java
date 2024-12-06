@@ -1,4 +1,4 @@
-package com.joo.digimon.crawling.procedure;
+package com.joo.digimon.crawling.procedure.crwaling;
 
 import com.joo.digimon.global.enums.Locale;
 import org.jsoup.nodes.Element;
@@ -8,11 +8,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-public class EngCrawlingProcedure implements CrawlingProcedure {
+public class JpnCrawlingProcedure implements CrawlingProcedure {
 
     Element element;
 
-    public EngCrawlingProcedure(Element element) {
+    public JpnCrawlingProcedure(Element element) {
         this.element = element;
     }
 
@@ -52,17 +52,17 @@ public class EngCrawlingProcedure implements CrawlingProcedure {
 
     @Override
     public String getForm() {
-        return element.select(".cardinfo_top_body dl:contains(Form) dd").text();
+        return element.select(".cardinfo_top_body dl:contains(形態) dd").text();
     }
 
     @Override
     public String getAttribute() {
-        return element.select(".cardinfo_top_body dl:contains(Attribute) dd").text();
+        return element.select(".cardinfo_top_body dl:contains(属性) dd").text();
     }
 
     @Override
     public String getType() {
-        return element.select(".cardinfo_top_body dl:contains(Type) dd").text();
+        return element.select(".cardinfo_top_body dl:contains(タイプ) dd").text();
     }
 
     @Override
@@ -72,32 +72,32 @@ public class EngCrawlingProcedure implements CrawlingProcedure {
 
     @Override
     public String getPlayCost() {
-        return element.select(".cardinfo_top_body dl:contains(Play Cost) dd").text();
+        return element.select(".cardinfo_top_body dl:contains(登場コスト) dd").text();
     }
 
     @Override
     public String getDigivolveCost1() {
-        return element.select(".cardinfo_top_body dl:contains(Digivolve Cost 1) dd").text();
+        return element.select(".cardinfo_top_body dl:contains(進化コスト1) dd").text();
     }
 
     @Override
     public String getDigivolveCost2() {
-        return element.select(".cardinfo_top_body dl:contains(Digivolve Cost 2) dd").text();
+        return element.select(".cardinfo_top_body dl:contains(進化コスト2) dd").text();
     }
 
     @Override
     public String getEffect() {
-        return CrawlingProcedure.parseElementToPlainText(element.select(".cardinfo_bottom dl dt:matchesOwn(^Effect$) + dd"));
+        return CrawlingProcedure.parseElementToPlainText(element.select(".cardinfo_bottom dl:contains(上段テキスト) dd"));
     }
 
     @Override
     public String getSourceEffect() {
-        return CrawlingProcedure.parseElementToPlainText(element.select(".cardinfo_bottom dl:contains(Inherited Effect) dd"));
+        return CrawlingProcedure.parseElementToPlainText(element.select(".cardinfo_bottom dl:contains(下段テキスト) dd"));
     }
 
     @Override
     public String getNote() {
-        return element.select(".cardinfo_bottom dl:contains(Notes) dd").text();
+        return element.select(".cardinfo_bottom dl:contains(入手情報) dd").text();
     }
 
     @Override
@@ -107,16 +107,16 @@ public class EngCrawlingProcedure implements CrawlingProcedure {
 
     @Override
     public Locale getLocale() {
-        return Locale.ENG;
+        return Locale.JPN;
     }
 
     @Override
     public List<String> getColors() {
         List<String> colors = new ArrayList<>();
         Elements colorSpans = element.select("dd.cardColor span");
-
         for (Element span : colorSpans) {
             String color = span.text();
+
             colors.add(color);
         }
         return colors;

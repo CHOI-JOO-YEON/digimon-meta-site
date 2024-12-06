@@ -1,4 +1,4 @@
-package com.joo.digimon.crawling.procedure;
+package com.joo.digimon.crawling.procedure.parse;
 
 import com.joo.digimon.crawling.dto.ReflectCardRequestDto;
 import com.joo.digimon.crawling.model.CrawlingCardEntity;

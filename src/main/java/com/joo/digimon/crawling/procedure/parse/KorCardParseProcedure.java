@@ -1,4 +1,4 @@
-package com.joo.digimon.crawling.procedure;
+package com.joo.digimon.crawling.procedure.parse;
 
 import com.joo.digimon.crawling.model.CrawlingCardEntity;
 import com.joo.digimon.global.enums.*;
@@ -7,11 +7,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class EngCardParseProcedure implements CardParseProcedure {
+public class KorCardParseProcedure implements CardParseProcedure{
 
     CrawlingCardEntity card;
 
-    public EngCardParseProcedure(CrawlingCardEntity card) {
+    public KorCardParseProcedure(CrawlingCardEntity card) {
         this.card = card;
     }
 
@@ -92,7 +92,7 @@ public class EngCardParseProcedure implements CardParseProcedure {
         if (card.getType() == null) {
             return new ArrayList<>();
         }
-        String[] types = card.getType().split("/");
+        String[] types = card.getType().split(",");
         List<String> typeList = new ArrayList<>();
         for (String s : types) {
             typeList.add(s.trim());
@@ -163,12 +163,12 @@ public class EngCardParseProcedure implements CardParseProcedure {
 
     @Override
     public String getOriginUrl() {
-        return card.getImgUrl().substring(2);
+        return card.getImgUrl();
     }
 
     @Override
     public Locale getLocale() {
-        return Locale.ENG;
+        return Locale.KOR;
     }
 
     @Override
@@ -186,17 +186,18 @@ public class EngCardParseProcedure implements CardParseProcedure {
         return card;
     }
 
-    private Digivolve getDigivolve(String digivolve) {
+    private Digivolve getDigivolve(String digivolve)
+    {
         if (digivolve == null || digivolve.equals("-")) {
             return new Digivolve(null, null);
         }
-        String[] digivolveStrings = digivolve.split(" from ");
+        String[] digivolveStrings = digivolve.split("~");
         if (digivolveStrings.length < 2) {
             return new Digivolve(null, null);
         }
         try {
-            int digivolveCondition = Integer.parseInt(digivolveStrings[1].replace("Lv.", ""));
-            double digivolveDoubleCost = Double.parseDouble(digivolveStrings[0]);
+            int digivolveCondition = Integer.parseInt(digivolveStrings[0].replace("Lv.", ""));
+            double digivolveDoubleCost = Double.parseDouble(digivolveStrings[1]);
             int digivolveCost = (int) digivolveDoubleCost;
             return new Digivolve(digivolveCost, digivolveCondition);
         } catch (NumberFormatException e) {

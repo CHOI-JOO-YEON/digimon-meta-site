@@ -19,7 +19,7 @@ public class CrawlingController {
 
 
     @PostMapping("/page")
-    public ResponseEntity<?> crawlingPageEnOnlyNote(@RequestParam(name = "page-url") String pageUrl, @RequestParam(name = "locale") String locale, @RequestParam(name = "note", required = false) String note) throws IOException {
+    public ResponseEntity<?> crawlingPageEnOnlyNote(@RequestParam(name = "page-url") String pageUrl, @RequestParam(name = "locale") Locale locale, @RequestParam(name = "note", required = false) String note) throws IOException {
         return new ResponseEntity<>(crawlingService.crawlAndSaveByUrl(pageUrl, locale, note), HttpStatus.CREATED);
     }
 
