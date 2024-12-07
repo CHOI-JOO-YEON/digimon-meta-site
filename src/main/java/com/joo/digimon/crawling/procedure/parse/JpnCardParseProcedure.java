@@ -125,7 +125,11 @@ public class JpnCardParseProcedure implements CardParseProcedure {
         if (card.getEffect().equals("-")) {
             return null;
         }
-        return card.getEffect().replace("<img src=\"../images/cardlist/evolution.png\">", "〔進化〕");
+        String effect = card.getEffect().replace("<img src=\"../images/cardlist/evolution.png\">", "〔進化〕");
+        effect = effect.replace("<br>", "");
+        String digicrossRegex = "<img src=\"\\.\\./images/cardlist/digicross-(\\d+)\\.png\">";
+        effect = effect.replaceAll(digicrossRegex, "デジクロス-$1:");
+        return effect;
     }
 
     @Override
