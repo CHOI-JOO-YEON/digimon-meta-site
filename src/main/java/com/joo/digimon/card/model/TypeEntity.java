@@ -18,8 +18,18 @@ import java.util.List;
 @NamedEntityGraph(
         name = "TypeEntity.detail",
         attributeNodes = {
-                @NamedAttributeNode(value = "cardCombineTypes")
+                @NamedAttributeNode(value = "cardCombineTypes", subgraph = "cardCombineTypeSubgraph"),
+
+        },
+        subgraphs = {
+                @NamedSubgraph(
+                        name = "cardCombineTypeSubgraph",
+                        attributeNodes = {
+                                @NamedAttributeNode("cardEntity")
+                        }
+                )
         }
+
 )
 
 
