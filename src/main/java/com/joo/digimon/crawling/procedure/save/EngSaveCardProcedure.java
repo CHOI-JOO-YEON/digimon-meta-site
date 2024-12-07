@@ -70,8 +70,7 @@ public class EngSaveCardProcedure implements SaveCardProcedure {
     }
 
     @Override
-    @jakarta.transaction.Transactional
-
+    @Transactional
     public Set<CardCombineTypeEntity> getCardCombineTypes(CardEntity cardEntity) {
         return dto.getTypes().stream()
                 .map(type -> {

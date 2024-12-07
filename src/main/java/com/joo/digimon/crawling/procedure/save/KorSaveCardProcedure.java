@@ -59,6 +59,7 @@ public class KorSaveCardProcedure implements SaveCardProcedure {
                     return cardRepository.save(newEntity);
                 }));
     }
+
     private CardEntity applyUpdateIfNecessary(CardEntity cardEntity) {
         if (Boolean.TRUE.equals(cardEntity.getIsOnlyEnCard())) {
             cardEntity.updateCardName(dto.getCardName());
