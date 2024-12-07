@@ -159,7 +159,7 @@ public class CrawlingServiceImpl implements CrawlingService {
     }
 
     @Transactional
-    public int setAttribute() {
+    public int setForm() {
         List<CrawlingCardEntity> crawlingCardEntities = crawlingCardRepository.findAll();
         crawlingCardEntities.forEach(crawlingCardEntity -> {
             ReflectCardRequestDto reflectCardRequestDto = createReflectCardRequestDto(crawlingCardEntity);
@@ -167,8 +167,8 @@ public class CrawlingServiceImpl implements CrawlingService {
             if(optionalCardEntity.isPresent()) {
                 CardEntity cardEntity = optionalCardEntity.get();
 
-                if(cardEntity.getAttribute() == null && reflectCardRequestDto.getAttribute() != null) {
-                    cardEntity.updateAttribute(reflectCardRequestDto.getAttribute());
+                if(cardEntity.getForm() == null && reflectCardRequestDto.getForm() != null) {
+                    cardEntity.updateForm(reflectCardRequestDto.getForm());
                 }
             }
         });

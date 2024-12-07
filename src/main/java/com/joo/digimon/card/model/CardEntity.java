@@ -96,4 +96,7 @@ public class CardEntity {
     public void updateAttribute(Attribute attribute) {
         this.attribute = attribute;
     }
+    public void updateForm(Form form) {
+        this.form = form;
+    }
 }

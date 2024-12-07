@@ -35,7 +35,7 @@ public class CrawlingController {
 
     @PostMapping("/re")
     public ResponseEntity<?> reCrawling() throws IOException {
-        return new ResponseEntity<>(crawlingService.setAttribute(), HttpStatus.OK);
+        return new ResponseEntity<>(crawlingService.setForm(), HttpStatus.OK);
     }
 
 }
