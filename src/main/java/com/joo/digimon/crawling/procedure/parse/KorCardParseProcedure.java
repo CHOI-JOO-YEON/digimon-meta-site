@@ -89,7 +89,7 @@ public class KorCardParseProcedure implements CardParseProcedure{
         if (cardType.equals(CardType.TAMER) || cardType.equals(CardType.OPTION)) {
             return new ArrayList<>();
         }
-        if (card.getType() == null) {
+        if (card.getType() == null || card.getType().isEmpty()) {
             return new ArrayList<>();
         }
         String[] types = card.getType().split(",");
