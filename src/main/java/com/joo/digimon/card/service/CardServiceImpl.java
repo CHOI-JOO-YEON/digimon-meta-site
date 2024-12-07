@@ -88,11 +88,12 @@ public class CardServiceImpl implements CardService {
 
         return new PageImpl<>(cardImgEntities, pageable, totalCount);
     }
+
     private Sort createSort(CardSearchRequestDto cardSearchRequestDto) {
         List<Sort.Order> orders = new ArrayList<>();
-        if("modifiedAt".equals(cardSearchRequestDto.getOrderOption())){
+        if ("modifiedAt".equals(cardSearchRequestDto.getOrderOption())) {
             orders.add(new Sort.Order(cardSearchRequestDto.getIsOrderDesc() ? Sort.Direction.DESC : Sort.Direction.ASC, cardSearchRequestDto.getOrderOption()));
-        }else{
+        } else {
             orders.add(new Sort.Order(cardSearchRequestDto.getIsOrderDesc() ? Sort.Direction.DESC : Sort.Direction.ASC, "cardEntity." + cardSearchRequestDto.getOrderOption()));
         }
 
@@ -118,7 +119,7 @@ public class CardServiceImpl implements CardService {
         addParallelCondition(cardSearchRequestDto.getParallelOption(), builder, cardImg);
         addNoteCondition(cardSearchRequestDto.getNoteId(), builder, cardImg);
         addTypeCondition(cardSearchRequestDto, cardCombine, builder, cardImg);
-        addFormCondition(cardSearchRequestDto.getForms(),builder,card);
+        addFormCondition(cardSearchRequestDto.getForms(), builder, card);
     }
 
     private void addFormCondition(Set<Form> forms, BooleanBuilder builder, QCardEntity card) {
@@ -166,8 +167,7 @@ public class CardServiceImpl implements CardService {
     }
 
     private void addDigivolveCostCondition(CardSearchRequestDto cardSearchRequestDto, BooleanBuilder builder, QCardEntity card) {
-        if(cardSearchRequestDto.getMinDigivolutionCost()==0&& cardSearchRequestDto.getMaxDigivolutionCost() == 8)
-        {
+        if (cardSearchRequestDto.getMinDigivolutionCost() == 0 && cardSearchRequestDto.getMaxDigivolutionCost() == 8) {
             return;
         }
         builder.and(card.digivolveCost1.between(
@@ -237,7 +237,12 @@ public class CardServiceImpl implements CardService {
 
     private void addEnglishCardCondition(boolean isEnglishCardInclude, BooleanBuilder builder, QCardImgEntity cardImg, QCardEntity card) {
         if (!isEnglishCardInclude) {
-            builder.and(cardImg.isEnCard.isNull()).or(cardImg.isEnCard.isFalse());
+            builder.and(
+                    cardImg.isEnCard.isNull()
+                            .or(cardImg.isEnCard.isFalse()));
+            builder.and(
+                    cardImg.isJpnCard.isNull()
+                            .or(cardImg.isJpnCard.isFalse()));
         }
     }
 
@@ -270,7 +275,7 @@ public class CardServiceImpl implements CardService {
 
     @Override
     public List<CardTypeResponseDto> getTypes() {
-        Sort sort = Sort.by(Sort.Direction.ASC,"name");
+        Sort sort = Sort.by(Sort.Direction.ASC, "name");
         List<TypeEntity> typeEntities = typeRepository.findByNameIsNotNull(sort);
         List<CardTypeResponseDto> cardTypeResponseDtoList = new ArrayList<>();
         for (TypeEntity typeEntity : typeEntities) {
@@ -278,8 +283,9 @@ public class CardServiceImpl implements CardService {
         }
         return cardTypeResponseDtoList;
     }
+
     @Override
-    public List<CardSummeryDto> getAllCardSummery(){
+    public List<CardSummeryDto> getAllCardSummery() {
         List<CardEntity> cardEntities = cardRepository.findAll();
         List<CardSummeryDto> cardSummeryDtoList = new ArrayList<>();
         for (CardEntity cardEntity : cardEntities) {
