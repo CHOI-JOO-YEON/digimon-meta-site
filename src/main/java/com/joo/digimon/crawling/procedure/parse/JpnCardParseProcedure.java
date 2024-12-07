@@ -125,7 +125,7 @@ public class JpnCardParseProcedure implements CardParseProcedure {
         if (card.getEffect().equals("-")) {
             return null;
         }
-        return card.getEffect();
+        return card.getEffect().replace("<img src=\"../images/cardlist/evolution.png\">", "〔進化〕");
     }
 
     @Override
@@ -133,7 +133,9 @@ public class JpnCardParseProcedure implements CardParseProcedure {
         if (card.getSourceEffect().equals("-")) {
             return null;
         }
-        return card.getSourceEffect();
+
+        String regex = "<img src=\"\\.\\./images/cardlist/overflow-(\\d+)\\.png\">";
+        return card.getSourceEffect().replaceAll(regex, "≪オーバーフロー《-$1》≫");
     }
 
     @Override
