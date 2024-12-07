@@ -93,4 +93,7 @@ public class CardEntity {
         this.sourceEffect = sourceEffect;
     }
 
+    public void updateAttribute(Attribute attribute) {
+        this.attribute = attribute;
+    }
 }

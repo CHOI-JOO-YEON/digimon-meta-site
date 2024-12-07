@@ -159,17 +159,18 @@ public class CrawlingServiceImpl implements CrawlingService {
     }
 
     @Transactional
-    public int reCrawlingByLocale(Locale locale) {
-        List<CrawlingCardEntity> crawlingCardEntities = crawlingCardRepository.findByLocale(locale);
-
+    public int setAttribute() {
+        List<CrawlingCardEntity> crawlingCardEntities = crawlingCardRepository.findAll();
         crawlingCardEntities.forEach(crawlingCardEntity -> {
             ReflectCardRequestDto reflectCardRequestDto = createReflectCardRequestDto(crawlingCardEntity);
-            switch (locale) {
-                case ENG ->
-                        new EngSaveCardProcedure(cardRepository, englishCardRepository, cardCombineTypeRepository, typeRepository, noteRepository, reflectCardRequestDto).execute();
-                case JPN ->
-                        new JpnSaveCardProcedure(cardRepository, japaneseCardRepository, cardCombineTypeRepository, typeRepository, noteRepository, reflectCardRequestDto).execute();
-            };
+            Optional<CardEntity> optionalCardEntity = cardRepository.findByCardNo(reflectCardRequestDto.getCardNo());
+            if(optionalCardEntity.isPresent()) {
+                CardEntity cardEntity = optionalCardEntity.get();
+
+                if(cardEntity.getAttribute() == null && reflectCardRequestDto.getAttribute() != null) {
+                    cardEntity.updateAttribute(reflectCardRequestDto.getAttribute());
+                }
+            }
         });
         return crawlingCardEntities.size();
     }

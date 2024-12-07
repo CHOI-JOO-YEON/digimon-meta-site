@@ -34,8 +34,8 @@ public class CrawlingController {
     }
 
     @PostMapping("/re")
-    public ResponseEntity<?> reCrawling(@RequestParam(name = "locale") Locale locale) throws IOException {
-        return new ResponseEntity<>(crawlingService.reCrawlingByLocale(locale), HttpStatus.OK);
+    public ResponseEntity<?> reCrawling() throws IOException {
+        return new ResponseEntity<>(crawlingService.setAttribute(), HttpStatus.OK);
     }
 
 }

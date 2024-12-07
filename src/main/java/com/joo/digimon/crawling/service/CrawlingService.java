@@ -5,5 +5,5 @@ import java.io.IOException;
 
 public interface CrawlingService {
     int crawlAndSaveByUrl(String url, Locale locale, String note) throws IOException;
-    int reCrawlingByLocale(Locale locale) throws IOException;
+    int setAttribute() throws IOException;
 }
