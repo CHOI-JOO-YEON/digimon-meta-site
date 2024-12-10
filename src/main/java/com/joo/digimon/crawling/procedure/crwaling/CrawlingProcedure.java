@@ -34,7 +34,9 @@ public interface CrawlingProcedure {
         dto.setLocale(getLocale());
 
         List<String> colors = getColors();
-        dto.setColor1(colors.getFirst());
+        if(!colors.isEmpty()) {
+            dto.setColor1(colors.getFirst());
+        }
         if(colors.size() > 1) {
             dto.setColor2(colors.get(1));
         }
