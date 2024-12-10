@@ -37,6 +37,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(IllegalArgumentException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public void handleIllegalArgumentException(Exception e) {
+        e.printStackTrace();
     }
 
     @ExceptionHandler(CanNotDeleteException.class)
