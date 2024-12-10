@@ -11,7 +11,7 @@ import java.util.Map;
 public class RequestDeckDto {
     Integer deckId;
     String deckName="My Deck";
-    Map<Integer,Integer> cardAndCntMap;
+    Map<Integer, Integer> cardAndCntMap;
     List<Color> colors=new ArrayList<>();
     Integer formatId=0;
     Boolean isPublic = false;

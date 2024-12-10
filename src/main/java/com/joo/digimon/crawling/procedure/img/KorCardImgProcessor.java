@@ -19,7 +19,7 @@ public class KorCardImgProcessor implements CardImgProcessor {
     public void process(ReflectCardRequestDto dto, CardEntity cardEntity, NoteEntity noteEntity) {
         if (!dto.getIsParallel()) {
             List<CardImgEntity> cardImgEntityList = cardImgRepository.findByCardEntityAndIsParallelFalse(cardEntity);
-            if (!cardImgEntityList.isEmpty() && (!cardImgEntityList.getFirst().getIsEnCard() || cardImgEntityList.getFirst().getIsJpnCard())) {
+            if (!cardImgEntityList.isEmpty()) {
                 CardImgEntity existingCardImg = cardImgEntityList.getFirst();
                 updateExistingCardImg(existingCardImg, dto, noteEntity);
             } else {
