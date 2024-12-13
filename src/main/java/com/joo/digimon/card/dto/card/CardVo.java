@@ -82,13 +82,21 @@ public class CardVo {
         localeCardData = new ArrayList<>();
 
         if (card.getCardEntity().getCardName() != null) {
+            String imgUrl = null;
+            String smallImgUrl = null;
+            if( Boolean.TRUE.equals(card.getCardEntity().getIsOnlyEnCard())) 
+            {
+                imgUrl = prefixUrl + card.getUploadUrl();
+                smallImgUrl = prefixUrl + card.getUploadUrl();
+            }
+            
             localeCardData.add(new LocaleCardData(
                     card.getCardEntity().getCardName(),
                     card.getCardEntity().getEffect(),
                     card.getCardEntity().getSourceEffect(),
                     Locale.KOR,
-                    prefixUrl + card.getUploadUrl(),
-                    prefixUrl + card.getSmallImgUrl()
+                    imgUrl,
+                    smallImgUrl
             ));
         }
 
