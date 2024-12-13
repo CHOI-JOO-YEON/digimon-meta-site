@@ -84,7 +84,7 @@ public class CardVo {
         if (card.getCardEntity().getCardName() != null) {
             String imgUrl = null;
             String smallImgUrl = null;
-            if( Boolean.TRUE.equals(card.getCardEntity().getIsOnlyEnCard())) 
+            if(!Boolean.TRUE.equals(card.getCardEntity().getIsOnlyEnCard())) 
             {
                 imgUrl = prefixUrl + card.getUploadUrl();
                 smallImgUrl = prefixUrl + card.getUploadUrl();
