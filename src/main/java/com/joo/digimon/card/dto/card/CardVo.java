@@ -87,7 +87,7 @@ public class CardVo {
             if(!Boolean.TRUE.equals(card.getCardEntity().getIsOnlyEnCard())) 
             {
                 imgUrl = prefixUrl + card.getUploadUrl();
-                smallImgUrl = prefixUrl + card.getUploadUrl();
+                smallImgUrl = prefixUrl + card.getSmallImgUrl();
             }
             
             localeCardData.add(new LocaleCardData(
