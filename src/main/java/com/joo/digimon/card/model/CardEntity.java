@@ -99,4 +99,7 @@ public class CardEntity {
     public void updateForm(Form form) {
         this.form = form;
     }
+    public void updateIsOnlyEnCard(Boolean isOnlyEnCard) {
+        this.isOnlyEnCard = isOnlyEnCard;
+    }
 }
