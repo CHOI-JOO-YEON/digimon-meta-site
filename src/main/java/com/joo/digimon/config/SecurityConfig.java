@@ -72,6 +72,7 @@ public class SecurityConfig {
         configuration.addAllowedOriginPattern("http://localhost:9999");
         configuration.addAllowedOriginPattern("http://localhost:50000");
         configuration.addAllowedOriginPattern("https://digimon-meta.site");
+        configuration.addAllowedOriginPattern("https://dgchub.com");
 //        configuration.addAllowedOriginPattern("https://digimon-meta.site/*");
         configuration.addAllowedMethod("*");
         configuration.addAllowedHeader("*");
