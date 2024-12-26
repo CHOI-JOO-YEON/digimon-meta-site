@@ -2,7 +2,6 @@ package com.joo.digimon.card.repository;
 
 import com.joo.digimon.card.model.CardEntity;
 import com.joo.digimon.card.model.CardImgEntity;
-import com.joo.digimon.crawling.model.CrawlingCardEntity;
 import com.querydsl.core.types.Predicate;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -50,7 +49,7 @@ public interface CardImgRepository extends JpaRepository<CardImgEntity, Integer>
     List<CardImgEntity> findByIsEnCardTrueOrIsJpnCardTrue();
     
     @EntityGraph(value = "CardImgEntity.detail")
-    List<CardImgEntity> findByBigWebpUrlIsNull(Pageable pageable);
-    List<CardImgEntity> findByBigWebpUrlIsNull();
+    List<CardImgEntity> findByBigWebpUrlIsNullAndOriginUrlIsNotNull(Pageable pageable);
+    List<CardImgEntity> findByBigWebpUrlIsNullAndOriginUrlIsNotNull();
 
 }
