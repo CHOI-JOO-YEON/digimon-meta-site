@@ -1,7 +1,6 @@
 package com.joo.digimon.card.repository;
 
 import com.joo.digimon.card.model.EnglishCardEntity;
-import com.joo.digimon.card.model.JapaneseCardEntity;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -17,6 +16,6 @@ public interface EnglishCardRepository extends JpaRepository<EnglishCardEntity, 
     List<EnglishCardEntity> findByOriginUrlIsNotNullAndUploadUrlIsNull();
 
     @EntityGraph("EnglishCardEntity.detail")
-    List<EnglishCardEntity> findByWebpUrlIsNull(Pageable pageable);
-    List<EnglishCardEntity> findByWebpUrlIsNull();
+    List<EnglishCardEntity> findByWebpUrlIsNullAndOriginUrlIsNotNull(Pageable pageable);
+    List<EnglishCardEntity> findByWebpUrlIsNullAndOriginUrlIsNotNull();
 }
