@@ -11,4 +11,5 @@ import java.util.List;
 public interface EnglishCardRepository extends JpaRepository<EnglishCardEntity, Integer> {
     List<EnglishCardEntity> findByUploadUrlIsNull();
     List<EnglishCardEntity> findByOriginUrlIsNotNullAndUploadUrlIsNull();
+    
 }

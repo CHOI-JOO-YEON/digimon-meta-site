@@ -1,5 +1,8 @@
 package com.joo.digimon.image;
 
+
+import com.sksamuel.scrimage.ImmutableImage;
+import com.sksamuel.scrimage.webp.WebpWriter;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
@@ -64,5 +67,12 @@ public class ImageUtil {
             }
         }
         return false;
+    }
+    public static byte[] convertBufferedImageToWebP(BufferedImage image) throws IOException {
+        ImmutableImage immutableImage = ImmutableImage.wrapAwt(image);
+        WebpWriter webpWriter = new WebpWriter()
+                .withZ(4)
+                .withQ(100);
+        return immutableImage.bytes(webpWriter);
     }
 }

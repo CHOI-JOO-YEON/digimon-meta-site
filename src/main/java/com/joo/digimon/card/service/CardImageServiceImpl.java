@@ -1,5 +1,6 @@
 package com.joo.digimon.card.service;
 
+import com.joo.digimon.card.dto.card.UploadWebpResponseDto;
 import com.joo.digimon.card.model.CardImgEntity;
 import com.joo.digimon.card.model.EnglishCardEntity;
 import com.joo.digimon.card.model.JapaneseCardEntity;
@@ -12,9 +13,13 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import net.coobird.thumbnailator.Thumbnails;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.awt.image.BufferedImage;
+import java.io.IOException;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.List;
 
 
@@ -29,6 +34,10 @@ public class CardImageServiceImpl implements CardImageService {
     private static final String KO_URL_PREFIX = "https://digimoncard.co.kr/";
     private static final String EN_URL_PREFIX = "https://world.digimoncard.com/";
     private static final String JP_URL_PREFIX = "https://digimoncard.com/";
+    private static final String WEBP_PREFIX = "webp/";
+
+    @Value("${domain.url}")
+    private String prefixUrl;
 
     @Value("${img.original}")
     private String originalUploadPrefix;
@@ -76,32 +85,37 @@ public class CardImageServiceImpl implements CardImageService {
         return cnt;
     }
 
-    private void uploadImage(CardImgEntity cardImgEntity) {
+    public void uploadImage(CardImgEntity cardImgEntity) {
         try {
             BufferedImage image = ImageUtil.getImageData(KO_URL_PREFIX + cardImgEntity.getOriginUrl());
             BufferedImage compressedImage = Thumbnails.of(image)
                     .size(200, 280)
                     .asBufferedImage();
-            StringBuilder keyNameBuilder = new StringBuilder();
-            keyNameBuilder.append(cardImgEntity.getCardEntity().getCardNo());
-            if (cardImgEntity.getIsParallel()) {
-                keyNameBuilder.append("P").append(cardImgEntity.getId());
-            }
-            s3Util.uploadImageToS3(originalUploadPrefix + keyNameBuilder, image, "png");
-            s3Util.uploadImageToS3(smallUploadPrefix + keyNameBuilder, compressedImage, "png");
-            cardImgEntity.updateUploadUrl(originalUploadPrefix, smallUploadPrefix, keyNameBuilder.toString());
+
+            String key = generateImageKey(cardImgEntity.getCardEntity().getCardNo(), cardImgEntity.getIsParallel(), cardImgEntity.getId());
+
+            uploadImage2(key, originalUploadPrefix, image);
+            uploadImage2(key, smallUploadPrefix, compressedImage);
+
+            cardImgEntity.updateUploadUrl(originalUploadPrefix, smallUploadPrefix, key);
+            cardImgEntity.updateUploadWebpUrl(originalUploadPrefix, smallUploadPrefix, key, WEBP_PREFIX);
         } catch (Exception ignored) {
         }
+    }
+
+    private void uploadImage2(String key, String uploadPrefix, BufferedImage image) throws IOException {
+        s3Util.uploadImageToS3(uploadPrefix + key, image, "png");
+        s3Util.uploadImageToS3(WEBP_PREFIX + uploadPrefix + key, ImageUtil.convertBufferedImageToWebP(image), "webp");
     }
 
     private void uploadImageEn(EnglishCardEntity englishCardEntity) {
         try {
             BufferedImage image = ImageUtil.getImageData(EN_URL_PREFIX + englishCardEntity.getOriginUrl());
-            StringBuilder keyNameBuilder = new StringBuilder();
-            keyNameBuilder.append(englishCardEntity.getCardEntity().getCardNo());
+            String key = generateImageKey(englishCardEntity.getCardEntity().getCardNo(), false, null);
             String uploadPrefix = originalUploadPrefix + "en/";
-            s3Util.uploadImageToS3(uploadPrefix + keyNameBuilder, image, "png");
-            englishCardEntity.updateUploadUrl(uploadPrefix, keyNameBuilder.toString());
+            uploadImage2(key, uploadPrefix, image);
+            englishCardEntity.updateUploadUrl(uploadPrefix, key);
+            englishCardEntity.updateWebpUrl(uploadPrefix, key, WEBP_PREFIX);
         } catch (Exception ignored) {
         }
     }
@@ -109,13 +123,56 @@ public class CardImageServiceImpl implements CardImageService {
     private void uploadImageJpn(JapaneseCardEntity japaneseCardEntity) {
         try {
             BufferedImage image = ImageUtil.getImageData(JP_URL_PREFIX + japaneseCardEntity.getOriginUrl());
-            StringBuilder keyNameBuilder = new StringBuilder();
-            keyNameBuilder.append(japaneseCardEntity.getCardEntity().getCardNo());
+            String key = generateImageKey(japaneseCardEntity.getCardEntity().getCardNo(), false, null);
             String uploadPrefix = originalUploadPrefix + "jp/";
-            s3Util.uploadImageToS3(uploadPrefix + keyNameBuilder, image, "png");
-            japaneseCardEntity.updateUploadUrl(uploadPrefix, keyNameBuilder.toString());
+            uploadImage2(key, uploadPrefix, image);
+            japaneseCardEntity.updateUploadUrl(uploadPrefix, key);
+            japaneseCardEntity.updateWebpUrl(uploadPrefix, key, WEBP_PREFIX);
         } catch (Exception ignored) {
         }
     }
+
+    private static String generateImageKey(String cardNo, Boolean isParallel, Integer id) {
+        StringBuilder keyNameBuilder = new StringBuilder();
+        keyNameBuilder.append(cardNo);
+        if (isParallel && id != null) {
+            keyNameBuilder.append("P").append(id);
+        }
+        return keyNameBuilder.toString();
+    }
+
+    @Transactional
+    public UploadWebpResponseDto uploadWebpImageYet(int count)
+    {
+        Instant startTime = Instant.now();
+        List<CardImgEntity> imgEntities = cardImgRepository.findByBigWebpUrlIsNull(PageRequest.of(0, count));
+        try {
+            for (CardImgEntity imgEntity : imgEntities) {
+                BufferedImage image = ImageUtil.getImageData(prefixUrl+imgEntity.getBigWebpUrl());
+                String key = generateImageKey(imgEntity.getCardEntity().getCardNo(), imgEntity.getIsParallel(), imgEntity.getId());
+                uploadWebpImage(image, key);
+                imgEntity.updateUploadWebpUrl(originalUploadPrefix, smallUploadPrefix, key, WEBP_PREFIX);
+            }
+        }catch (Exception ignored) {
+            
+        }
+        Instant endTime = Instant.now();
+        long uploadDurationSeconds = Duration.between(startTime, endTime).getSeconds();
+
+        int pendingCount = cardImgRepository.findByBigWebpUrlIsNull().size();
+        return new UploadWebpResponseDto(imgEntities.size(), pendingCount, uploadDurationSeconds);
+    }
     
+    public void uploadWebpImage(BufferedImage image, String key) throws IOException {
+        BufferedImage compressedImage = Thumbnails.of(image)
+                .size(200, 280)
+                .asBufferedImage();
+
+        byte[] big = ImageUtil.convertBufferedImageToWebP(image);
+        byte[] small = ImageUtil.convertBufferedImageToWebP(compressedImage);
+
+        s3Util.uploadImageToS3(WEBP_PREFIX + originalUploadPrefix + key, big, "webp");
+        s3Util.uploadImageToS3(WEBP_PREFIX + smallUploadPrefix + key, small, "webp");
+    }
+
 }

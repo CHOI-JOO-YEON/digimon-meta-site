@@ -35,6 +35,14 @@ public class S3Util {
                 .build();
         s3Client.putObject(putObjectRequest, RequestBody.fromBytes(convertBufferedImageToByteArray(image, fileType)));
     }
+    public void uploadImageToS3(String keyName, byte[] image, String fileType) throws IOException {
+        PutObjectRequest putObjectRequest = PutObjectRequest.builder()
+                .bucket(bucketName)
+                .key(keyName)
+                .contentType("image/"+fileType)
+                .build();
+        s3Client.putObject(putObjectRequest, RequestBody.fromBytes(image));
+    }
 
     byte[] convertBufferedImageToByteArray(BufferedImage image, String formatName) throws IOException {
         try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
