@@ -86,8 +86,8 @@ public class CardVo {
             String smallImgUrl = null;
             if(!Boolean.TRUE.equals(card.getCardEntity().getIsOnlyEnCard())) 
             {
-                imgUrl = prefixUrl + card.getUploadUrl();
-                smallImgUrl = prefixUrl + card.getSmallImgUrl();
+                imgUrl = prefixUrl + card.getBigWebpUrl();
+                smallImgUrl = prefixUrl + card.getSmallWebpUrl();
             }
             
             localeCardData.add(new LocaleCardData(
@@ -106,8 +106,8 @@ public class CardVo {
                     card.getCardEntity().getEnglishCard().getEffect(),
                     card.getCardEntity().getEnglishCard().getSourceEffect(),
                     Locale.ENG,
-                    prefixUrl + card.getCardEntity().getEnglishCard().getUploadUrl(),
-                    prefixUrl + card.getCardEntity().getEnglishCard().getUploadUrl()
+                    prefixUrl + card.getCardEntity().getEnglishCard().getWebpUrl(),
+                    prefixUrl + card.getCardEntity().getEnglishCard().getWebpUrl()
             ));
         }
 
@@ -117,8 +117,8 @@ public class CardVo {
                     card.getCardEntity().getJapaneseCardEntity().getEffect(),
                     card.getCardEntity().getJapaneseCardEntity().getSourceEffect(),
                     Locale.JPN,
-                    prefixUrl + card.getCardEntity().getJapaneseCardEntity().getUploadUrl(),
-                    prefixUrl + card.getCardEntity().getJapaneseCardEntity().getUploadUrl()
+                    prefixUrl + card.getCardEntity().getJapaneseCardEntity().getWebpUrl(),
+                    prefixUrl + card.getCardEntity().getJapaneseCardEntity().getWebpUrl()
             ));
         }
 
