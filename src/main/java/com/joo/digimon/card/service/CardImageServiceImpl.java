@@ -7,6 +7,7 @@ import com.joo.digimon.card.model.JapaneseCardEntity;
 import com.joo.digimon.card.repository.CardImgRepository;
 import com.joo.digimon.card.repository.EnglishCardRepository;
 import com.joo.digimon.card.repository.JapaneseCardRepository;
+import com.joo.digimon.global.enums.Locale;
 import com.joo.digimon.image.ImageUtil;
 import com.joo.digimon.util.S3Util;
 import jakarta.transaction.Transactional;
@@ -16,6 +17,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
+import javax.sound.midi.Soundbank;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.time.Duration;
@@ -148,19 +150,80 @@ public class CardImageServiceImpl implements CardImageService {
         List<CardImgEntity> imgEntities = cardImgRepository.findByBigWebpUrlIsNull(PageRequest.of(0, count));
         try {
             for (CardImgEntity imgEntity : imgEntities) {
-                BufferedImage image = ImageUtil.getImageData(prefixUrl+imgEntity.getBigWebpUrl());
+                BufferedImage image = ImageUtil.getImageData(prefixUrl+imgEntity.getUploadUrl());
                 String key = generateImageKey(imgEntity.getCardEntity().getCardNo(), imgEntity.getIsParallel(), imgEntity.getId());
                 uploadWebpImage(image, key);
                 imgEntity.updateUploadWebpUrl(originalUploadPrefix, smallUploadPrefix, key, WEBP_PREFIX);
             }
         }catch (Exception ignored) {
-            
+            ignored.printStackTrace();
         }
+
+        cardImgRepository.saveAll(imgEntities);
         Instant endTime = Instant.now();
         long uploadDurationSeconds = Duration.between(startTime, endTime).getSeconds();
 
         int pendingCount = cardImgRepository.findByBigWebpUrlIsNull().size();
         return new UploadWebpResponseDto(imgEntities.size(), pendingCount, uploadDurationSeconds);
+    }
+    
+    @Override
+    public UploadWebpResponseDto uploadWebpImage(int count, Locale locale)
+    {
+        return switch (locale) {
+            case Locale.KOR -> uploadWebpImageYet(count);
+            case Locale.ENG -> uploadWebpImageEngYet(count);
+            case Locale.JPN -> uploadWebpImageJpnYet(count);
+        };
+    }
+
+    @Transactional
+    public UploadWebpResponseDto uploadWebpImageEngYet(int count)
+    {
+        Instant startTime = Instant.now();
+        List<EnglishCardEntity> englishCardEntities = englishCardRepository.findByWebpUrlIsNull(PageRequest.of(0, count));
+        try {
+            for (EnglishCardEntity englishCardEntity : englishCardEntities) {
+                BufferedImage image = ImageUtil.getImageData(prefixUrl+englishCardEntity.getUploadUrl());
+                String key = generateImageKey(englishCardEntity.getCardEntity().getCardNo(), false, null);
+                byte[] webp = ImageUtil.convertBufferedImageToWebP(image);
+                s3Util.uploadImageToS3(WEBP_PREFIX + originalUploadPrefix + "en/" + key, webp, "webp");
+
+                englishCardEntity.updateWebpUrl(originalUploadPrefix + "en/", key, WEBP_PREFIX);
+            }
+        }catch (Exception ignored) {
+
+        }
+        englishCardRepository.saveAll(englishCardEntities);
+        Instant endTime = Instant.now();
+        long uploadDurationSeconds = Duration.between(startTime, endTime).getSeconds();
+
+        int pendingCount = englishCardRepository.findByWebpUrlIsNull().size();
+        return new UploadWebpResponseDto(englishCardEntities.size(), pendingCount, uploadDurationSeconds);
+    }
+
+    @Transactional
+    public UploadWebpResponseDto uploadWebpImageJpnYet(int count)
+    {
+        Instant startTime = Instant.now();
+        List<JapaneseCardEntity> japaneseCardEntities = japaneseCardRepository.findByWebpUrlIsNull(PageRequest.of(0, count));
+        try {
+            for (JapaneseCardEntity japaneseCardEntity : japaneseCardEntities) {
+                BufferedImage image = ImageUtil.getImageData(prefixUrl+japaneseCardEntity.getUploadUrl());
+                String key = generateImageKey(japaneseCardEntity.getCardEntity().getCardNo(), false, null);
+                byte[] webp = ImageUtil.convertBufferedImageToWebP(image);
+                s3Util.uploadImageToS3(WEBP_PREFIX + originalUploadPrefix + "jp/" + key, webp, "webp");
+                japaneseCardEntity.updateWebpUrl(originalUploadPrefix + "jp/", key, WEBP_PREFIX);
+            }
+        }catch (Exception ignored) {
+
+        }
+        japaneseCardRepository.saveAll(japaneseCardEntities);
+        Instant endTime = Instant.now();
+        long uploadDurationSeconds = Duration.between(startTime, endTime).getSeconds();
+
+        int pendingCount = japaneseCardRepository.findByWebpUrlIsNull().size();
+        return new UploadWebpResponseDto(japaneseCardEntities.size(), pendingCount, uploadDurationSeconds);
     }
     
     public void uploadWebpImage(BufferedImage image, String key) throws IOException {

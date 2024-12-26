@@ -13,6 +13,12 @@ import java.util.Optional;
 @Builder
 @Getter
 @Table(name = "ENG_CARDS_TB")
+@NamedEntityGraph(
+        name = "EnglishCardEntity.detail",
+        attributeNodes = {
+                @NamedAttributeNode(value = "cardEntity")
+        }
+)
 public class EnglishCardEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
