@@ -17,7 +17,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
-import javax.sound.midi.Soundbank;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.time.Duration;
@@ -181,7 +180,7 @@ public class CardImageServiceImpl implements CardImageService {
     public UploadWebpResponseDto uploadWebpImageEngYet(int count)
     {
         Instant startTime = Instant.now();
-        List<EnglishCardEntity> englishCardEntities = englishCardRepository.findByWebpUrlIsNull(PageRequest.of(0, count));
+        List<EnglishCardEntity> englishCardEntities = englishCardRepository.findByWebpUrlIsNullAndOriginUrlIsNotNull(PageRequest.of(0, count));
         try {
             for (EnglishCardEntity englishCardEntity : englishCardEntities) {
                 BufferedImage image = ImageUtil.getImageData(prefixUrl+englishCardEntity.getUploadUrl());
@@ -198,7 +197,7 @@ public class CardImageServiceImpl implements CardImageService {
         Instant endTime = Instant.now();
         long uploadDurationSeconds = Duration.between(startTime, endTime).getSeconds();
 
-        int pendingCount = englishCardRepository.findByWebpUrlIsNull().size();
+        int pendingCount = englishCardRepository.findByWebpUrlIsNullAndOriginUrlIsNotNull().size();
         return new UploadWebpResponseDto(englishCardEntities.size(), pendingCount, uploadDurationSeconds);
     }
 
@@ -206,7 +205,7 @@ public class CardImageServiceImpl implements CardImageService {
     public UploadWebpResponseDto uploadWebpImageJpnYet(int count)
     {
         Instant startTime = Instant.now();
-        List<JapaneseCardEntity> japaneseCardEntities = japaneseCardRepository.findByWebpUrlIsNull(PageRequest.of(0, count));
+        List<JapaneseCardEntity> japaneseCardEntities = japaneseCardRepository.findByWebpUrlIsNullAndOriginUrlIsNotNull(PageRequest.of(0, count));
         try {
             for (JapaneseCardEntity japaneseCardEntity : japaneseCardEntities) {
                 BufferedImage image = ImageUtil.getImageData(prefixUrl+japaneseCardEntity.getUploadUrl());
@@ -222,7 +221,7 @@ public class CardImageServiceImpl implements CardImageService {
         Instant endTime = Instant.now();
         long uploadDurationSeconds = Duration.between(startTime, endTime).getSeconds();
 
-        int pendingCount = japaneseCardRepository.findByWebpUrlIsNull().size();
+        int pendingCount = japaneseCardRepository.findByWebpUrlIsNullAndOriginUrlIsNotNull().size();
         return new UploadWebpResponseDto(japaneseCardEntities.size(), pendingCount, uploadDurationSeconds);
     }
     
