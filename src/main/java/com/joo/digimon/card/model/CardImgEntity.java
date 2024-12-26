@@ -50,6 +50,8 @@ public class CardImgEntity {
     String originUrl;
     String uploadUrl;
     String smallImgUrl;
+    String bigWebpUrl;
+    String smallWebpUrl;
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "crawling_cards_tb_id")
@@ -97,12 +99,13 @@ public class CardImgEntity {
         this.isEnCard = dto.getIsEn();
         this.modifiedAt = LocalDateTime.now();
     }
-    public void updateType(Set<CardCombineTypeEntity> cardCombineTypeEntityList){
+
+    public void updateType(Set<CardCombineTypeEntity> cardCombineTypeEntityList) {
         this.cardEntity.cardCombineTypeEntities = cardCombineTypeEntityList;
     }
 
     public void updateNote(NoteEntity noteEntity) {
-        this.noteEntity=noteEntity;
+        this.noteEntity = noteEntity;
     }
 
     public void updateCrawlingCardEntity(CrawlingCardEntity crawlingCardEntity) {
@@ -125,14 +128,18 @@ public class CardImgEntity {
         if (this.getUploadUrl() != null) {
             return this.getUploadUrl();
         }
-        if(this.cardEntity.getEnglishCard() != null) {
+        if (this.cardEntity.getEnglishCard() != null) {
             return this.cardEntity.getEnglishCard().getUploadUrl();
         }
-        if(this.cardEntity.getJapaneseCardEntity() != null) {
+        if (this.cardEntity.getJapaneseCardEntity() != null) {
             return this.cardEntity.getJapaneseCardEntity().getUploadUrl();
         }
         return "";
     }
 
 
+    public void updateUploadWebpUrl(String originalPrefix, String smallPrefix, String key, String webpPrefix) {
+        this.bigWebpUrl = webpPrefix + originalPrefix + key;
+        this.smallWebpUrl = webpPrefix + smallPrefix + key;
+    }
 }

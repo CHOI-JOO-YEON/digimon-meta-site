@@ -47,6 +47,8 @@ dependencies {
     implementation 'net.sf.uadetector:uadetector-resources:2014.10'
     implementation 'net.sf.uadetector:uadetector-core:0.9.22'
     implementation group: 'io.awspring.cloud', name: 'spring-cloud-starter-aws-secrets-manager-config', version: '2.4.4'
+    implementation group: 'com.sksamuel.scrimage', name: 'scrimage-core', version: '4.3.0'
+    implementation group: 'com.sksamuel.scrimage', name: 'scrimage-webp', version: '4.3.0'
 }
 
 tasks.named('test') {

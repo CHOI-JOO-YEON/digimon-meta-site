@@ -16,6 +16,12 @@ import java.util.Optional;
 @Builder
 @Getter
 @Table(name = "JPN_CARDS_TB")
+@NamedEntityGraph(
+        name = "JapaneseCardEntity.detail",
+        attributeNodes = {
+                @NamedAttributeNode(value = "cardEntity")
+        }
+)
 public class JapaneseCardEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -27,7 +33,7 @@ public class JapaneseCardEntity {
     String sourceEffect;
     String originUrl;
     String uploadUrl;
-
+    String webpUrl;
     @OneToOne
     @JoinColumn(name = "cards_tb_id")
     CardEntity cardEntity;
@@ -46,7 +52,9 @@ public class JapaneseCardEntity {
     public void updateUploadUrl(String originalPrefix, String url) {
         this.uploadUrl = originalPrefix + url;
     }
-
+    public void updateWebpUrl(String originalPrefix, String key, String webpPrefix) {
+        this.webpUrl = webpPrefix + originalPrefix + key;
+    }
     public void updateUploadUrl(String url) {
         this.uploadUrl = url;
     }

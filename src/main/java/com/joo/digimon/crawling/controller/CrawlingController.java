@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import software.amazon.awssdk.services.s3.endpoints.internal.Value;
 
 import java.io.IOException;
 
@@ -30,7 +31,7 @@ public class CrawlingController {
 
     @GetMapping("/upload-yet-count")
     public ResponseEntity<?> uploadYetCount() {
-        return new ResponseEntity<>(cardImageService.getUploadYetCount(),HttpStatus.OK);
+        return new ResponseEntity<>(cardImageService.getUploadYetCount(), HttpStatus.OK);
     }
 
     @PostMapping("/re")
@@ -38,4 +39,8 @@ public class CrawlingController {
         return new ResponseEntity<>(crawlingService.setForm(), HttpStatus.OK);
     }
 
+    @PostMapping("/upload-webp")
+    public ResponseEntity<?> uploadWebp(@RequestParam(name = "size") Integer size, @RequestParam(name = "locale") Locale locale){
+        return new ResponseEntity<>(cardImageService.uploadWebpImage(size, locale), HttpStatus.OK);
+    }
 }

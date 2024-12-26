@@ -13,6 +13,12 @@ import java.util.Optional;
 @Builder
 @Getter
 @Table(name = "ENG_CARDS_TB")
+@NamedEntityGraph(
+        name = "EnglishCardEntity.detail",
+        attributeNodes = {
+                @NamedAttributeNode(value = "cardEntity")
+        }
+)
 public class EnglishCardEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -24,6 +30,7 @@ public class EnglishCardEntity {
     String sourceEffect;
     String originUrl;
     String uploadUrl;
+    String webpUrl;
 
     @OneToOne
     @JoinColumn(name = "cards_tb_id")
@@ -40,8 +47,11 @@ public class EnglishCardEntity {
         this.cardEntity = cardEntity;
     }
 
-    public void updateUploadUrl(String originalPrefix, String url) {
-        this.uploadUrl = originalPrefix + url;
+    public void updateUploadUrl(String prefix, String key) {
+        this.uploadUrl = prefix + key;
+    }
+    public void updateWebpUrl(String originalPrefix, String key, String webpPrefix) {
+        this.webpUrl = webpPrefix + originalPrefix + key;
     }
 
     public void updateUploadUrl(String url) {
@@ -50,4 +60,5 @@ public class EnglishCardEntity {
     public void updateOriginUrl(String url) {
         this.originUrl = url;
     }
+    
 }
