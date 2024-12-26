@@ -147,7 +147,7 @@ public class CardImageServiceImpl implements CardImageService {
     public UploadWebpResponseDto uploadWebpImageYet(int count)
     {
         Instant startTime = Instant.now();
-        List<CardImgEntity> imgEntities = cardImgRepository.findByBigWebpUrlIsNull(PageRequest.of(0, count));
+        List<CardImgEntity> imgEntities = cardImgRepository.findByBigWebpUrlIsNullAndOriginUrlIsNotNull(PageRequest.of(0, count));
         try {
             for (CardImgEntity imgEntity : imgEntities) {
                 BufferedImage image = ImageUtil.getImageData(prefixUrl+imgEntity.getUploadUrl());
@@ -163,7 +163,7 @@ public class CardImageServiceImpl implements CardImageService {
         Instant endTime = Instant.now();
         long uploadDurationSeconds = Duration.between(startTime, endTime).getSeconds();
 
-        int pendingCount = cardImgRepository.findByBigWebpUrlIsNull().size();
+        int pendingCount = cardImgRepository.findByBigWebpUrlIsNullAndOriginUrlIsNotNull().size();
         return new UploadWebpResponseDto(imgEntities.size(), pendingCount, uploadDurationSeconds);
     }
     
