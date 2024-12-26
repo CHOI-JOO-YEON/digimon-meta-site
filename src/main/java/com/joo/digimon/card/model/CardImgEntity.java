@@ -50,6 +50,8 @@ public class CardImgEntity {
     String originUrl;
     String uploadUrl;
     String smallImgUrl;
+    String bigWebpUrl;
+    String smallWebpUrl;
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "crawling_cards_tb_id")
