@@ -230,11 +230,16 @@ public class DeckServiceImpl implements DeckService {
             throw new UnAuthorizationException("");
         }
         BooleanBuilder builder = getBuilderByDeckSearchParameter(deckSearchParameter);
+        
         QDeckEntity qDeckEntity = QDeckEntity.deckEntity;
         builder.and(qDeckEntity.user.eq(user));
 
-        Map<Integer, Integer> formatMyDeckCount = getFormatMyDeckCount(deckSearchParameter.getIsOnlyValidDeck(), user);
+        Map<Integer, Integer> formatMyDeckCount = getFormatDeckCount(builder);
+        if (deckSearchParameter.getFormatId() != null) {
+            builder.and(qDeckEntity.format.id.eq(deckSearchParameter.getFormatId()));
+        }
 
+        
         return new PagedResponseDeckDto(getDeckPage(builder, deckSearchParameter), prefixUrl, formatMyDeckCount);
     }
 
@@ -245,7 +250,10 @@ public class DeckServiceImpl implements DeckService {
         QDeckEntity qDeckEntity = QDeckEntity.deckEntity;
         builder.and(qDeckEntity.isPublic.eq(true));
 
-        Map<Integer, Integer> formatAllDeckCount = getFormatAllDeckCount(deckSearchParameter.getIsOnlyValidDeck());
+        Map<Integer, Integer> formatAllDeckCount = getFormatDeckCount(builder);
+        if (deckSearchParameter.getFormatId() != null) {
+            builder.and(qDeckEntity.format.id.eq(deckSearchParameter.getFormatId()));
+        }
 
         return new PagedResponseDeckDto(getDeckPage(builder, deckSearchParameter), prefixUrl, formatAllDeckCount);
     }
@@ -348,10 +356,6 @@ public class DeckServiceImpl implements DeckService {
             builder.and(qDeckEntity.deckColors.any().color.in(deckSearchParameter.getColors()));
         }
 
-        //포맷
-        if (deckSearchParameter.getFormatId() != null) {
-            builder.and(qDeckEntity.format.id.eq(deckSearchParameter.getFormatId()));
-        }
 
 
         return builder;
@@ -362,7 +366,7 @@ public class DeckServiceImpl implements DeckService {
         return PageRequest.of(deckSearchParameter.getPage() - 1, deckSearchParameter.getSize());
     }
 
-    public Map<Integer, Integer> getFormatAllDeckCount(Boolean isValid) {
+    public Map<Integer, Integer> getFormatDeckCount(BooleanBuilder builder) {
         JPAQueryFactory queryFactory = new JPAQueryFactory(entityManager);
 
         QDeckEntity deck = QDeckEntity.deckEntity;
@@ -372,10 +376,7 @@ public class DeckServiceImpl implements DeckService {
                 .select(format.id, deck.id.count())
                 .from(deck)
                 .join(deck.format, format)
-                .where(
-                        deck.isPublic.isTrue(),
-                        deck.isValid.eq(isValid)
-                )
+                .where(builder)
                 .groupBy(format.id)
                 .fetch();
 
@@ -385,29 +386,6 @@ public class DeckServiceImpl implements DeckService {
                         tuple -> Objects.requireNonNull(tuple.get(deck.id.count())).intValue()
                 ));
     }
-
-    public Map<Integer, Integer> getFormatMyDeckCount(Boolean isValid, User user) {
-        JPAQueryFactory queryFactory = new JPAQueryFactory(entityManager);
-
-        QDeckEntity deck = QDeckEntity.deckEntity;
-        QFormat format = QFormat.format;
-
-        List<Tuple> result = queryFactory
-                .select(format.id, deck.id.count())
-                .from(deck)
-                .join(deck.format, format)
-                .where(
-                        deck.user.eq(user),
-                        deck.isValid.eq(isValid)
-                )
-                .groupBy(format.id)
-                .fetch();
-
-        return result.stream()
-                .collect(Collectors.toMap(
-                        tuple -> tuple.get(format.id),
-                        tuple -> Objects.requireNonNull(tuple.get(deck.id.count())).intValue()
-                ));
-    }
+    
 
 }
