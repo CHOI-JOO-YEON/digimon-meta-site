@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
@@ -54,7 +55,7 @@ public class FormatServiceImpl implements FormatService {
     public List<FormatResponseDto> getFormatList(LocalDate latestReleaseCardDate) {
         List<FormatResponseDto> result = new ArrayList<>();
 
-        Sort sort = Sort.by("startDate").descending();
+        Sort sort = Sort.by("endDate").descending();
         List<Format> formats = formatRepository.findByEndDateGreaterThanEqual(latestReleaseCardDate, sort);
 
         for (Format format : formats) {
