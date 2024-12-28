@@ -9,6 +9,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import java.util.Set;
 
 @Entity
 @NoArgsConstructor
@@ -25,6 +26,10 @@ public class Format {
     Boolean isOnlyEn;
     LocalDate startDate;
     LocalDate endDate;
+
+    @OneToMany(mappedBy = "format")
+    Set<DeckEntity> decks;
+    
     public void update(FormatUpdateRequestDto dto){
         this.name = dto.getFormatName();
         this.isOnlyEn = dto.getIsOnlyEn();
