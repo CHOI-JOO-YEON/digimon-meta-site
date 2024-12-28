@@ -18,9 +18,11 @@ import com.joo.digimon.limit.model.LimitEntity;
 import com.joo.digimon.limit.repository.LimitRepository;
 import com.joo.digimon.user.model.User;
 import com.querydsl.core.BooleanBuilder;
+import com.querydsl.core.Tuple;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.JPQLQuery;
 import com.querydsl.jpa.impl.JPAQuery;
+import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -231,8 +233,9 @@ public class DeckServiceImpl implements DeckService {
         QDeckEntity qDeckEntity = QDeckEntity.deckEntity;
         builder.and(qDeckEntity.user.eq(user));
 
+        Map<Integer, Integer> formatMyDeckCount = getFormatMyDeckCount(deckSearchParameter.getIsOnlyValidDeck(), user);
 
-        return new PagedResponseDeckDto(getDeckPage(builder, deckSearchParameter), prefixUrl);
+        return new PagedResponseDeckDto(getDeckPage(builder, deckSearchParameter), prefixUrl, formatMyDeckCount);
     }
 
 
@@ -242,8 +245,9 @@ public class DeckServiceImpl implements DeckService {
         QDeckEntity qDeckEntity = QDeckEntity.deckEntity;
         builder.and(qDeckEntity.isPublic.eq(true));
 
+        Map<Integer, Integer> formatAllDeckCount = getFormatAllDeckCount(deckSearchParameter.getIsOnlyValidDeck());
 
-        return new PagedResponseDeckDto(getDeckPage(builder, deckSearchParameter), prefixUrl);
+        return new PagedResponseDeckDto(getDeckPage(builder, deckSearchParameter), prefixUrl, formatAllDeckCount);
     }
 
     private Page<DeckEntity> getDeckPage(BooleanBuilder builder, DeckSearchParameter deckSearchParameter) {
@@ -264,7 +268,6 @@ public class DeckServiceImpl implements DeckService {
                 .limit(pageable.getPageSize())
                 .fetch();
 
-//        List<DeckEntity> deckEntities = deckRepository.findByIdIn(deckIds);
         List<DeckEntity> deckEntities = deckRepository.findByIdInOrderByUpdateTimestampDesc(deckIds);
 
         return new PageImpl<>(deckEntities, pageable, totalCount);
@@ -357,6 +360,54 @@ public class DeckServiceImpl implements DeckService {
 
     private Pageable generatePageableByDeckSearchParameter(DeckSearchParameter deckSearchParameter) {
         return PageRequest.of(deckSearchParameter.getPage() - 1, deckSearchParameter.getSize());
+    }
+
+    public Map<Integer, Integer> getFormatAllDeckCount(Boolean isValid) {
+        JPAQueryFactory queryFactory = new JPAQueryFactory(entityManager);
+
+        QDeckEntity deck = QDeckEntity.deckEntity;
+        QFormat format = QFormat.format;
+
+        List<Tuple> result = queryFactory
+                .select(format.id, deck.id.count())
+                .from(deck)
+                .join(deck.format, format)
+                .where(
+                        deck.isPublic.isTrue(),
+                        deck.isValid.eq(isValid)
+                )
+                .groupBy(format.id)
+                .fetch();
+
+        return result.stream()
+                .collect(Collectors.toMap(
+                        tuple -> tuple.get(format.id),
+                        tuple -> Objects.requireNonNull(tuple.get(deck.id.count())).intValue()
+                ));
+    }
+
+    public Map<Integer, Integer> getFormatMyDeckCount(Boolean isValid, User user) {
+        JPAQueryFactory queryFactory = new JPAQueryFactory(entityManager);
+
+        QDeckEntity deck = QDeckEntity.deckEntity;
+        QFormat format = QFormat.format;
+
+        List<Tuple> result = queryFactory
+                .select(format.id, deck.id.count())
+                .from(deck)
+                .join(deck.format, format)
+                .where(
+                        deck.user.eq(user),
+                        deck.isValid.eq(isValid)
+                )
+                .groupBy(format.id)
+                .fetch();
+
+        return result.stream()
+                .collect(Collectors.toMap(
+                        tuple -> tuple.get(format.id),
+                        tuple -> Objects.requireNonNull(tuple.get(deck.id.count())).intValue()
+                ));
     }
 
 }
