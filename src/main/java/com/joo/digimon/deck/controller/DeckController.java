@@ -9,6 +9,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
+import java.util.Map;
 
 
 @RestController
@@ -55,6 +57,29 @@ public class DeckController {
     ResponseEntity<?> importDecks(@RequestParam("deck-id") Integer deckId, @CurUser User user) {
         deckService.deleteDeck(deckId,user);
         return new ResponseEntity<>(HttpStatus.OK);
+    }
+    
+    @GetMapping("/import/qr")
+    ResponseEntity<?> importDeckByQr(@RequestParam("deck") String deckString) {
+        Map<Integer, Integer> deckMap = parseDeckString(deckString);
+
+        return ResponseEntity.ok(deckService.importDeckByDeckMap(deckMap));
+    }
+
+    private Map<Integer, Integer> parseDeckString(String deckString) {
+        Map<Integer, Integer> result = new HashMap<>();
+        String[] pairs = deckString.split(",");
+        for (String pair : pairs) {
+            if (pair.contains("=")) {
+                String[] parts = pair.split("=");
+                if (parts.length == 2) {
+                    Integer key = Integer.parseInt(parts[0]);
+                    Integer value = Integer.parseInt(parts[1]);
+                    result.put(key, value);
+                }
+            }
+        }
+        return result;
     }
 
 

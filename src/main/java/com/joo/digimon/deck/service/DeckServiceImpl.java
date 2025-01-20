@@ -189,6 +189,18 @@ public class DeckServiceImpl implements DeckService {
 
         return responseDeckDto;
     }
+    
+    @Override
+    public ResponseDeckDto importDeckByDeckMap(Map<Integer, Integer> map)
+    {
+        ResponseDeckDto responseDeckDto = new ResponseDeckDto();
+        for (Map.Entry<Integer, Integer> entry : map.entrySet()) {
+            Optional<CardImgEntity> cardImg = cardImgRepository.findById(entry.getKey());
+            cardImg.ifPresent(cardImgEntity -> responseDeckDto.addCard(cardImgEntity, entry.getValue(), prefixUrl));
+        }
+
+        return responseDeckDto;
+    }
 
     @Override
     public TTSDeckFileDto exportTTSDeck(RequestDeckDto requestDeckDto) {
