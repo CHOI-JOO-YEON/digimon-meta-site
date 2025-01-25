@@ -102,7 +102,7 @@ public class CardAdminServiceImpl implements CardAdminService {
         List<TypeEntity> types = typeRepository.findAll();
         List<TypeDto> typeDtoList = new ArrayList<>();
         for (TypeEntity type : types) {
-            typeDtoList.add(new TypeDto(type, false));
+            typeDtoList.add(new TypeDto(type, true));
         }
         return typeDtoList;
     }
