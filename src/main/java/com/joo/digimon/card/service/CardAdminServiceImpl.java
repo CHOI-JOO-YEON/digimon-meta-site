@@ -88,10 +88,21 @@ public class CardAdminServiceImpl implements CardAdminService {
         List<TypeEntity> types = typeRepository.findAll();
         List<TypeDto> typeDtoList = new ArrayList<>();
         for (TypeEntity type : types) {
-            typeDtoList.add(new TypeDto(type));
+            typeDtoList.add(new TypeDto(type, false));
         }
         return typeDtoList;
     }
+
+    @Override
+    public List<TypeDto> getAllTypeDetail() {
+        List<TypeEntity> types = typeRepository.findAll();
+        List<TypeDto> typeDtoList = new ArrayList<>();
+        for (TypeEntity type : types) {
+            typeDtoList.add(new TypeDto(type, false));
+        }
+        return typeDtoList;
+    }
+
 
     @Override
     @Transactional

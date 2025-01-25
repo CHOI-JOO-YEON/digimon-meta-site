@@ -67,6 +67,11 @@ public class CardAdminController {
         return new ResponseEntity<>(cardAdminService.getAllType(), HttpStatus.OK);
     }
 
+    @GetMapping("/card/types/detail")
+    public ResponseEntity<?> getAllTypesDetail() {
+        return new ResponseEntity<>(cardAdminService.getAllTypeDetail(), HttpStatus.OK);
+    }
+
     @DeleteMapping("/card/type/{type-id}")
     public ResponseEntity<?> deleteType(@PathVariable(name = "type-id") Integer typeId) {
         return new ResponseEntity<>(cardAdminService.deleteType(typeId), HttpStatus.OK);

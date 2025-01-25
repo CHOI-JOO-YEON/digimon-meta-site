@@ -19,16 +19,21 @@ public class TypeDto {
     Integer cardCount;
     List<String> cardNos;
 
-    public TypeDto(TypeEntity typeEntity) {
+    public TypeDto(TypeEntity typeEntity, boolean isDetail) {
+        
+        if(isDetail) {
+            this.cardCount = typeEntity.getCardCombineTypes().size();
+            this.cardNos = typeEntity.getCardCombineTypes()
+                    .stream()
+                    .map(CardCombineTypeEntity::getCardEntity)
+                    .map(CardEntity::getCardNo)
+                    .collect(Collectors.toList());
+        }
         this.typeId = typeEntity.getId();
         this.name = typeEntity.getName();
         this.engName = typeEntity.getEngName();
         this.jpnName = typeEntity.getJpnName();
-        this.cardCount = typeEntity.getCardCombineTypes().size();
-        this.cardNos = typeEntity.getCardCombineTypes()
-                .stream()
-                .map(CardCombineTypeEntity::getCardEntity)
-                .map(CardEntity::getCardNo)
-                .collect(Collectors.toList());
+        
     }
+    
 }
