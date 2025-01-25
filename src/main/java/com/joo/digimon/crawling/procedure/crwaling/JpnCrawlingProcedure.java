@@ -8,6 +8,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import static org.springframework.security.crypto.encrypt.Encryptors.text;
+
 public class JpnCrawlingProcedure implements CrawlingProcedure {
 
     Element element;
@@ -28,7 +30,12 @@ public class JpnCrawlingProcedure implements CrawlingProcedure {
 
     @Override
     public String getCardType() {
-        return Objects.requireNonNull(element.selectFirst(".cardtype")).text();
+        Element cardTypeElement = element.selectFirst(".cardtype");
+
+        if(cardTypeElement != null) {
+            return cardTypeElement.text();
+        }
+        return "Error";
     }
 
     @Override
