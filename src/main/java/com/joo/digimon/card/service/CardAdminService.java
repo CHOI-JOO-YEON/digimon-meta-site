@@ -28,4 +28,6 @@ public interface CardAdminService {
     List<ResponseNoteDto> getNotes();
 
     void mergeTypeToKorean(TypeMergeRequestDto dto);
+
+    void deleteDuplicateCardCombineType();
 }

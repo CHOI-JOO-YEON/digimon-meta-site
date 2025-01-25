@@ -84,6 +84,13 @@ public class CardAdminController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
+    @DeleteMapping("/card/type/duplicate")
+    public ResponseEntity<?> deleteDuplicateCardCombineType() {
+        cardAdminService.deleteDuplicateCardCombineType();
+
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
     @PutMapping("/card/type/update")
     public ResponseEntity<?> updateType(@RequestBody List<TypeDto> typeDtoList) {
         return new ResponseEntity<>(cardAdminService.putTypes(typeDtoList), HttpStatus.OK);

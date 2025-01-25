@@ -10,6 +10,9 @@ import com.joo.digimon.card.model.*;
 import com.joo.digimon.card.repository.*;
 import com.joo.digimon.global.enums.Locale;
 import com.joo.digimon.global.exception.model.CanNotDeleteException;
+import com.querydsl.core.Tuple;
+import com.querydsl.jpa.impl.JPAQueryFactory;
+import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,6 +28,7 @@ public class CardAdminServiceImpl implements CardAdminService {
     private final CardCombineTypeRepository cardCombineTypeRepository;
     private final TypeRepository typeRepository;
     private final JapaneseCardRepository japaneseCardRepository;
+    private final EntityManager entityManager;
 
     @Override
     @Transactional
@@ -237,5 +241,39 @@ public class CardAdminServiceImpl implements CardAdminService {
         }
 
         typeRepository.delete(baseType);
+    }
+
+    @Override
+    @Transactional
+    public void deleteDuplicateCardCombineType() {
+        QCardCombineTypeEntity cct = QCardCombineTypeEntity.cardCombineTypeEntity;
+        JPAQueryFactory queryFactory = new JPAQueryFactory(entityManager);
+        List<Tuple> duplicates = queryFactory
+                .select(cct.cardEntity.id, cct.typeEntity.id, cct.id.count())
+                .from(cct)
+                .groupBy(cct.cardEntity.id, cct.typeEntity.id)
+                .having(cct.id.count().gt(1))
+                .fetch();
+
+        for (Tuple tuple : duplicates) {
+            Integer cardId = tuple.get(cct.cardEntity.id);
+            Integer typeId = tuple.get(cct.typeEntity.id);
+
+            List<CardCombineTypeEntity> entities = queryFactory
+                    .selectFrom(cct)
+                    .where(cct.cardEntity.id.eq(cardId)
+                            .and(cct.typeEntity.id.eq(typeId)))
+                    .orderBy(cct.id.asc())
+                    .fetch();
+
+            for (int i = 1; i < entities.size(); i++) {
+                queryFactory
+                        .delete(cct)
+                        .where(cct.id.eq(entities.get(i).getId()))
+                        .execute();
+            }
+        }
+        
+        
     }
 }
