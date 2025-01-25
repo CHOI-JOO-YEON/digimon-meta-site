@@ -55,7 +55,7 @@ public class CardEntity {
     @OneToMany(mappedBy = "cardEntity")
     Set<CardImgEntity> cardImgEntity;
 
-    @OneToMany(mappedBy = "cardEntity", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "cardEntity", cascade = CascadeType.ALL, orphanRemoval = true)
     Set<CardCombineTypeEntity> cardCombineTypeEntities;
 
     String sortString;
