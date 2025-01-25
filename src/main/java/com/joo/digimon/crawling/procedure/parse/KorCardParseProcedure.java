@@ -85,17 +85,16 @@ public class KorCardParseProcedure implements CardParseProcedure{
 
     @Override
     public List<String> getTypes() {
-        CardType cardType = getCardType();
-        if (cardType.equals(CardType.TAMER) || cardType.equals(CardType.OPTION)) {
-            return new ArrayList<>();
-        }
         if (card.getType() == null || card.getType().isEmpty()) {
             return new ArrayList<>();
         }
-        String[] types = card.getType().split(",");
+        String typeString = card.getType().replace("-", "");
+        String[] types = typeString.split("/");
         List<String> typeList = new ArrayList<>();
         for (String s : types) {
-            typeList.add(s.trim());
+            if(!s.isEmpty()) {
+                typeList.add(s.trim());
+            }
         }
         return typeList;
     }

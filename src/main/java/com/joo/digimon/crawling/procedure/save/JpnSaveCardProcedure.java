@@ -73,7 +73,6 @@ public class JpnSaveCardProcedure implements SaveCardProcedure {
                 .map(type -> {
                     TypeEntity typeEntity = typeRepository.findByJpnName(type)
                             .orElseGet(() -> typeRepository.save(TypeEntity.builder().jpnName(type).build()));
-
                     return cardCombineTypeRepository.save(
                             CardCombineTypeEntity.builder()
                                     .cardEntity(cardEntity)

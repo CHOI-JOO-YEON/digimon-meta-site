@@ -48,6 +48,7 @@ public class TypeEntity {
     public void putType(TypeDto dto) {
         this.name = dto.getName();
         this.engName = dto.getEngName();
+        this.jpnName = dto.getJpnName();
     }
 
     public void updateEngName(String engName) {
