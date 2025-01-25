@@ -98,12 +98,19 @@ public class CrawlingServiceImpl implements CrawlingService {
         }
         List<CrawlingCardDto> crawlingCardDtoList = new ArrayList<>();
         for (Element element : cardElement) {
-            CrawlingCardDto crawlingCardDto = crawlingCardByElement(element, locale);
-
-            if ((note == null || crawlingCardDto.getNote().equals(note))
-                    && (locale == Locale.KOR || !crawlingCardDto.getIsParallel())) {
-                crawlingCardDtoList.add(crawlingCardDto);
+            try {
+                CrawlingCardDto crawlingCardDto = crawlingCardByElement(element, locale);
+                if ((note == null || crawlingCardDto.getNote().equals(note))
+                        && (locale == Locale.KOR || !crawlingCardDto.getIsParallel())) {
+                    crawlingCardDtoList.add(crawlingCardDto);
+                }
             }
+            catch (Exception e) {
+                log.error(e.getMessage(), e);
+            }
+            
+
+           
         }
         return crawlingCardDtoList;
     }

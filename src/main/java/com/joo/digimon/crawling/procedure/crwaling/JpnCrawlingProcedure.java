@@ -54,7 +54,13 @@ public class JpnCrawlingProcedure implements CrawlingProcedure {
 
     @Override
     public String getCardName() {
-        return Objects.requireNonNull(element.selectFirst(".card_name")).text();
+        Element cardTypeElement = element.selectFirst(".card_name");
+        
+        if(cardTypeElement != null) {
+            return cardTypeElement.text();
+        }
+        return "Error";
+        
     }
 
     @Override
