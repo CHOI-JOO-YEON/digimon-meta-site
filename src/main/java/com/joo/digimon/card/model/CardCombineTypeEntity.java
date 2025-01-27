@@ -29,4 +29,8 @@ public class CardCombineTypeEntity {
     public void updateType(TypeEntity typeEntity) {
         this.typeEntity = typeEntity;
     }
+
+    void setCardEntity(CardEntity cardEntity) {
+        this.cardEntity = cardEntity;
+    }
 }

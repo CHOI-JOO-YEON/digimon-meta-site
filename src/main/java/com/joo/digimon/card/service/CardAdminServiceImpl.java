@@ -147,28 +147,26 @@ public class CardAdminServiceImpl implements CardAdminService {
 
     @Transactional
     public void updateType(CardAdminPutDto cardAdminPutDto, CardImgEntity cardImgEntity) {
-        if (cardAdminPutDto.getTypes()!=null) {
+        if (cardAdminPutDto.getTypes() != null) {
             Set<String> types = cardAdminPutDto.getTypes();
-            cardCombineTypeRepository.deleteAll(cardImgEntity.getCardEntity().getCardCombineTypeEntities());
-            Set<CardCombineTypeEntity> cardCombineTypeEntities = new HashSet<>();
-            for (String type : types) {
-                TypeEntity typeEntity;
-                if(typeRepository.findByName(type).isPresent()) {
-                    typeEntity = typeRepository.findByName(type).get();
-                }else{
-                    typeEntity = typeRepository.save(TypeEntity.builder().name(type).build());
-                }
-                cardCombineTypeEntities.add(
-                        CardCombineTypeEntity.builder()
-                                .cardEntity(cardImgEntity.getCardEntity())
-                                .typeEntity(typeEntity)
-                                .build()
-                );
-            }
-            cardCombineTypeRepository.saveAll(cardCombineTypeEntities);
-            cardImgEntity.updateType(cardCombineTypeEntities);
-        }
+            CardEntity cardEntity = cardImgEntity.getCardEntity();
+            Set<CardCombineTypeEntity> existingEntities = cardEntity.getCardCombineTypeEntities();
 
+            existingEntities.clear(); 
+
+            for (String type : types) {
+                TypeEntity typeEntity = typeRepository.findByName(type)
+                        .orElseGet(() -> typeRepository.save(TypeEntity.builder().name(type).build()));
+
+                CardCombineTypeEntity newEntity = CardCombineTypeEntity.builder()
+                        .cardEntity(cardEntity)
+                        .typeEntity(typeEntity)
+                        .build();
+
+                cardEntity.addCardCombineType(newEntity);
+            }
+
+        }
     }
 
     @Transactional

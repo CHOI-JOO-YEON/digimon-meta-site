@@ -102,4 +102,9 @@ public class CardEntity {
     public void updateIsOnlyEnCard(Boolean isOnlyEnCard) {
         this.isOnlyEnCard = isOnlyEnCard;
     }
+
+    public void addCardCombineType(CardCombineTypeEntity entity) {
+        cardCombineTypeEntities.add(entity);
+        entity.setCardEntity(this);
+    }
 }
