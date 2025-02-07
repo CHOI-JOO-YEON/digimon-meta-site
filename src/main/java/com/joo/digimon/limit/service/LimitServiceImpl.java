@@ -2,11 +2,16 @@ package com.joo.digimon.limit.service;
 
 import com.joo.digimon.card.model.CardEntity;
 import com.joo.digimon.card.repository.CardRepository;
+import com.joo.digimon.limit.dto.LimitPair;
 import com.joo.digimon.limit.dto.LimitPutRequestDto;
 import com.joo.digimon.limit.dto.GetLimitResponseDto;
 import com.joo.digimon.limit.model.LimitCardEntity;
 import com.joo.digimon.limit.model.LimitEntity;
+import com.joo.digimon.limit.model.LimitPairCardEntity;
+import com.joo.digimon.limit.model.LimitPairEntity;
 import com.joo.digimon.limit.repository.LimitCardRepository;
+import com.joo.digimon.limit.repository.LimitPairCardRepository;
+import com.joo.digimon.limit.repository.LimitPairRepository;
 import com.joo.digimon.limit.repository.LimitRepository;
 
 import jakarta.annotation.PostConstruct;
@@ -15,14 +20,18 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
 public class LimitServiceImpl implements LimitService {
     private final LimitRepository limitRepository;
     private final LimitCardRepository limitCardRepository;
+    private final LimitPairRepository limitPairRepository;
+    private final LimitPairCardRepository limitPairCardRepository;
     private final CardRepository cardRepository;
 
     @PostConstruct
@@ -59,6 +68,61 @@ public class LimitServiceImpl implements LimitService {
                 .build());
 
         updateLimitCardEntity(limitPutRequestDto, limitEntity);
+        updateLimitPairEntity(limitPutRequestDto.getLimitPairList(), limitEntity);
+
+    }
+
+    @Transactional
+    public void updateLimitPairEntity(List<LimitPair> limitPairRequestDtoList, LimitEntity limitEntity) {
+        deleteLimitPairEntity(limitEntity);
+        if (limitPairRequestDtoList == null || limitPairRequestDtoList.isEmpty()) {
+            return;
+        }
+
+        Set<String> allCardNos = limitPairRequestDtoList.stream()
+                .flatMap(dto -> Stream.concat(dto.getACardPairNos().stream(), dto.getBCardPairNos().stream()))
+                .collect(Collectors.toSet());
+
+        Map<String, CardEntity> cardEntityMap = cardRepository.findByCardNoIn(allCardNos).stream()
+                .collect(Collectors.toMap(CardEntity::getCardNo, Function.identity()));
+
+        List<LimitPairEntity> limitPairEntities = limitPairRequestDtoList.stream()
+                .map(limitPair -> {
+                    LimitPairEntity limitPairEntity = LimitPairEntity.builder()
+                            .limitEntity(limitEntity)
+                            .pairACardSet(new HashSet<>()) 
+                            .pairBCardSet(new HashSet<>()) 
+                            .build();
+
+                    Set<LimitPairCardEntity> pairACards = limitPair.getACardPairNos().stream()
+                            .map(cardEntityMap::get)
+                            .filter(Objects::nonNull)
+                            .map(card -> LimitPairCardEntity.builder()
+                                    .cardEntity(card)
+                                    .pairA(limitPairEntity) // 연관 관계 설정
+                                    .build())
+                            .collect(Collectors.toSet());
+
+                    Set<LimitPairCardEntity> pairBCards = limitPair.getBCardPairNos().stream()
+                            .map(cardEntityMap::get)
+                            .filter(Objects::nonNull)
+                            .map(card -> LimitPairCardEntity.builder()
+                                    .cardEntity(card)
+                                    .pairB(limitPairEntity) // 연관 관계 설정
+                                    .build())
+                            .collect(Collectors.toSet());
+
+                    limitPairEntity.getPairACardSet().addAll(pairACards);
+                    limitPairEntity.getPairBCardSet().addAll(pairBCards);
+
+                    limitPairCardRepository.saveAll(pairACards);
+                    limitPairCardRepository.saveAll(pairBCards);
+
+                    return limitPairEntity;
+                })
+                .collect(Collectors.toList());
+
+        limitPairRepository.saveAll(limitPairEntities);
     }
 
     @Transactional
@@ -73,8 +137,9 @@ public class LimitServiceImpl implements LimitService {
     @Transactional
     public void updateLimit(LimitPutRequestDto limitPutRequestDto) {
         LimitEntity limitEntity = limitRepository.findById(limitPutRequestDto.getId()).orElseThrow();
-        limitEntity.update(limitPutRequestDto);
+        limitEntity.updateBeginDate(limitPutRequestDto.getRestrictionBeginDate());
         updateLimitCardEntity(limitPutRequestDto, limitEntity);
+        updateLimitPairEntity(limitPutRequestDto.getLimitPairList(), limitEntity);
     }
 
     @Override
@@ -88,8 +153,6 @@ public class LimitServiceImpl implements LimitService {
     @Transactional
     public void updateLimitCardEntity(LimitPutRequestDto limitPutRequestDto, LimitEntity limitEntity) {
         deleteLimitCardEntity(limitEntity);
-
-
         List<LimitCardEntity> limitCardEntities = new ArrayList<>();
 
         if (limitPutRequestDto.getBanList() != null) {
@@ -118,7 +181,14 @@ public class LimitServiceImpl implements LimitService {
     @Transactional
     public void deleteLimitCardEntity(LimitEntity limitEntity) {
         if (limitEntity.getLimitCardEntities() != null && !limitEntity.getLimitCardEntities().isEmpty()) {
-            limitCardRepository.deleteAll();
+            limitCardRepository.deleteAll(limitEntity.getLimitCardEntities());
+        }
+    }
+
+    @Transactional
+    public void deleteLimitPairEntity(LimitEntity limitEntity) {
+        if (limitEntity.getLimitPairEntities() != null && !limitEntity.getLimitPairEntities().isEmpty()) {
+            limitPairRepository.deleteAll(limitEntity.getLimitPairEntities());
         }
     }
 
