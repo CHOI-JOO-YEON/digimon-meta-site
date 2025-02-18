@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
+import java.util.HashSet;
 import java.util.Set;
 
 @Entity
@@ -77,8 +78,17 @@ public class CardEntity {
     public void updateJapaneseCard(JapaneseCardEntity japaneseCard) {
         this.japaneseCardEntity = japaneseCard;
     }
-    public void updateCardCombineTypes(Set<CardCombineTypeEntity> cardCombineTypeEntities) {
-        this.cardCombineTypeEntities = cardCombineTypeEntities;
+    public void updateCardCombineTypes(Set<CardCombineTypeEntity> newCardCombineTypeEntities) {
+        if (this.cardCombineTypeEntities != null) {
+            this.cardCombineTypeEntities.clear();
+        } else {
+            this.cardCombineTypeEntities = new HashSet<>();
+        }
+        if (newCardCombineTypeEntities != null) {
+            for (CardCombineTypeEntity entity : newCardCombineTypeEntities) {
+                addCardCombineType(entity);
+            }
+        }
     }
 
     public void updateCardName(String cardName) {
