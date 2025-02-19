@@ -10,7 +10,6 @@ public interface LimitService {
     List<GetLimitResponseDto> findAll();
     void createLimit(LimitPutRequestDto limitPutRequestDto);
 
-
     @Transactional
     void updateLimits(List<LimitPutRequestDto> limitPutRequestDto);
 

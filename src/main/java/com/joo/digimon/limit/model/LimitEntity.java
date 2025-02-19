@@ -28,6 +28,7 @@ import java.util.Set;
                 ),
         }
 )
+@Table(name = "limit_entity")
 public class LimitEntity {
 
     @Id
@@ -41,7 +42,10 @@ public class LimitEntity {
     @OneToMany(mappedBy = "limitEntity")
     Set<LimitCardEntity> limitCardEntities;
 
-    public void update(LimitPutRequestDto limitPutRequestDto) {
-        this.restrictionBeginDate = limitPutRequestDto.getRestrictionBeginDate();
+    @OneToMany(mappedBy = "limitEntity")
+    Set<LimitPairEntity> limitPairEntities;
+    
+    public void updateBeginDate(LocalDate newRestrictionBeginDate) {
+        this.restrictionBeginDate = newRestrictionBeginDate;
     }
 }
