@@ -278,13 +278,14 @@ public class DeckServiceImpl implements DeckService {
         QDeckEntity qDeckEntity = QDeckEntity.deckEntity;
         Pageable pageable = generatePageableByDeckSearchParameter(deckSearchParameter);
 
-        JPAQuery<Integer> query = new JPAQuery<>(entityManager);
-        int totalCount = query.select(qDeckEntity.id)
+        long totalCount = new JPAQuery<>(entityManager)
+                .select(qDeckEntity.id.count())
                 .from(qDeckEntity)
                 .where(builder)
-                .fetch().size();
+                .fetchOne();
 
-        List<Integer> deckIds = query.select(qDeckEntity.id)
+        List<Integer> deckIds = new JPAQuery<>(entityManager)
+                .select(qDeckEntity.id)
                 .from(qDeckEntity)
                 .where(builder)
                 .orderBy(qDeckEntity.updateTimestamp.desc().nullsLast())
