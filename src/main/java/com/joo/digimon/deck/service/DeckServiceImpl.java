@@ -16,6 +16,7 @@ import com.joo.digimon.global.exception.model.UnAuthorizationException;
 import com.joo.digimon.limit.model.LimitCardEntity;
 import com.joo.digimon.limit.model.LimitEntity;
 import com.joo.digimon.limit.repository.LimitRepository;
+import com.joo.digimon.user.enums.Role;
 import com.joo.digimon.user.model.User;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.Tuple;
@@ -257,10 +258,13 @@ public class DeckServiceImpl implements DeckService {
 
 
     @Override
-    public PagedResponseDeckDto findDecks(DeckSearchParameter deckSearchParameter) {
+    public PagedResponseDeckDto findDecks(DeckSearchParameter deckSearchParameter, User user) {
         BooleanBuilder builder = getBuilderByDeckSearchParameter(deckSearchParameter);
         QDeckEntity qDeckEntity = QDeckEntity.deckEntity;
-        builder.and(qDeckEntity.isPublic.eq(true));
+        
+        if(user == null || user.getRole().equals(Role.USER)) {
+            builder.and(qDeckEntity.isPublic.eq(true));    
+        }
 
         Map<Integer, Integer> formatAllDeckCount = getFormatDeckCount(builder);
         if (deckSearchParameter.getFormatId() != null) {

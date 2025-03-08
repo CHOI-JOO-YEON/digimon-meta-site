@@ -29,7 +29,7 @@ public class DeckController {
         if (deckSearchParameter.getIsMyDeck()) {
             return new ResponseEntity<>(deckService.finMyDecks(user, deckSearchParameter), HttpStatus.OK);
         }
-        return new ResponseEntity<>(deckService.findDecks(deckSearchParameter), HttpStatus.OK);
+        return new ResponseEntity<>(deckService.findDecks(deckSearchParameter, user), HttpStatus.OK);
 
     }
     @GetMapping("/detail")
