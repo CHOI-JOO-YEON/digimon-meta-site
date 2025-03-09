@@ -247,13 +247,12 @@ public class DeckServiceImpl implements DeckService {
         QDeckEntity qDeckEntity = QDeckEntity.deckEntity;
         builder.and(qDeckEntity.user.eq(user));
 
-        Map<Integer, Integer> formatMyDeckCount = getFormatDeckCount(builder);
         if (deckSearchParameter.getFormatId() != null) {
             builder.and(qDeckEntity.format.id.eq(deckSearchParameter.getFormatId()));
         }
 
         
-        return new PagedResponseDeckDto(getDeckPage(builder, deckSearchParameter), prefixUrl, formatMyDeckCount);
+        return new PagedResponseDeckDto(getDeckPage(builder, deckSearchParameter), prefixUrl);
     }
 
 
@@ -266,12 +265,11 @@ public class DeckServiceImpl implements DeckService {
             builder.and(qDeckEntity.isPublic.eq(true));    
         }
 
-        Map<Integer, Integer> formatAllDeckCount = getFormatDeckCount(builder);
         if (deckSearchParameter.getFormatId() != null) {
             builder.and(qDeckEntity.format.id.eq(deckSearchParameter.getFormatId()));
         }
 
-        return new PagedResponseDeckDto(getDeckPage(builder, deckSearchParameter), prefixUrl, formatAllDeckCount);
+        return new PagedResponseDeckDto(getDeckPage(builder, deckSearchParameter), prefixUrl);
     }
 
     private Page<DeckEntity> getDeckPage(BooleanBuilder builder, DeckSearchParameter deckSearchParameter) {
@@ -383,25 +381,48 @@ public class DeckServiceImpl implements DeckService {
         return PageRequest.of(deckSearchParameter.getPage() - 1, deckSearchParameter.getSize());
     }
 
-    public Map<Integer, Integer> getFormatDeckCount(BooleanBuilder builder) {
+    public FormatDeckCountResponseDto getFormatDeckCount(User user) {
+        FormatDeckCountResponseDto response = new FormatDeckCountResponseDto();
         JPAQueryFactory queryFactory = new JPAQueryFactory(entityManager);
 
         QDeckEntity deck = QDeckEntity.deckEntity;
         QFormat format = QFormat.format;
 
-        List<Tuple> result = queryFactory
+        List<Tuple> allResult = queryFactory
                 .select(format.id, deck.id.count())
                 .from(deck)
                 .join(deck.format, format)
-                .where(builder)
+                .where(deck.isValid.eq(true))
+                .where(deck.isPublic.eq(true))
                 .groupBy(format.id)
                 .fetch();
+        
+        response.setAllFormatCount(
+                allResult.stream()
+                .map(tuple -> new FormatDeckCountResponseDto.FormatCount(
+                        tuple.get(format.id),
+                        Math.toIntExact(tuple.get(deck.id.count()))
+                ))
+                .collect(Collectors.toList()));
+        
+        if (user != null) {
+            List<Tuple> myResult = queryFactory
+                    .select(format.id, deck.id.count())
+                    .from(deck)
+                    .join(deck.format, format)
+                    .where(deck.user.eq(user))
+                    .groupBy(format.id)
+                    .fetch();
+            response.setMyFormatCount(myResult.stream()
+                    .map(tuple -> new FormatDeckCountResponseDto.FormatCount(
+                            tuple.get(format.id),
+                            Math.toIntExact(tuple.get(deck.id.count()))
+                    ))
+                    .collect(Collectors.toList()));
+        }
 
-        return result.stream()
-                .collect(Collectors.toMap(
-                        tuple -> tuple.get(format.id),
-                        tuple -> Objects.requireNonNull(tuple.get(deck.id.count())).intValue()
-                ));
+
+        return response;
     }
     
 
