@@ -1,6 +1,10 @@
 package com.joo.digimon.card.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.joo.digimon.card.dto.card.CardAdminPutDto;
+import com.joo.digimon.card.dto.card.CardVo;
 import com.joo.digimon.card.dto.card.TypeMergeRequestDto;
 import com.joo.digimon.card.dto.note.CreateNoteDto;
 import com.joo.digimon.card.dto.note.ResponseNoteDto;
@@ -14,14 +18,39 @@ import com.querydsl.core.Tuple;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
+import org.eclipse.jgit.api.Git;
+import org.eclipse.jgit.api.ResetCommand;
+import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.*;
 
 @Service
 @RequiredArgsConstructor
 public class CardAdminServiceImpl implements CardAdminService {
+
+    @Value("${repository.url}")
+    private String repositoryUrl;
+
+    @Value("${github.username}")
+    private String username;
+
+    @Value("${github.access-token}")
+    private String accessToken;
+
+    @Value("${domain.url}")
+    private String prefixUrl;
+    
+    private static final String localPath = "repo";
+    private static final String filePath = localPath + "/assets/data/cards.json";
+
+
     private final CardImgRepository cardImgRepository;
     private final NoteRepository noteRepository;
     private final EnglishCardRepository englishCardRepository;
@@ -29,6 +58,8 @@ public class CardAdminServiceImpl implements CardAdminService {
     private final TypeRepository typeRepository;
     private final JapaneseCardRepository japaneseCardRepository;
     private final EntityManager entityManager;
+    private final ObjectMapper objectMapper;
+
 
     @Override
     @Transactional
@@ -271,7 +302,79 @@ public class CardAdminServiceImpl implements CardAdminService {
                         .execute();
             }
         }
-        
-        
+    }
+
+    public Boolean createCardJsonUpdateToGitHubPR(String message) {
+        String branchName = "auto/" + UUID.randomUUID();
+        File localRepoDir = new File(localPath);
+        Git git = null;
+
+        try {
+            if (localRepoDir.exists() && localRepoDir.isDirectory()) {
+                git = Git.open(localRepoDir);
+            } else {
+                git = Git.cloneRepository()
+                        .setURI(repositoryUrl)
+                        .setDirectory(localRepoDir)
+                        .setCredentialsProvider(new UsernamePasswordCredentialsProvider(username, accessToken))
+                        .call();
+            }
+
+            git.checkout().setName("master").call();
+
+            git.fetch()
+                    .setRemote("origin")
+                    .setCredentialsProvider(new UsernamePasswordCredentialsProvider(username, accessToken))
+                    .call();
+
+            git.reset()
+                    .setMode(ResetCommand.ResetType.HARD)
+                    .setRef("origin/master")
+                    .call();
+
+            git.checkout().setCreateBranch(true).setName(branchName).call();
+
+            File file = new File(filePath);
+            if (!file.getParentFile().exists()) {
+                file.getParentFile().mkdirs();
+            }
+            try (FileWriter writer = new FileWriter(file, false)) {
+                writer.write(getCardsJson());
+            }
+
+            git.add()
+                    .addFilepattern(".")
+                    .call();
+
+            git.commit()
+                    .setMessage(message)
+                    .call();
+
+            git.push()
+                    .setCredentialsProvider(new UsernamePasswordCredentialsProvider(username, accessToken))
+                    .setRemote("origin")
+                    .add(branchName)
+                    .call();
+
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        } finally {
+            if (git != null) {
+                git.close();
+            }
+        }
+    }
+
+    private String getCardsJson() throws JsonProcessingException {
+        List<CardImgEntity> cardImgEntities = cardImgRepository.findAll();
+        List<CardVo> cardVos = new ArrayList<>();
+
+        for (CardImgEntity cardImgEntity : cardImgEntities) {
+            cardVos.add(new CardVo(cardImgEntity, prefixUrl));
+        }
+        objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
+        return objectMapper.writeValueAsString(cardVos);
     }
 }

@@ -30,4 +30,6 @@ public interface CardAdminService {
     void mergeTypeToKorean(TypeMergeRequestDto dto);
 
     void deleteDuplicateCardCombineType();
+    
+    Boolean createCardJsonUpdateToGitHubPR(String message);
 }
