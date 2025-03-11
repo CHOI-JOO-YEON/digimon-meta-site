@@ -15,13 +15,13 @@ public class PagedResponseDeckDto {
     private int totalPages;
     private long totalElements;
 
-    public PagedResponseDeckDto(Page<DeckEntity> deckEntityPage, String prefixUrl) {
+    public PagedResponseDeckDto(Page<DeckEntity> deckEntityPage) {
         this.decks = new ArrayList<>();
         this.currentPage = deckEntityPage.getNumber();
         this.totalPages = deckEntityPage.getTotalPages();
         this.totalElements = deckEntityPage.getTotalElements();
         for (DeckEntity deck : deckEntityPage) {
-            decks.add(new ResponseDeckDto(deck, prefixUrl));
+            decks.add(new ResponseDeckDto(deck));
         }
     }
 }
