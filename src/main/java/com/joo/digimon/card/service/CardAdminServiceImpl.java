@@ -20,7 +20,6 @@ import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.ResetCommand;
-import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -28,7 +27,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.File;
 import java.io.FileWriter;
-import java.io.IOException;
 import java.util.*;
 
 @Service
@@ -48,7 +46,8 @@ public class CardAdminServiceImpl implements CardAdminService {
     private String prefixUrl;
     
     private static final String localPath = "repo";
-    private static final String filePath = localPath + "/assets/data/cards.json";
+    private static final String cardsPath = localPath + "/assets/data/cards.json";
+    private static final String notesPath = localPath + "/assets/data/notes.json";
 
 
     private final CardImgRepository cardImgRepository;
@@ -334,13 +333,23 @@ public class CardAdminServiceImpl implements CardAdminService {
 
             git.checkout().setCreateBranch(true).setName(branchName).call();
 
-            File file = new File(filePath);
+            File file = new File(cardsPath);
             if (!file.getParentFile().exists()) {
                 file.getParentFile().mkdirs();
             }
             try (FileWriter writer = new FileWriter(file, false)) {
                 writer.write(getCardsJson());
             }
+
+            file = new File(notesPath);
+            if (!file.getParentFile().exists()) {
+                file.getParentFile().mkdirs();
+            }
+            try (FileWriter writer = new FileWriter(file, false)) {
+                writer.write(getNotesJson());
+            }
+            
+            
 
             git.add()
                     .addFilepattern(".")
@@ -376,5 +385,15 @@ public class CardAdminServiceImpl implements CardAdminService {
         }
         objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
         return objectMapper.writeValueAsString(cardVos);
+    }
+
+    private String getNotesJson() throws JsonProcessingException {
+        List<ResponseNoteDto> notes = new ArrayList<>();
+        List<NoteEntity> noteEntityList = noteRepository.findByIsDisableFalseOrIsDisableNullOrderByReleaseDateAscPriorityAsc();
+        for (NoteEntity noteEntity : noteEntityList) {
+            notes.add(new ResponseNoteDto(noteEntity));
+        }
+        objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
+        return objectMapper.writeValueAsString(notes);
     }
 }
