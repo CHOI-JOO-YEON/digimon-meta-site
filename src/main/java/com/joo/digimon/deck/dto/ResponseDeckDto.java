@@ -10,10 +10,7 @@ import com.joo.digimon.deck.model.DeckEntity;
 import lombok.Data;
 import lombok.Getter;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Data
 public class ResponseDeckDto {
@@ -21,20 +18,20 @@ public class ResponseDeckDto {
     String authorName;
     Integer deckId;
     String deckName;
-    List<Card> cards;
+    Map<Integer, Integer> cards;
     Set<Color> colors;
     Integer formatId;
     Boolean isPublic;
 
-    public ResponseDeckDto(DeckEntity deck, String prefixUrl) {
+    public ResponseDeckDto(DeckEntity deck) {
         this.authorId = deck.getUser().getId();
         this.authorName = deck.getUser().getNickName();
         this.deckId = deck.getId();
         this.deckName = deck.getDeckName();
         this.isPublic = deck.getIsPublic();
-        cards = new ArrayList<>();
+        cards = new HashMap<>();
         for (DeckCardEntity deckCardEntity : deck.getDeckCardEntities()) {
-            cards.add(new Card(deckCardEntity, prefixUrl));
+            cards.put(deckCardEntity.getCardImgEntity().getId(), deckCardEntity.getCnt());
         }
         colors = new HashSet<>();
         for (DeckColor deckColor : deck.getDeckColors()) {
@@ -45,11 +42,11 @@ public class ResponseDeckDto {
 
 
     public ResponseDeckDto() {
-        this.cards = new ArrayList<>();
+        this.cards = new HashMap<>();
     }
 
-    public void addCard(CardImgEntity cardImgEntity, Integer cnt, String prefixUrl) {
-        cards.add(new Card(cardImgEntity, cnt, prefixUrl));
+    public void addCard(CardImgEntity cardImgEntity, Integer cnt) {
+        cards.put(cardImgEntity.getId(), cnt);
     }
 
 

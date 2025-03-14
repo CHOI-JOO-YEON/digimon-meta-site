@@ -59,6 +59,13 @@ import java.util.Set;
                 )
         }
 )
+@NamedEntityGraph(
+        name = "Deck.summary",
+        attributeNodes = {
+                @NamedAttributeNode(value = "deckCardEntities"),
+                @NamedAttributeNode(value = "user"), @NamedAttributeNode(value = "format"), @NamedAttributeNode(value = "deckColors")
+        }
+)
 
 public class DeckEntity {
     @Id

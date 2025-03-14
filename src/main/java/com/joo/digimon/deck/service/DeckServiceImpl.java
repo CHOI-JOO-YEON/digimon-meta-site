@@ -74,7 +74,7 @@ public class DeckServiceImpl implements DeckService {
         updateDeckCards(requestDeckDto, deck, format);
         updateDeckColors(requestDeckDto.getColors(), deck);
         deck.updateDeckValid();
-        return new ResponseDeckDto(deck, prefixUrl);
+        return new ResponseDeckDto(deck);
     }
 
     private void updateDeckColors(List<Color> colors, DeckEntity deck) {
@@ -161,46 +161,48 @@ public class DeckServiceImpl implements DeckService {
         if (!deck.getIsPublic() && !deck.getUser().equals(user)) {
             throw new ForbiddenAccessException();
         }
-        return new ResponseDeckDto(deck, prefixUrl);
+        return new ResponseDeckDto(deck);
     }
 
     @Override
     public ResponseDeckDto importDeck(DeckImportRequestDto deckImportRequestDto) {
-        Map<String, Integer> map = deckImportRequestDto.getDeck();
-
-        ResponseDeckDto responseDeckDto = new ResponseDeckDto();
-        for (Map.Entry<String, Integer> entry : map.entrySet()) {
-            Optional<CardImgEntity> cardImg = cardImgRepository.findByCardEntityCardNoAndIsParallelFalse(entry.getKey());
-            cardImg.ifPresent(cardImgEntity -> responseDeckDto.addCard(cardImgEntity, entry.getValue(), prefixUrl));
-        }
-
-
-        return responseDeckDto;
+//        Map<String, Integer> map = deckImportRequestDto.getDeck();
+//
+//        ResponseDeckDto responseDeckDto = new ResponseDeckDto();
+//        for (Map.Entry<String, Integer> entry : map.entrySet()) {
+//            Optional<CardImgEntity> cardImg = cardImgRepository.findByCardEntityCardNoAndIsParallelFalse(entry.getKey());
+//            cardImg.ifPresent(cardImgEntity -> responseDeckDto.addCard(cardImgEntity, entry.getValue(), prefixUrl));
+//        }
+//
+//        return responseDeckDto;
+        return null;
     }
 
     @Override
     public ResponseDeckDto importDeck(DeckImportThisSiteRequestDto deckImportThisSiteRequestDto) {
-        Map<String, Integer> map = deckImportThisSiteRequestDto.getDeck();
-        ResponseDeckDto responseDeckDto = new ResponseDeckDto();
-        for (Map.Entry<String, Integer> entry : map.entrySet()) {
-            Optional<CardImgEntity> cardImg = cardImgRepository.findById(Integer.parseInt(entry.getKey()));
-            cardImg.ifPresent(cardImgEntity -> responseDeckDto.addCard(cardImgEntity, entry.getValue(), prefixUrl));
-        }
-
-
-        return responseDeckDto;
+//        Map<String, Integer> map = deckImportThisSiteRequestDto.getDeck();
+//        ResponseDeckDto responseDeckDto = new ResponseDeckDto();
+//        for (Map.Entry<String, Integer> entry : map.entrySet()) {
+//            Optional<CardImgEntity> cardImg = cardImgRepository.findById(Integer.parseInt(entry.getKey()));
+//            cardImg.ifPresent(cardImgEntity -> responseDeckDto.addCard(cardImgEntity, entry.getValue(), prefixUrl));
+//        }
+//
+//
+//        return responseDeckDto;
+        return null;
     }
     
     @Override
     public ResponseDeckDto importDeckByDeckMap(Map<Integer, Integer> map)
     {
-        ResponseDeckDto responseDeckDto = new ResponseDeckDto();
-        for (Map.Entry<Integer, Integer> entry : map.entrySet()) {
-            Optional<CardImgEntity> cardImg = cardImgRepository.findById(entry.getKey());
-            cardImg.ifPresent(cardImgEntity -> responseDeckDto.addCard(cardImgEntity, entry.getValue(), prefixUrl));
-        }
-
-        return responseDeckDto;
+//        ResponseDeckDto responseDeckDto = new ResponseDeckDto();
+//        for (Map.Entry<Integer, Integer> entry : map.entrySet()) {
+//            Optional<CardImgEntity> cardImg = cardImgRepository.findById(entry.getKey());
+//            cardImg.ifPresent(cardImgEntity -> responseDeckDto.addCard(cardImgEntity, entry.getValue(), prefixUrl));
+//        }
+//
+//        return responseDeckDto;
+        return null;
     }
 
     @Override
@@ -252,7 +254,7 @@ public class DeckServiceImpl implements DeckService {
         }
 
         
-        return new PagedResponseDeckDto(getDeckPage(builder, deckSearchParameter), prefixUrl);
+        return new PagedResponseDeckDto(getDeckPage(builder, deckSearchParameter));
     }
 
 
@@ -269,7 +271,7 @@ public class DeckServiceImpl implements DeckService {
             builder.and(qDeckEntity.format.id.eq(deckSearchParameter.getFormatId()));
         }
 
-        return new PagedResponseDeckDto(getDeckPage(builder, deckSearchParameter), prefixUrl);
+        return new PagedResponseDeckDto(getDeckPage(builder, deckSearchParameter));
     }
 
     private Page<DeckEntity> getDeckPage(BooleanBuilder builder, DeckSearchParameter deckSearchParameter) {
@@ -314,7 +316,7 @@ public class DeckServiceImpl implements DeckService {
         List<ResponseDeckDto> responseDeckDtoList = new ArrayList<>();
 
         for (DeckEntity deck : decks) {
-            responseDeckDtoList.add(new ResponseDeckDto(deck, prefixUrl));
+            responseDeckDtoList.add(new ResponseDeckDto(deck));
         }
 
         return responseDeckDtoList;
