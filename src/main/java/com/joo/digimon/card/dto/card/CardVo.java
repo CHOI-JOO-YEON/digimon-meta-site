@@ -68,6 +68,7 @@ public class CardVo {
                 .map(CardCombineTypeEntity::getTypeEntity)
                 .map(TypeEntity::getName)
                 .filter(Objects::nonNull)
+                .sorted()
                 .toList();
 
         this.isParallel = card.getIsParallel();
