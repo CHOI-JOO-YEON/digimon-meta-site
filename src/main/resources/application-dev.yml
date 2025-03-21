@@ -56,4 +56,8 @@ back:
   digitama: https://digimon-meta.site/images/digitama_back.png
 domain:
   url: http://127.0.0.1:9000/digimon-meta-dev-bucket/
-
+repository:
+  url: 123
+github:
+  username: 123
+  access-token: 123

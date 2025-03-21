@@ -34,7 +34,7 @@ public class CardVo {
     Rarity rarity;
     CardType cardType;
     Form form;
-    Attribute attribute;
+    String attribute;
     List<String> types;
     Boolean isParallel;
     String sortString;
@@ -61,7 +61,7 @@ public class CardVo {
         this.rarity = card.getCardEntity().getRarity();
         this.cardType = card.getCardEntity().getCardType();
         this.form = card.getCardEntity().getForm();
-        this.attribute = card.getCardEntity().getAttribute();
+        this.attribute = card.getCardEntity().getAttribute().getKor();
 
         types = card.getCardEntity().getCardCombineTypeEntities()
                 .stream()
