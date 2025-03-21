@@ -61,7 +61,10 @@ public class CardVo {
         this.rarity = card.getCardEntity().getRarity();
         this.cardType = card.getCardEntity().getCardType();
         this.form = card.getCardEntity().getForm();
-        this.attribute = card.getCardEntity().getAttribute().getKor();
+        if(card.getCardEntity().getAttribute() != null) {
+            this.attribute = card.getCardEntity().getAttribute().getKor();    
+        }
+        
 
         types = card.getCardEntity().getCardCombineTypeEntities()
                 .stream()
