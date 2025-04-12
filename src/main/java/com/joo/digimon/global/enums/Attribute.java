@@ -9,6 +9,10 @@ public enum Attribute {
     프리("Free", "フリー", "프리"),
     불명("Unknown", "不明", "불명"),
     배리어블종("Variable", "ヴァリアブル種", "배리어블종"),
+    검색("Social", "ソーシャル", "검색"),
+    툴("Tool", "ツール", "툴"),
+    내비("Navi", "ナビ", "내비"),
+    게임("Game", "ゲーム", "게임"),
     NODATA("NO DATA", "NODATA", "NO DATA")
     ;
 
