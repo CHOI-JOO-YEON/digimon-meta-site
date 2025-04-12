@@ -14,6 +14,7 @@ public enum Form {
     D_REAPER("D-Reaper", "디・리퍼", "デ・リーパー"),
     UNKNOWN("Unknown", "불명", "不明"),
     HYBRID("Hybrid", "하이브리드체", "ハイブリッド体"),
+    APPMON("Appmon", "어플몬", "アプモン"),
     STND("Stnd./Appmon", "스탠다드/어플몬", "並/アプモン"),
     SUP("Sup./Appmon", "슈퍼/어플몬", "超/アプモン"),
     ULT("Ult./Appmon", "얼티메이트/어플몬", "極/アプモン"),
