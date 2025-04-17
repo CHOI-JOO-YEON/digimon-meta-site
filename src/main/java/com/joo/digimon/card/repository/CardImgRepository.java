@@ -38,15 +38,9 @@ public interface CardImgRepository extends JpaRepository<CardImgEntity, Integer>
     @EntityGraph(value = "CardImgEntity.detail", type = EntityGraph.EntityGraphType.LOAD)
     Page<CardImgEntity> findAll(Predicate predicate, Pageable pageable);
 
-
-    @EntityGraph(value = "CardImgEntity.detail")
-    Optional<CardImgEntity> findByCardEntityCardNoAndIsParallelFalse(String cardNo);
-
     @EntityGraph(value = "CardImgEntity.detail")
     List<CardImgEntity> findByCardEntityAndIsParallelFalse(CardEntity cardEntity);
 
-    @EntityGraph(value = "CardImgEntity.detail")
-    List<CardImgEntity> findByIsEnCardTrueOrIsJpnCardTrue();
     
     @EntityGraph(value = "CardImgEntity.detail")
     List<CardImgEntity> findByBigWebpUrlIsNullAndOriginUrlIsNotNull(Pageable pageable);

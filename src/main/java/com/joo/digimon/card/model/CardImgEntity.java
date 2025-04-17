@@ -62,8 +62,8 @@ public class CardImgEntity {
     NoteEntity noteEntity;
 
     Boolean isParallel;
-    Boolean isEnCard;
-    Boolean isJpnCard;
+//    Boolean isEnCard;
+//    Boolean isJpnCard;
 
     private LocalDateTime modifiedAt;
 
@@ -96,7 +96,7 @@ public class CardImgEntity {
         this.cardEntity.form = dto.getForm();
         this.cardEntity.attribute = dto.getAttribute();
         this.cardEntity.releaseDate = dto.getReleaseDate();
-        this.isEnCard = dto.getIsEn();
+//        this.isEnCard = dto.getIsEn();
         this.modifiedAt = LocalDateTime.now();
     }
 
@@ -116,13 +116,13 @@ public class CardImgEntity {
         this.originUrl = originUrl;
     }
 
-    public void updateIsEnCard(boolean b) {
-        this.isEnCard = b;
-    }
-
-    public void updateIsJpnCard(boolean b) {
-        this.isJpnCard = b;
-    }
+//    public void updateIsEnCard(boolean b) {
+//        this.isEnCard = b;
+//    }
+//
+//    public void updateIsJpnCard(boolean b) {
+//        this.isJpnCard = b;
+//    }
 
     public String getDisplayImage() {
         if (this.getUploadUrl() != null) {

@@ -238,11 +238,11 @@ public class CardServiceImpl implements CardService {
     private void addEnglishCardCondition(boolean isEnglishCardInclude, BooleanBuilder builder, QCardImgEntity cardImg, QCardEntity card) {
         if (!isEnglishCardInclude) {
             builder.and(
-                    cardImg.isEnCard.isNull()
-                            .or(cardImg.isEnCard.isFalse()));
+                    card.isOnlyEnCard.isNull()
+                            .or(card.isOnlyEnCard.isFalse()));
             builder.and(
-                    cardImg.isJpnCard.isNull()
-                            .or(cardImg.isJpnCard.isFalse()));
+                    card.isOnlyEnCard.isNull()
+                            .or(card.isOnlyEnCard.isFalse()));
         }
     }
 

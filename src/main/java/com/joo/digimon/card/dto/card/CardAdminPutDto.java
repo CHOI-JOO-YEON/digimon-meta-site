@@ -44,5 +44,5 @@ public class CardAdminPutDto {
     String noteName;
     Integer noteId;
     LocalDate releaseDate;
-    Boolean isEn;
+//    Boolean isEn;
 }

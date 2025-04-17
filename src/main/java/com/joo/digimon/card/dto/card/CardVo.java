@@ -73,13 +73,13 @@ public class CardVo {
                 .filter(Objects::nonNull)
                 .sorted()
                 .toList();
-
+        this.isEn = card.getCardEntity().getIsOnlyEnCard();
         this.isParallel = card.getIsParallel();
         this.sortString = card.getCardEntity().getSortString();
         this.releaseDate = card.getCardEntity().getReleaseDate();
         this.noteName = card.getNoteEntity().getName();
         this.noteId = card.getNoteEntity().getId();
-        this.isEn = card.getIsEnCard();
+        
         this.modifiedAt = card.getModifiedAt() == null ?
                 LocalDateTime.of(1998, 7, 15, 9, 30) : card.getModifiedAt();
 

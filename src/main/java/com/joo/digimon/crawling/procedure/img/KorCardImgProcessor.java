@@ -34,8 +34,8 @@ public class KorCardImgProcessor implements CardImgProcessor {
         existingCardImg.updateNote(noteEntity);
         existingCardImg.updateCrawlingCardEntity(dto.getCrawlingCardEntity());
         existingCardImg.updateOriginUrl(dto.getOriginUrl());
-        existingCardImg.updateIsEnCard(false);
-        existingCardImg.updateIsJpnCard(false);
+//        existingCardImg.updateIsEnCard(false);
+//        existingCardImg.updateIsJpnCard(false);
 
         cardImgRepository.save(existingCardImg);
     }
@@ -47,8 +47,8 @@ public class KorCardImgProcessor implements CardImgProcessor {
                 .crawlingCardEntity(dto.getCrawlingCardEntity())
                 .cardEntity(cardEntity)
                 .originUrl(dto.getOriginUrl())
-                .isEnCard(false)
-                .isJpnCard(false)
+//                .isEnCard(false)
+//                .isJpnCard(false)
                 .build();
 
         cardImgRepository.save(cardImgEntity);
