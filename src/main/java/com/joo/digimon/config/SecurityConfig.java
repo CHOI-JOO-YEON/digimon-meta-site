@@ -4,6 +4,7 @@ import com.joo.digimon.security.entry_point.CustomAuthenticationEntryPoint;
 import com.joo.digimon.security.filter.JwtFilter;
 import com.joo.digimon.security.handler.CustomAccessDeniedHandler;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -18,6 +19,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.util.UriComponentsBuilder;
 
 @Configuration
 @RequiredArgsConstructor
@@ -26,6 +28,13 @@ public class SecurityConfig {
     private final CustomAccessDeniedHandler customAccessDeniedHandler;
     private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
 
+
+    @Value("${spring.security.oauth2.client.registration.kakao.client-id}")
+    private String kakaoClientId;
+
+    @Value("${app.logout-redirect-uri}")
+    private String logoutRedirectUri;
+    
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
@@ -58,8 +67,21 @@ public class SecurityConfig {
                         sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                .logout(logout -> logout
+                        .logoutUrl("/api/logout")
+                        .deleteCookies("JWT_TOKEN")
+                        .logoutSuccessHandler((request, response, authentication) -> {
+                            String kakaoLogoutUrl = UriComponentsBuilder
+                                    .fromHttpUrl("https://kauth.kakao.com/oauth/logout")
+                                    .queryParam("client_id", kakaoClientId)
+                                    .queryParam("logout_redirect_uri", logoutRedirectUri)
+                                    .build()
+                                    .toUriString();
 
-        ;
+                            response.sendRedirect(kakaoLogoutUrl);
+                        })
+                        .permitAll()
+                );
 
 
         return http.build();

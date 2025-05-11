@@ -37,3 +37,4 @@ out/
 .vscode/
 minio_data
 wiremock
+localstack_data
