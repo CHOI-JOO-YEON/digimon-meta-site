@@ -5,9 +5,12 @@ import com.joo.digimon.user.dto.UsernameLoginRequestDto;
 import com.joo.digimon.user.service.UserService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.constraints.NotBlank;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
@@ -15,11 +18,12 @@ import java.io.IOException;
 @RestController
 @RequestMapping("/api/account")
 @RequiredArgsConstructor
+@Validated
 public class AccountController {
     private final UserService userService;
-
+    
     @GetMapping("/token/kakao")
-    public ResponseEntity<?> getKakaoToken(@RequestParam(name = "code") String code, HttpServletResponse response) throws IOException {
+    public ResponseEntity<?> getKakaoToken(@NotBlank @RequestParam(name = "code") String code, HttpServletResponse response) throws IOException {
         LoginResponseDto loginResponseDto = userService.getKakaoToken(code);
         setTokenCookie(response, loginResponseDto);
         return new ResponseEntity<>(loginResponseDto, HttpStatus.OK);
