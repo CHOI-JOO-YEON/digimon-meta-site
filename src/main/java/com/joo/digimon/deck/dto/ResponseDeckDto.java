@@ -22,6 +22,7 @@ public class ResponseDeckDto {
     Set<Color> colors;
     Integer formatId;
     Boolean isPublic;
+    String description;
 
     public ResponseDeckDto(DeckEntity deck) {
         this.authorId = deck.getUser().getId();
@@ -29,15 +30,16 @@ public class ResponseDeckDto {
         this.deckId = deck.getId();
         this.deckName = deck.getDeckName();
         this.isPublic = deck.getIsPublic();
-        cards = new HashMap<>();
+        this.cards = new HashMap<>();
         for (DeckCardEntity deckCardEntity : deck.getDeckCardEntities()) {
             cards.put(deckCardEntity.getCardImgEntity().getId(), deckCardEntity.getCnt());
         }
-        colors = new HashSet<>();
+        this.colors = new HashSet<>();
         for (DeckColor deckColor : deck.getDeckColors()) {
             colors.add(deckColor.getColor());
         }
-        formatId = deck.getFormat().getId();
+        this.formatId = deck.getFormat().getId();
+        this.description = deck.getDescription();
     }
 
 

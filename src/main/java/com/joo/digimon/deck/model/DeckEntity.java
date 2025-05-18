@@ -90,6 +90,9 @@ public class DeckEntity {
 
     private Timestamp updateTimestamp;
 
+    @Column(length = 1000)
+    private String description;
+
     private Boolean isPublic;
 
 
@@ -111,6 +114,7 @@ public class DeckEntity {
         this.isPublic = requestDeckDto.getIsPublic();
         this.format = format;
         this.updateTimestamp= Timestamp.valueOf(LocalDateTime.now());
+        this.description = requestDeckDto.getDescription();
     }
 
     public void addDeckColor(DeckColor deckColor){

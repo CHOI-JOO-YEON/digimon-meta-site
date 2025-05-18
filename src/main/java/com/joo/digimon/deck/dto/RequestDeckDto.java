@@ -15,4 +15,5 @@ public class RequestDeckDto {
     List<Color> colors=new ArrayList<>();
     Integer formatId=0;
     Boolean isPublic = false;
+    String description="";
 }
