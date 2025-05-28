@@ -240,9 +240,6 @@ public class CardServiceImpl implements CardService {
             builder.and(
                     card.isOnlyEnCard.isNull()
                             .or(card.isOnlyEnCard.isFalse()));
-            builder.and(
-                    card.isOnlyEnCard.isNull()
-                            .or(card.isOnlyEnCard.isFalse()));
         }
     }
 
