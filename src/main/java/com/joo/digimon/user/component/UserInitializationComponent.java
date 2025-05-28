@@ -4,6 +4,7 @@ import com.joo.digimon.user.enums.AuthSupplier;
 import com.joo.digimon.user.repository.UserRepository;
 import com.joo.digimon.user.enums.Role;
 import com.joo.digimon.user.model.User;
+import com.joo.digimon.user.service.UserSettingService;
 import jakarta.annotation.PostConstruct;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -23,13 +24,14 @@ public class UserInitializationComponent {
 
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
+    private final UserSettingService userSettingService;
 
     @PostConstruct
     @Transactional
     public void init(){
         Optional<User> user = userRepository.findByUsername(username);
         if (user.isEmpty()) {
-            userRepository.save(
+            User admin = userRepository.save(
                     User.builder()
                             .username(username)
                             .password(bCryptPasswordEncoder.encode(password))
@@ -38,6 +40,8 @@ public class UserInitializationComponent {
                             .role(Role.ADMIN)
                             .build()
             );
+            userSettingService.initUserSetting(admin);
         }
     }
 }
+
