@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class UserSettingServiceImpl implements UserSettingService {
     private final UserSettingRepository userSettingRepository;
-    private final ObjectMapper objectMapper;
+    private final ObjectMapper objectMapper
 
     @Override
     public UserSettingDto getUserSetting(User user) {
