@@ -1,5 +1,6 @@
 package com.joo.digimon.user.model;
 
+import com.joo.digimon.global.enums.Locale;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -23,10 +24,10 @@ public class UserSetting {
 
     private Integer defaultLimitId;
 
-    // comma separated sort priority keys
-    private String sortPriority;
-
     private Boolean isStrictDeck;
+
+    @Column(columnDefinition = "TEXT")
+    private String sortPriority;
 
     public void setLocalePriority(String localePriority) {
         this.localePriority = localePriority;
@@ -34,10 +35,11 @@ public class UserSetting {
     public void setDefaultLimitId(Integer defaultLimitId) {
         this.defaultLimitId = defaultLimitId;
     }
-    public void setSortPriority(String sortPriority) {
-        this.sortPriority = sortPriority;
-    }
     public void setIsStrictDeck(Boolean isStrictDeck) {
         this.isStrictDeck = isStrictDeck;
+    }
+
+    public void setSortPriority(String sortPriority) {
+        this.sortPriority = sortPriority;
     }
 }

@@ -14,5 +14,5 @@ public class UserSettingDto {
     private List<Locale> localePriority;
     private Integer defaultLimitId;
     private Boolean strictDeck;
-    private List<String> sortPriority;
+    private List<SortCriterionDto> sortPriority;
 }
