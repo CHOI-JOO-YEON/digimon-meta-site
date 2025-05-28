@@ -27,6 +27,7 @@ public class UserServiceImpl implements UserService {
     private final KakaoAuthClient kakaoAuthClient;
     private final KakaoApiClient kakaoApiClient;
     private final NicknameService nicknameService;
+    private final UserSettingService userSettingService;
     private final JwtProvider jwtProvider;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
@@ -42,9 +43,7 @@ public class UserServiceImpl implements UserService {
                                 .nickName(nicknameService.generateNickname())
                                 .authSupplier(AuthSupplier.KAKAO)
                                 .build()));
-
-
-
+        userSettingService.initUserSetting(user);
         return new LoginResponseDto(jwtProvider.generateToken(user), user.getNickName(), user.getRole(),user.getId());
     }
 
@@ -55,6 +54,7 @@ public class UserServiceImpl implements UserService {
         {
             return null;
         }
+        userSettingService.initUserSetting(user);
         return new LoginResponseDto(jwtProvider.generateToken(user), user.getNickName(), user.getRole(), user.getId());
     }
 
