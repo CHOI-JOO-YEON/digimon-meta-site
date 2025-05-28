@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -37,7 +38,8 @@ public class UseCardServiceImpl implements UseCardService {
         QDeckCardEntity subDeckCard = new QDeckCardEntity("subDeckCard");
 
         CardEntity searchCard = cardImgRepository.findById(cardImgId).orElseThrow().getCardEntity();
-        Long totalCount = getTotalDeckCountWithCard(searchCard, formatId);
+        Long totalCount = Optional.ofNullable(getTotalDeckCountWithCard(searchCard, formatId))
+                .orElse(0L);
 
         List<Tuple> results = getTopUsedCardsWithCardQuery(searchCard, formatId, cardImg, card, deckCard, subDeckCard)
                 .fetch();
