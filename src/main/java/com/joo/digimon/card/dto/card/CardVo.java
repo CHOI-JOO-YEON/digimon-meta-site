@@ -90,8 +90,8 @@ public class CardVo {
             String smallImgUrl = null;
             if(!Boolean.TRUE.equals(card.getCardEntity().getIsOnlyEnCard())) 
             {
-                imgUrl = prefixUrl + card.getBigWebpUrl();
-                smallImgUrl = prefixUrl + card.getSmallWebpUrl();
+                imgUrl = card.getBigWebpUrl() != null ? prefixUrl + card.getBigWebpUrl() : null;
+                smallImgUrl = card.getSmallWebpUrl() != null ? prefixUrl + card.getSmallWebpUrl() : null;
             }
             
             localeCardData.add(new LocaleCardData(
