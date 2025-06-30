@@ -10,10 +10,12 @@ import com.joo.digimon.user.model.User;
 import com.joo.digimon.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -33,18 +35,40 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public LoginResponseDto getKakaoToken(String code) throws IOException {
-        KakaoTokenResponseDto authorizationCode = kakaoAuthClient.getToken("authorization_code", KAKAO_CLIENT_ID, KAKAO_REDIRECT_URI, code);
-        KakaoUserInfoResponseDto kakaoUserInfo = kakaoApiClient.getKakaoUserInfo("Bearer " + authorizationCode.getAccessToken());
-        User user = userRepository.findByOauthId(kakaoUserInfo.getId()).orElseGet(
-                () -> userRepository.save(
-                        User.builder()
-                                .role(Role.USER)
-                                .oauthId(kakaoUserInfo.getId())
-                                .nickName(nicknameService.generateNickname())
-                                .authSupplier(AuthSupplier.KAKAO)
-                                .build()));
+        KakaoTokenResponseDto authorizationCode =
+                kakaoAuthClient.getToken("authorization_code", KAKAO_CLIENT_ID, KAKAO_REDIRECT_URI, code);
+        KakaoUserInfoResponseDto kakaoUserInfo =
+                kakaoApiClient.getKakaoUserInfo("Bearer " + authorizationCode.getAccessToken());
+
+        String oauthId = kakaoUserInfo.getId();
+        User user;
+
+        Optional<User> existing = userRepository.findByOauthId(oauthId);
+        if (existing.isPresent()) {
+            user = existing.get();
+        } else {
+            try {
+                User newUser = User.builder()
+                        .role(Role.USER)
+                        .oauthId(oauthId)
+                        .nickName(nicknameService.generateNickname())
+                        .authSupplier(AuthSupplier.KAKAO)
+                        .build();
+                user = userRepository.save(newUser);
+            } catch (DataIntegrityViolationException ex) {
+                user = userRepository.findByOauthId(oauthId)
+                        .orElseThrow(() -> new IllegalStateException("Failed to resolve user after conflict", ex));
+            }
+        }
+
         userSettingService.initUserSetting(user);
-        return new LoginResponseDto(jwtProvider.generateToken(user), user.getNickName(), user.getRole(),user.getId());
+
+        return new LoginResponseDto(
+                jwtProvider.generateToken(user),
+                user.getNickName(),
+                user.getRole(),
+                user.getId()
+        );
     }
 
     @Override

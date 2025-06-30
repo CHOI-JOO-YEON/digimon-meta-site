@@ -22,6 +22,8 @@ public class User {
 
     private String username;
     private String password;
+
+    @Column(unique = true)
     private String oauthId;
     private String nickName;
 
