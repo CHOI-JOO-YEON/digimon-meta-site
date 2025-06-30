@@ -5,6 +5,7 @@ import com.joo.digimon.global.exception.model.ForbiddenAccessException;
 import com.joo.digimon.global.exception.model.UnAuthorizationException;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.catalina.connector.ClientAbortException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.HttpMessageConversionException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -40,6 +41,11 @@ public class GlobalExceptionHandler {
     public void handleIllegalArgumentException(Exception e) {
     }
 
+    @ExceptionHandler(ClientAbortException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public void handleClientAbortException() {
+    }
+    
     @ExceptionHandler(CanNotDeleteException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public void handleCanNotDeleteException(Exception e) {
