@@ -101,7 +101,9 @@ public class CrawlingServiceImpl implements CrawlingService {
             try {
                 CrawlingCardDto crawlingCardDto = crawlingCardByElement(element, locale);
                 if ((note == null || crawlingCardDto.getNote().equals(note))
-                        && (locale == Locale.KOR || !crawlingCardDto.getIsParallel())) {
+                        && (locale == Locale.KOR || !crawlingCardDto.getIsParallel())
+                        && !isTokenCard(crawlingCardDto.getCardNo())
+                ) {
                     crawlingCardDtoList.add(crawlingCardDto);
                 }
             }
@@ -113,6 +115,10 @@ public class CrawlingServiceImpl implements CrawlingService {
            
         }
         return crawlingCardDtoList;
+    }
+
+    private boolean isTokenCard(String cardNo) {
+        return cardNo.contains("TOKEN");
     }
 
     private List<CrawlingCardEntity> createCrawlingCardEntities(List<CrawlingCardDto> crawlingCardDtoList) {
