@@ -19,6 +19,7 @@ public enum Form {
     SUP("Sup./Appmon", "슈퍼/어플몬", "超/アプモン"),
     ULT("Ult./Appmon", "얼티메이트/어플몬", "極/アプモン"),
     GOD("God/Appmon", "갓/어플몬", "神/アプモン"),
+    EATER("Eater", "이터", "イーター"),
     ERROR("Error", "에러", "Error"),
     ;
 
