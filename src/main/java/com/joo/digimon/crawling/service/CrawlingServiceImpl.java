@@ -118,7 +118,7 @@ public class CrawlingServiceImpl implements CrawlingService {
     }
 
     private boolean isTokenCard(String cardNo) {
-        return cardNo.contains("TOKEN");
+        return cardNo.toLowerCase().contains("token");
     }
 
     private List<CrawlingCardEntity> createCrawlingCardEntities(List<CrawlingCardDto> crawlingCardDtoList) {
