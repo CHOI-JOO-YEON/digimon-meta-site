@@ -63,7 +63,7 @@ public class KorCardParseProcedure implements CardParseProcedure{
             return card.getCardName();
         }
 
-        return String.join(" ", Arrays.copyOfRange(cardNameStrings, 1, cardNameStrings.length));
+        return String.join(" ", Arrays.copyOfRange(cardNameStrings, 1, cardNameStrings.length)).replace("･","·");
     }
 
     @Override
@@ -129,7 +129,7 @@ public class KorCardParseProcedure implements CardParseProcedure{
         if (card.getEffect().equals("-")) {
             return null;
         }
-        return card.getEffect();
+        return card.getEffect().replace("･","·");
     }
 
     @Override
@@ -137,7 +137,7 @@ public class KorCardParseProcedure implements CardParseProcedure{
         if (card.getSourceEffect().equals("-")) {
             return null;
         }
-        return card.getSourceEffect();
+        return card.getSourceEffect().replace("･","·");
     }
 
     @Override
