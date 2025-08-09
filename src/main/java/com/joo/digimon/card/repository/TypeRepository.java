@@ -4,6 +4,7 @@ import com.joo.digimon.card.model.TypeEntity;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -15,10 +16,21 @@ public interface TypeRepository extends JpaRepository<TypeEntity,Integer> {
     Optional<TypeEntity> findByEngName(String engName);
     Optional<TypeEntity> findByJpnName(String engName);
 
-    @Override
     @EntityGraph("TypeEntity.detail")
-    List<TypeEntity> findAll();
+    @Query("SELECT t FROM TypeEntity t")
+    List<TypeEntity> findAllWithDetail();
 
+    @Query("SELECT t FROM TypeEntity t")
+    List<TypeEntity> findAllPlain();
+
+    default List<TypeEntity> findAll(boolean fetchDetail) {
+        return fetchDetail
+                ? findAllWithDetail()
+                : findAllPlain();
+    }
+
+
+    @EntityGraph("TypeEntity.detail")
     List<TypeEntity> findByNameIsNotNull(Sort sort);
 
     @Override

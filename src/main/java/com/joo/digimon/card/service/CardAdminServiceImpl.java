@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.joo.digimon.card.dto.card.CardAdminPutDto;
 import com.joo.digimon.card.dto.card.CardVo;
+import com.joo.digimon.card.dto.card.TraitDto;
 import com.joo.digimon.card.dto.card.TypeMergeRequestDto;
 import com.joo.digimon.card.dto.note.CreateNoteDto;
 import com.joo.digimon.card.dto.note.ResponseNoteDto;
@@ -12,6 +13,8 @@ import com.joo.digimon.card.dto.note.UpdateNoteDto;
 import com.joo.digimon.card.dto.type.TypeDto;
 import com.joo.digimon.card.model.*;
 import com.joo.digimon.card.repository.*;
+import com.joo.digimon.global.enums.Attribute;
+import com.joo.digimon.global.enums.Form;
 import com.joo.digimon.global.enums.Locale;
 import com.joo.digimon.global.exception.model.CanNotDeleteException;
 import com.querydsl.core.Tuple;
@@ -28,6 +31,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.io.File;
 import java.io.FileWriter;
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -119,7 +124,7 @@ public class CardAdminServiceImpl implements CardAdminService {
 
     @Override
     public List<TypeDto> getAllType() {
-        List<TypeEntity> types = typeRepository.findAll();
+        List<TypeEntity> types = typeRepository.findAll(false);
         List<TypeDto> typeDtoList = new ArrayList<>();
         for (TypeEntity type : types) {
             typeDtoList.add(new TypeDto(type, false));
@@ -129,7 +134,7 @@ public class CardAdminServiceImpl implements CardAdminService {
 
     @Override
     public List<TypeDto> getAllTypeDetail() {
-        List<TypeEntity> types = typeRepository.findAll();
+        List<TypeEntity> types = typeRepository.findAll(true);
         List<TypeDto> typeDtoList = new ArrayList<>();
         for (TypeEntity type : types) {
             typeDtoList.add(new TypeDto(type, true));
@@ -374,6 +379,19 @@ public class CardAdminServiceImpl implements CardAdminService {
                 git.close();
             }
         }
+    }
+
+    @Override
+    public TraitDto getAllTraits() {
+        List<TraitDto.TraitDtoType> dtoTypes = typeRepository.findAll(false).stream()
+                .map(t -> new TraitDto.TraitDtoType(t.getName(), t.getId()))
+                .collect(Collectors.toList());
+
+        return TraitDto.builder()
+                .attributes(Arrays.stream(Attribute.values()).map(Enum::name).collect(Collectors.toList()))
+                .forms(Stream.of(Form.values()).filter(f -> f != Form.BABY).map(f -> new TraitDto.TraitDtoForm(f.name(), f.getKor())).collect(Collectors.toList()))
+                .types(dtoTypes)
+                .build();
     }
 
     private String getCardsJson() throws JsonProcessingException {

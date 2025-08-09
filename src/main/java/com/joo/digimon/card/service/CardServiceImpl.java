@@ -10,6 +10,7 @@ import com.joo.digimon.card.repository.CardImgRepository;
 import com.joo.digimon.card.repository.CardRepository;
 import com.joo.digimon.card.repository.NoteRepository;
 import com.joo.digimon.card.repository.TypeRepository;
+import com.joo.digimon.global.enums.Attribute;
 import com.joo.digimon.global.enums.CardType;
 import com.joo.digimon.global.enums.Form;
 import com.joo.digimon.global.enums.Rarity;
@@ -120,11 +121,18 @@ public class CardServiceImpl implements CardService {
         addNoteCondition(cardSearchRequestDto.getNoteId(), builder, cardImg);
         addTypeCondition(cardSearchRequestDto, cardCombine, builder, cardImg);
         addFormCondition(cardSearchRequestDto.getForms(), builder, card);
+        addAttributeCondition(cardSearchRequestDto.getAttributes(), builder, card);
     }
 
     private void addFormCondition(Set<Form> forms, BooleanBuilder builder, QCardEntity card) {
         if (forms != null) {
             builder.and(card.form.in(forms));
+        }
+    }
+
+    private void addAttributeCondition(Set<Attribute> attributes, BooleanBuilder builder, QCardEntity card) {
+        if (attributes != null) {
+            builder.and(card.attribute.in(attributes));
         }
     }
 

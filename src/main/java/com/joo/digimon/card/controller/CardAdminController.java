@@ -62,6 +62,11 @@ public class CardAdminController {
         return new ResponseEntity<>(cardAdminService.putNotes(updateNoteDtoList), HttpStatus.OK);
     }
 
+    @GetMapping("/card/traits")
+    public ResponseEntity<?> getAllTraits() {
+        return new ResponseEntity<>(cardAdminService.getAllTraits(), HttpStatus.OK);
+    }
+    
     @GetMapping("/card/types")
     public ResponseEntity<?> getAllTypes() {
         return new ResponseEntity<>(cardAdminService.getAllType(), HttpStatus.OK);
@@ -146,6 +151,8 @@ public class CardAdminController {
     ResponseEntity<?> createPr(@RequestParam(value = "message") String message) {
         return cardAdminService.createCardJsonUpdateToGitHubPR(message) ? new ResponseEntity<>(HttpStatus.CREATED) : new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
     }
+    
+    
 
 
 }
