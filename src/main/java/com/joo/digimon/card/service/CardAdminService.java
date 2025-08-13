@@ -32,4 +32,6 @@ public interface CardAdminService {
     void deleteDuplicateCardCombineType();
     
     Boolean createCardJsonUpdateToGitHubPR(String message);
+
+    void originUrlSet();
 }

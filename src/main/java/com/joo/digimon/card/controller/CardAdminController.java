@@ -146,6 +146,13 @@ public class CardAdminController {
     ResponseEntity<?> createPr(@RequestParam(value = "message") String message) {
         return cardAdminService.createCardJsonUpdateToGitHubPR(message) ? new ResponseEntity<>(HttpStatus.CREATED) : new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
     }
+    
+    @PostMapping("/card/origin-url/set")
+    ResponseEntity<?> originUrlSet() {
+        cardAdminService.originUrlSet();
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+    
 
 
 }

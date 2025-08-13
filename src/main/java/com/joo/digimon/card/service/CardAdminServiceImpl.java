@@ -376,6 +376,23 @@ public class CardAdminServiceImpl implements CardAdminService {
         }
     }
 
+
+    @Override
+    @Transactional
+    public void originUrlSet() {
+        List<EnglishCardEntity> englishCardEntities = englishCardRepository.findByOriginUrlIsNull();
+
+        englishCardEntities.forEach(e -> {
+            e.updateOriginUrl("/images/cardlist/card/" + e.getCardEntity().getCardNo() + ".png");
+        });
+
+        List<JapaneseCardEntity> japaneseCardEntities = japaneseCardRepository.findByOriginUrlIsNull();
+
+        japaneseCardEntities.forEach(e -> {
+            e.updateOriginUrl("/images/cardlist/card/" + e.getCardEntity().getCardNo() + ".png");
+        });
+    }
+
     private String getCardsJson() throws JsonProcessingException {
         List<CardImgEntity> cardImgEntities = cardImgRepository.findAll();
         List<CardVo> cardVos = new ArrayList<>();
