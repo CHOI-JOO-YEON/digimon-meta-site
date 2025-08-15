@@ -6,6 +6,7 @@ import com.joo.digimon.crawling.dto.*;
 import com.joo.digimon.crawling.model.CrawlingCardEntity;
 import com.joo.digimon.crawling.procedure.crwaling.EngCrawlingProcedure;
 import com.joo.digimon.crawling.procedure.crwaling.JpnCrawlingProcedure;
+import com.joo.digimon.crawling.procedure.crwaling.JpnCrawlingProcedureV2;
 import com.joo.digimon.crawling.procedure.crwaling.KorCrawlingProcedure;
 import com.joo.digimon.crawling.procedure.img.KorCardImgProcessor;
 import com.joo.digimon.crawling.procedure.img.OtherLocaleCardImgProcessor;
@@ -94,7 +95,7 @@ public class CrawlingServiceImpl implements CrawlingService {
 
         List<Element> cardElement = new ArrayList<>();
         for (Document document : documentListByFirstPageUrl) {
-            cardElement.addAll(getCardElementsByDocument(document));
+            cardElement.addAll(getCardElementsByDocument(document, locale));
         }
         List<CrawlingCardDto> crawlingCardDtoList = new ArrayList<>();
         for (Element element : cardElement) {
@@ -151,15 +152,18 @@ public class CrawlingServiceImpl implements CrawlingService {
         return documentList;
     }
 
-    private List<Element> getCardElementsByDocument(Document document) {
-        return document.select(".cardlistCol .popup");
+    private List<Element> getCardElementsByDocument(Document document, Locale locale) {
+        return switch (locale) {
+            case KOR, ENG-> document.select(".cardlistCol .popup");
+            case JPN -> document.select(".cardlistCol .image_lists_item");
+        };
     }
 
     private CrawlingCardDto crawlingCardByElement(Element element, Locale locale) {
         return switch (locale) {
             case KOR -> new KorCrawlingProcedure(element).execute();
             case ENG -> new EngCrawlingProcedure(element).execute();
-            case JPN -> new JpnCrawlingProcedure(element).execute();
+            case JPN -> new JpnCrawlingProcedureV2(element).execute();
         };
     }
 
