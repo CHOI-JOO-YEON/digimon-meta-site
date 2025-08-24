@@ -15,6 +15,8 @@ public class ResponseNoteDto {
     Integer priority;
     Integer cardCount;
     Boolean isDisable;
+    String description;
+    String parent;
 
     public ResponseNoteDto(NoteEntity noteEntity) {
         this.noteId = noteEntity.getId();
@@ -28,7 +30,7 @@ public class ResponseNoteDto {
             this.cardCount = 0;
         }
         this.isDisable = noteEntity.getIsDisable();
-
-
+        this.description = noteEntity.getDescription();
+        this.parent = noteEntity.getParent();
     }
 }

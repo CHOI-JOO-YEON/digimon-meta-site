@@ -16,4 +16,6 @@ public class UpdateNoteDto {
     CardOrigin cardOrigin;
     Integer priority;
     Boolean isDisable;
+    String description;
+    String parent;
 }

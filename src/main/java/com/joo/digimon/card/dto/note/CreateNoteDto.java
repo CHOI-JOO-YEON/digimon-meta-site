@@ -14,4 +14,6 @@ public class CreateNoteDto {
     LocalDate releaseDate;
     CardOrigin cardOrigin;
     Integer priority;
+    String description;
+    String parent;
 }
