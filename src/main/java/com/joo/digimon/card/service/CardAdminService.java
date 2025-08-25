@@ -35,4 +35,6 @@ public interface CardAdminService {
     Boolean createCardJsonUpdateToGitHubPR(String message);
 
     TraitDto getAllTraits();
+
+    TypeDto getCardByTypeId(Integer typeId);
 }

@@ -71,6 +71,11 @@ public class CardAdminController {
     public ResponseEntity<?> getAllTypes() {
         return new ResponseEntity<>(cardAdminService.getAllType(), HttpStatus.OK);
     }
+    
+    @GetMapping("/card/types/{type-id}/detail")
+    public ResponseEntity<?> getCardByType(@PathVariable(name = "type-id") Integer typeId) {
+        return new ResponseEntity<>(cardAdminService.getCardByTypeId(typeId), HttpStatus.OK);
+    }
 
     @GetMapping("/card/types/detail")
     public ResponseEntity<?> getAllTypesDetail() {

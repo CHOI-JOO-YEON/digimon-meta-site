@@ -18,6 +18,7 @@ import com.joo.digimon.global.enums.Form;
 import com.joo.digimon.global.enums.Locale;
 import com.joo.digimon.global.exception.model.CanNotDeleteException;
 import com.querydsl.core.Tuple;
+import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
@@ -392,6 +393,35 @@ public class CardAdminServiceImpl implements CardAdminService {
                 .forms(Stream.of(Form.values()).filter(f -> f != Form.BABY).map(f -> new TraitDto.TraitDtoForm(f.name(), f.getKor())).collect(Collectors.toList()))
                 .types(dtoTypes)
                 .build();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public TypeDto getCardByTypeId(Integer typeId) {
+        QCardCombineTypeEntity cct = QCardCombineTypeEntity.cardCombineTypeEntity;
+        QCardEntity card = QCardEntity.cardEntity;
+
+        List<String> cardNos = new JPAQuery<String>(entityManager)
+                .select(card.cardNo)
+                .from(cct)
+                .join(cct.cardEntity, card)
+                .where(cct.typeEntity.id.eq(typeId))
+                .distinct()
+                .orderBy(card.cardNo.asc())
+                .fetch();
+
+        Long total = new JPAQuery<Long>(entityManager)
+                .select(card.id.countDistinct())
+                .from(cct)
+                .join(cct.cardEntity, card)
+                .where(cct.typeEntity.id.eq(typeId))
+                .fetchOne();
+
+        TypeDto dto = new TypeDto();
+        dto.setTypeId(typeId);
+        dto.setCardNos(cardNos);
+        dto.setCardCount(total == null ? 0 : total.intValue());
+        return dto;
     }
 
     private String getCardsJson() throws JsonProcessingException {
