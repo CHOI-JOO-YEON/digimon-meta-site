@@ -33,8 +33,11 @@ public interface CardAdminService {
     void deleteDuplicateCardCombineType();
     
     Boolean createCardJsonUpdateToGitHubPR(String message);
-
+  
     TraitDto getAllTraits();
-
+  
     TypeDto getCardByTypeId(Integer typeId);
+  
+    void originUrlSet();
+
 }

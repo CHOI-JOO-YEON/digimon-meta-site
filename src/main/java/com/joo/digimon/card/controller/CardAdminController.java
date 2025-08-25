@@ -157,6 +157,13 @@ public class CardAdminController {
         return cardAdminService.createCardJsonUpdateToGitHubPR(message) ? new ResponseEntity<>(HttpStatus.CREATED) : new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
     }
     
+
+    @PostMapping("/card/origin-url/set")
+    ResponseEntity<?> originUrlSet() {
+        cardAdminService.originUrlSet();
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
     
 
 

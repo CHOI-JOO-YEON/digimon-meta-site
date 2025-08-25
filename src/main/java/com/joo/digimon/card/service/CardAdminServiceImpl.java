@@ -382,6 +382,7 @@ public class CardAdminServiceImpl implements CardAdminService {
         }
     }
 
+
     @Override
     public TraitDto getAllTraits() {
         List<TraitDto.TraitDtoType> dtoTypes = typeRepository.findAll(false).stream()
@@ -422,6 +423,23 @@ public class CardAdminServiceImpl implements CardAdminService {
         dto.setCardNos(cardNos);
         dto.setCardCount(total == null ? 0 : total.intValue());
         return dto;
+
+
+    @Override
+    @Transactional
+    public void originUrlSet() {
+        List<EnglishCardEntity> englishCardEntities = englishCardRepository.findByOriginUrlIsNull();
+
+        englishCardEntities.forEach(e -> {
+            e.updateOriginUrl("/images/cardlist/card/" + e.getCardEntity().getCardNo() + ".png");
+        });
+
+        List<JapaneseCardEntity> japaneseCardEntities = japaneseCardRepository.findByOriginUrlIsNull();
+
+        japaneseCardEntities.forEach(e -> {
+            e.updateOriginUrl("/images/cardlist/card/" + e.getCardEntity().getCardNo() + ".png");
+        });
+
     }
 
     private String getCardsJson() throws JsonProcessingException {

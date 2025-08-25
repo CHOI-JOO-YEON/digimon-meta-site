@@ -8,6 +8,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.security.Principal;
 import java.time.LocalDate;
 import java.util.Set;
 
@@ -34,6 +35,11 @@ public class NoteEntity {
     @Enumerated(EnumType.STRING)
     CardOrigin cardOrigin;
 
+    @Column(length = 1000)
+    private String description;
+    
+    private String parent;
+
     @OneToMany(mappedBy = "noteEntity")
     Set<CardImgEntity> cardImgEntities;
 
@@ -50,6 +56,13 @@ public class NoteEntity {
         this.cardOrigin = dto.getCardOrigin();
         this.priority = dto.getPriority();
         this.isDisable = dto.getIsDisable();
-    }
+        
+        if (dto.getParent() != null) {
+            this.description = dto.getParent();    
+        }
 
+        if (dto.getDescription() != null) {
+            this.description = dto.getDescription();
+        }
+    }
 }
