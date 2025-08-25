@@ -38,8 +38,6 @@ public interface CardParseProcedure {
 
         dto.setDigivolveCondition1(digivolve1.digivolveCondition);
         dto.setDigivolveCost1(digivolve1.digivolveCost);
-        dto.setDigivolveCondition1(digivolve1.digivolveCondition);
-        dto.setDigivolveCost1(digivolve1.digivolveCost);
 
         Digivolve digivolve2 = getDigivolve2();
         dto.setDigivolveCondition2(digivolve2.digivolveCondition);

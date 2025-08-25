@@ -1,5 +1,6 @@
 package com.joo.digimon.card.model;
 
+import com.joo.digimon.crawling.dto.ReflectCardRequestDto;
 import com.joo.digimon.global.enums.*;
 import jakarta.persistence.*;
 import lombok.*;
@@ -116,5 +117,12 @@ public class CardEntity {
     public void addCardCombineType(CardCombineTypeEntity entity) {
         cardCombineTypeEntities.add(entity);
         entity.setCardEntity(this);
+    }
+
+    public void updateDigivolve(ReflectCardRequestDto dto) {
+        digivolveCost1 = dto.getDigivolveCost1();
+        digivolveCondition1 = dto.getDigivolveCondition1();
+        digivolveCost2 = dto.getDigivolveCost2();
+        digivolveCondition2 = dto.getDigivolveCondition2();
     }
 }
