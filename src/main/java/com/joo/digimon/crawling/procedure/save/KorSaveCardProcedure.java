@@ -66,6 +66,7 @@ public class KorSaveCardProcedure implements SaveCardProcedure {
             cardEntity.updateEffect(dto.getEffect());
             cardEntity.updateSourceEffect(dto.getSourceEffect());
             cardEntity.updateIsOnlyEnCard(Boolean.FALSE);
+            cardEntity.updateDigivolve(dto);
         }
         return cardEntity;
     }

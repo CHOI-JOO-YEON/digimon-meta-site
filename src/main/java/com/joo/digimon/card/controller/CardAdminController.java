@@ -62,9 +62,19 @@ public class CardAdminController {
         return new ResponseEntity<>(cardAdminService.putNotes(updateNoteDtoList), HttpStatus.OK);
     }
 
+    @GetMapping("/card/traits")
+    public ResponseEntity<?> getAllTraits() {
+        return new ResponseEntity<>(cardAdminService.getAllTraits(), HttpStatus.OK);
+    }
+    
     @GetMapping("/card/types")
     public ResponseEntity<?> getAllTypes() {
         return new ResponseEntity<>(cardAdminService.getAllType(), HttpStatus.OK);
+    }
+    
+    @GetMapping("/card/types/{type-id}/detail")
+    public ResponseEntity<?> getCardByType(@PathVariable(name = "type-id") Integer typeId) {
+        return new ResponseEntity<>(cardAdminService.getCardByTypeId(typeId), HttpStatus.OK);
     }
 
     @GetMapping("/card/types/detail")
@@ -147,11 +157,13 @@ public class CardAdminController {
         return cardAdminService.createCardJsonUpdateToGitHubPR(message) ? new ResponseEntity<>(HttpStatus.CREATED) : new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
     }
     
+
     @PostMapping("/card/origin-url/set")
     ResponseEntity<?> originUrlSet() {
         cardAdminService.originUrlSet();
         return new ResponseEntity<>(HttpStatus.OK);
     }
+
     
 
 

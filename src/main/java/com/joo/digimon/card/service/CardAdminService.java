@@ -1,6 +1,7 @@
 package com.joo.digimon.card.service;
 
 import com.joo.digimon.card.dto.card.CardAdminPutDto;
+import com.joo.digimon.card.dto.card.TraitDto;
 import com.joo.digimon.card.dto.card.TypeMergeRequestDto;
 import com.joo.digimon.card.dto.note.CreateNoteDto;
 import com.joo.digimon.card.dto.note.ResponseNoteDto;
@@ -32,6 +33,11 @@ public interface CardAdminService {
     void deleteDuplicateCardCombineType();
     
     Boolean createCardJsonUpdateToGitHubPR(String message);
-
+  
+    TraitDto getAllTraits();
+  
+    TypeDto getCardByTypeId(Integer typeId);
+  
     void originUrlSet();
+
 }
