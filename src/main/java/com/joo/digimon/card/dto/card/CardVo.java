@@ -105,24 +105,34 @@ public class CardVo {
         }
 
         if (card.getCardEntity().getEnglishCard() != null) {
+            
+            String imageUrl = card.getCardEntity().getEnglishCard().getWebpUrl();
+            if (imageUrl == null) {
+                imageUrl = card.getCardEntity().getEnglishCard().getSampleWebpUrl();
+            }
+            
             localeCardData.add(new LocaleCardData(
                     card.getCardEntity().getEnglishCard().getCardName(),
                     card.getCardEntity().getEnglishCard().getEffect(),
                     card.getCardEntity().getEnglishCard().getSourceEffect(),
                     Locale.ENG,
-                    prefixUrl + card.getCardEntity().getEnglishCard().getWebpUrl(),
-                    prefixUrl + card.getCardEntity().getEnglishCard().getWebpUrl()
+                    prefixUrl + imageUrl,
+                    prefixUrl + imageUrl
             ));
         }
 
         if (card.getCardEntity().getJapaneseCardEntity() != null) {
+            String imageUrl = card.getCardEntity().getJapaneseCardEntity().getWebpUrl();
+            if (imageUrl == null) {
+                imageUrl = card.getCardEntity().getJapaneseCardEntity().getSampleWebpUrl();
+            }
             localeCardData.add(new LocaleCardData(
                     card.getCardEntity().getJapaneseCardEntity().getCardName(),
                     card.getCardEntity().getJapaneseCardEntity().getEffect(),
                     card.getCardEntity().getJapaneseCardEntity().getSourceEffect(),
                     Locale.JPN,
-                    prefixUrl + card.getCardEntity().getJapaneseCardEntity().getWebpUrl(),
-                    prefixUrl + card.getCardEntity().getJapaneseCardEntity().getWebpUrl()
+                    prefixUrl + imageUrl,
+                    prefixUrl + imageUrl
             ));
         }
 

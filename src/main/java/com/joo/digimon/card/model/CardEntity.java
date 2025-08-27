@@ -115,6 +115,9 @@ public class CardEntity {
     }
 
     public void addCardCombineType(CardCombineTypeEntity entity) {
+        if (cardCombineTypeEntities == null) {
+            cardCombineTypeEntities = new HashSet<>();
+        }
         cardCombineTypeEntities.add(entity);
         entity.setCardEntity(this);
     }

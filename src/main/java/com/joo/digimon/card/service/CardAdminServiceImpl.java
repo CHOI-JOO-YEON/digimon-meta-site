@@ -13,10 +13,12 @@ import com.joo.digimon.card.dto.note.UpdateNoteDto;
 import com.joo.digimon.card.dto.type.TypeDto;
 import com.joo.digimon.card.model.*;
 import com.joo.digimon.card.repository.*;
+import com.joo.digimon.crawling.procedure.save.SaveCardProcedure;
 import com.joo.digimon.global.enums.Attribute;
 import com.joo.digimon.global.enums.Form;
 import com.joo.digimon.global.enums.Locale;
 import com.joo.digimon.global.exception.model.CanNotDeleteException;
+import com.joo.digimon.util.S3Util;
 import com.querydsl.core.Tuple;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -26,14 +28,22 @@ import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.ResetCommand;
 import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import static com.joo.digimon.image.ImageUtil.convertBufferedImageToWebP;
 
 @Service
 @RequiredArgsConstructor
@@ -50,7 +60,7 @@ public class CardAdminServiceImpl implements CardAdminService {
 
     @Value("${domain.url}")
     private String prefixUrl;
-    
+
     private static final String localPath = "repo";
     private static final String cardsPath = localPath + "/assets/data/cards.json";
     private static final String notesPath = localPath + "/assets/data/notes.json";
@@ -60,10 +70,12 @@ public class CardAdminServiceImpl implements CardAdminService {
     private final NoteRepository noteRepository;
     private final EnglishCardRepository englishCardRepository;
     private final CardCombineTypeRepository cardCombineTypeRepository;
+    private final CardRepository cardRepository;
     private final TypeRepository typeRepository;
     private final JapaneseCardRepository japaneseCardRepository;
     private final EntityManager entityManager;
     private final ObjectMapper objectMapper;
+    private final S3Util s3Util;
 
 
     @Override
@@ -188,7 +200,10 @@ public class CardAdminServiceImpl implements CardAdminService {
             CardEntity cardEntity = cardImgEntity.getCardEntity();
             Set<CardCombineTypeEntity> existingEntities = cardEntity.getCardCombineTypeEntities();
 
-            existingEntities.clear(); 
+            if (existingEntities == null) {
+                existingEntities = new HashSet<>();
+            }
+            existingEntities.clear();
 
             for (String type : types) {
                 TypeEntity typeEntity = typeRepository.findByName(type)
@@ -231,11 +246,13 @@ public class CardAdminServiceImpl implements CardAdminService {
         japaneseCardEntity.update(cardAdminPutDto);
         japaneseCardRepository.save(japaneseCardEntity);
     }
+
     private boolean isJpnPresent(CardAdminPutDto cardAdminPutDto) {
-        return cardAdminPutDto.getCardJpnName()!=null || cardAdminPutDto.getJpnEffect()!=null || cardAdminPutDto.getJpnSourceEffect()!=null;
+        return cardAdminPutDto.getCardJpnName() != null || cardAdminPutDto.getJpnEffect() != null || cardAdminPutDto.getJpnSourceEffect() != null;
     }
+
     private boolean isEngPresent(CardAdminPutDto cardAdminPutDto) {
-        return cardAdminPutDto.getCardEngName()!=null || cardAdminPutDto.getEngEffect()!=null || cardAdminPutDto.getEngSourceEffect()!=null;
+        return cardAdminPutDto.getCardEngName() != null || cardAdminPutDto.getEngEffect() != null || cardAdminPutDto.getEngSourceEffect() != null;
     }
 
     private List<ResponseNoteDto> getAllResponseNoteDto() {
@@ -267,10 +284,9 @@ public class CardAdminServiceImpl implements CardAdminService {
         baseType.getCardCombineTypes()
                 .forEach(cardCombineType -> cardCombineType.updateType(targetType));
 
-        if(dto.getLocale().equals(Locale.ENG)){
+        if (dto.getLocale().equals(Locale.ENG)) {
             targetType.updateEngName(baseType.getEngName());
-        }
-        else if(dto.getLocale().equals(Locale.JPN)){
+        } else if (dto.getLocale().equals(Locale.JPN)) {
             targetType.updateJpnName(baseType.getJpnName());
         }
 
@@ -354,8 +370,7 @@ public class CardAdminServiceImpl implements CardAdminService {
             try (FileWriter writer = new FileWriter(file, false)) {
                 writer.write(getNotesJson());
             }
-            
-            
+
 
             git.add()
                     .addFilepattern(".")
@@ -463,4 +478,100 @@ public class CardAdminServiceImpl implements CardAdminService {
         objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
         return objectMapper.writeValueAsString(notes);
     }
+
+    @Override
+    @Transactional
+    public Boolean createCard(CardAdminPutDto cardAdminPutDto, MultipartFile image) throws IOException {
+
+        Optional<CardEntity> card = cardRepository.findByCardNo(cardAdminPutDto.getCardNo());
+        if (card.isPresent()) {
+            return false;
+        }
+
+        CardEntity cardEntity = CardEntity.builder()
+                .isOnlyEnCard(true)
+                .sortString(SaveCardProcedure.generateSortString(cardAdminPutDto.getCardNo()))
+                .build();
+        try {
+            cardRepository.save(cardEntity);
+            cardRepository.flush();
+        } catch (DataIntegrityViolationException e) {
+            return false;
+        }
+
+        CardImgEntity cardImgEntity;
+        cardImgEntity = CardImgEntity
+                .builder()
+                .isParallel(false)
+                .cardEntity(cardEntity)
+                .build();
+
+        String uploadCardImage = uploadCardImage(cardAdminPutDto, image);
+
+
+        if (cardAdminPutDto.getSampleImageLocale() == Locale.ENG) {
+            EnglishCardEntity englishCard = EnglishCardEntity.builder()
+                    .sampleWebpUrl(uploadCardImage)
+                    .cardEntity(cardEntity)
+                    .build();
+            englishCardRepository.save(englishCard);
+            englishCardRepository.flush();
+        } else if (cardAdminPutDto.getSampleImageLocale() == Locale.JPN) {
+            JapaneseCardEntity japaneseCardEntity = JapaneseCardEntity.builder()
+                    .sampleWebpUrl(uploadCardImage)
+                    .cardEntity(cardEntity)
+                    .build();
+            japaneseCardRepository.save(japaneseCardEntity);
+            japaneseCardRepository.flush();
+        }
+
+
+        cardImgEntity.update(cardAdminPutDto);
+        NoteEntity noteEntity = noteRepository.findById(cardAdminPutDto.getNoteId()).orElseThrow();
+        cardImgEntity.updateNote(noteEntity);
+        updateType(cardAdminPutDto, cardImgEntity);
+
+        cardImgRepository.save(cardImgEntity);
+        return true;
+    }
+
+    @Override
+    public Boolean createType(String name) {
+        if (typeRepository.findByName(name).isPresent()) {
+            return false;
+        }
+        
+        TypeEntity typeEntity = TypeEntity.builder()
+                .name(name)
+                .build();
+        
+        typeRepository.save(typeEntity);
+        return true;
+    }
+
+    public String uploadCardImage(CardAdminPutDto dto, MultipartFile image) throws IOException {
+        if (image == null || image.isEmpty()) {
+            throw new IllegalArgumentException("이미지 파일이 비어있습니다.");
+        }
+
+        String contentType = image.getContentType(); // e.g. image/png
+        if (contentType == null || !contentType.startsWith("image/")) {
+            throw new IllegalArgumentException("이미지 MIME 타입이 아닙니다.");
+        }
+
+        // 파일명을 무조건 webp로 저장
+        String key = "sample/" + dto.getSampleImageLocale().name() + "/" + dto.getCardNo() + ".webp";
+
+        // MultipartFile → BufferedImage 변환
+        BufferedImage bufferedImage = ImageIO.read(image.getInputStream());
+
+        // BufferedImage → WebP 변환
+        byte[] webpBytes = convertBufferedImageToWebP(bufferedImage);
+
+        // S3 업로드 (mime type은 webp)
+        s3Util.uploadImageToS3(key, webpBytes, "webp");
+
+        return key;
+    }
+
 }

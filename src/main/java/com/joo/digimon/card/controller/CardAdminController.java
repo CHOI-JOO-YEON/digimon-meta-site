@@ -18,7 +18,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 
 @RestController
@@ -35,6 +37,13 @@ public class CardAdminController {
     public ResponseEntity<?> getCards(@ModelAttribute CardSearchRequestDto cardSearchRequestDto) {
         return new ResponseEntity<>(cardService.searchCards(cardSearchRequestDto), HttpStatus.OK);
     }
+
+    @PostMapping("/card")
+    public ResponseEntity<?> createCard(@RequestPart("image") MultipartFile image,
+                                        @RequestPart("card")  CardAdminPutDto cardAdminPutDto) throws IOException {
+        return new ResponseEntity<>(cardAdminService.createCard(cardAdminPutDto, image), HttpStatus.CREATED);
+    }
+    
 
     @PutMapping("/card/update")
     public ResponseEntity<?> updateCard(@RequestBody List<CardAdminPutDto> cardAdminPutDtoList) {
@@ -85,6 +94,11 @@ public class CardAdminController {
     @DeleteMapping("/card/type/{type-id}")
     public ResponseEntity<?> deleteType(@PathVariable(name = "type-id") Integer typeId) {
         return new ResponseEntity<>(cardAdminService.deleteType(typeId), HttpStatus.OK);
+    }
+    
+    @PostMapping("/card/type/{type-name}")
+    public ResponseEntity<?> createType(@PathVariable(name = "type-name") String typeName) {
+        return new ResponseEntity<>(cardAdminService.createType(typeName), HttpStatus.CREATED);
     }
 
     @PostMapping("/card/type/merge")

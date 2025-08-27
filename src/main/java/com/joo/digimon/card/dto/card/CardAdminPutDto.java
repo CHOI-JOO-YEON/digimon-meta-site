@@ -3,6 +3,7 @@ package com.joo.digimon.card.dto.card;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.joo.digimon.global.enums.*;
+import com.joo.digimon.global.enums.Locale;
 import lombok.Data;
 
 import java.time.LocalDate;
@@ -44,5 +45,6 @@ public class CardAdminPutDto {
     String noteName;
     Integer noteId;
     LocalDate releaseDate;
+    Locale sampleImageLocale;
 //    Boolean isEn;
 }

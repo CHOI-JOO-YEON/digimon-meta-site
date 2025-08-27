@@ -32,6 +32,8 @@ public class EnglishCardEntity {
     String uploadUrl;
     String webpUrl;
 
+    String sampleWebpUrl;
+
     @OneToOne
     @JoinColumn(name = "cards_tb_id")
     CardEntity cardEntity;
