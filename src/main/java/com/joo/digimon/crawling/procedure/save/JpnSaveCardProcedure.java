@@ -52,17 +52,15 @@ public class JpnSaveCardProcedure implements SaveCardProcedure {
                     return cardRepository.save(newEntity);
                 });
 
-        if (cardEntity.getJapaneseCardEntity() == null) {
-            JapaneseCardEntity japaneseCardEntity = japaneseCardRepository.save(JapaneseCardEntity.builder()
-                    .effect(dto.getEffect())
-                    .sourceEffect(dto.getSourceEffect())
-                    .cardName(dto.getCardName())
-                    .originUrl(dto.getOriginUrl())
+        JapaneseCardEntity japaneseCardEntity = cardEntity.getJapaneseCardEntity();
+        if (japaneseCardEntity == null) {
+            japaneseCardEntity = JapaneseCardEntity.builder()
                     .cardEntity(cardEntity)
-                    .build());
-            cardEntity.updateJapaneseCard(japaneseCardEntity);
+                    .build();
         }
-
+        japaneseCardEntity.update(dto);
+        japaneseCardRepository.save(japaneseCardEntity);
+        cardEntity.updateJapaneseCard(japaneseCardEntity);
         return cardEntity;
     }
 

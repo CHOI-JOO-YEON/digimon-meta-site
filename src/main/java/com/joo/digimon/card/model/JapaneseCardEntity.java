@@ -1,6 +1,7 @@
 package com.joo.digimon.card.model;
 
 import com.joo.digimon.card.dto.card.CardAdminPutDto;
+import com.joo.digimon.crawling.dto.ReflectCardRequestDto;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -63,5 +64,12 @@ public class JapaneseCardEntity {
     }
     public void updateOriginUrl(String url) {
         this.originUrl = url;
+    }
+
+    public void update(ReflectCardRequestDto dto) {
+        effect = dto.getEffect();
+        sourceEffect = dto.getSourceEffect();
+        cardName = dto.getCardName();
+        originUrl = dto.getOriginUrl();
     }
 }

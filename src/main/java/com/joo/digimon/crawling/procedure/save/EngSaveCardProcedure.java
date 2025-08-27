@@ -11,6 +11,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static com.joo.digimon.card.model.QEnglishCardEntity.englishCardEntity;
+
 public class EngSaveCardProcedure implements SaveCardProcedure {
     CardRepository cardRepository;
     EnglishCardRepository englishCardRepository;
@@ -55,17 +57,15 @@ public class EngSaveCardProcedure implements SaveCardProcedure {
                     return cardRepository.save(newEntity);
                 });
 
-        if (cardEntity.getEnglishCard() == null) {
-            EnglishCardEntity englishCardEntity = englishCardRepository.save(EnglishCardEntity.builder()
-                    .effect(dto.getEffect())
-                    .sourceEffect(dto.getSourceEffect())
-                    .cardName(dto.getCardName())
-                    .originUrl(dto.getOriginUrl())
+        EnglishCardEntity englishCardEntity = cardEntity.getEnglishCard();
+        if (englishCardEntity == null) {
+            englishCardEntity = EnglishCardEntity.builder()
                     .cardEntity(cardEntity)
-                    .build());
-            cardEntity.updateEnglishCard(englishCardEntity);
+                    .build();
         }
-
+        englishCardEntity.update(dto);
+        englishCardRepository.save(englishCardEntity);
+        cardEntity.updateEnglishCard(englishCardEntity);
         return cardEntity;
     }
 
