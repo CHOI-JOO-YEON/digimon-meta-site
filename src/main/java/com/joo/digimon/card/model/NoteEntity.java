@@ -58,7 +58,7 @@ public class NoteEntity {
         this.isDisable = dto.getIsDisable();
         
         if (dto.getParent() != null) {
-            this.description = dto.getParent();    
+            this.parent = dto.getParent();    
         }
 
         if (dto.getDescription() != null) {
