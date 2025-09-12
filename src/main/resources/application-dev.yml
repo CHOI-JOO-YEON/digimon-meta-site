@@ -3,14 +3,14 @@ spring:
     hibernate:
       ddl-auto: update
     show-sql: true
-  h2:
-    console:
-      enabled: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MariaDBDialect
   datasource:
-    username: sa
-    password:
-    driver-class-name: org.h2.Driver
-    url: jdbc:h2:file:~/demo;AUTO_SERVER=TRUE
+    username: root
+    password: rootpassword
+    driver-class-name: org.mariadb.jdbc.Driver
+    url: jdbc:mariadb://localhost:13306/digimon
   application:
     name: Digimon-Meta-Dev
   cloud:
@@ -27,10 +27,13 @@ spring:
             scope:
               - profile_nickname
             client-name: kakao
-            client-id: dummy-client-id
-            redirect-uri: localhost:50000
+            client-id: 0deb62356d0547996925661521cc665f
+            redirect-uri: http://localhost:50000/login/kakao
         provider:
           kakao:
+#            authorization-uri: https://kauth.kakao.com/oauth/authorize
+#            token-uri: https://kauth.kakao.com/oauth/token
+#            user-info-uri: https://kapi.kakao.com/v2/user/me
             authorization-uri: http://localhost:8089/oauth/authorize
             token-uri: http://localhost:8089/oauth/token
             user-info-uri: http://localhost:8089/v2/user/me
@@ -61,3 +64,5 @@ repository:
 github:
   username: 123
   access-token: 123
+app:
+  logout-redirect-uri: http://localhost:50000/logout/kakao
