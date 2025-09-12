@@ -14,6 +14,9 @@ public enum Attribute {
     내비("Navi", "ナビ", "내비"),
     게임("Game", "ゲーム", "게임"),
     갓("God", "ゴッド", "갓"),
+    시스템("System", "システム", "시스템"),
+    엔터테인먼트("Entertainment", "エンタメ", "엔터테인먼트"),
+    라이프("God", "ライフ", "라이프"),
     NODATA("NO DATA", "NODATA", "NO DATA")
     ;
 
