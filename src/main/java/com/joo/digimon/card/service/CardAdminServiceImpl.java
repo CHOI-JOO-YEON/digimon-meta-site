@@ -505,25 +505,24 @@ public class CardAdminServiceImpl implements CardAdminService {
                 .cardEntity(cardEntity)
                 .build();
 
-        String uploadCardImage = uploadCardImage(cardAdminPutDto, image);
-
-
-        if (cardAdminPutDto.getSampleImageLocale() == Locale.ENG) {
-            EnglishCardEntity englishCard = EnglishCardEntity.builder()
-                    .sampleWebpUrl(uploadCardImage)
-                    .cardEntity(cardEntity)
-                    .build();
-            englishCardRepository.save(englishCard);
-            englishCardRepository.flush();
-        } else if (cardAdminPutDto.getSampleImageLocale() == Locale.JPN) {
-            JapaneseCardEntity japaneseCardEntity = JapaneseCardEntity.builder()
-                    .sampleWebpUrl(uploadCardImage)
-                    .cardEntity(cardEntity)
-                    .build();
-            japaneseCardRepository.save(japaneseCardEntity);
-            japaneseCardRepository.flush();
+        if (image != null && !image.isEmpty()) {
+            String uploadCardImage = uploadCardImage(cardAdminPutDto, image);
+            if (cardAdminPutDto.getSampleImageLocale() == Locale.ENG) {
+                EnglishCardEntity englishCard = EnglishCardEntity.builder()
+                        .sampleWebpUrl(uploadCardImage)
+                        .cardEntity(cardEntity)
+                        .build();
+                englishCardRepository.save(englishCard);
+                englishCardRepository.flush();
+            } else if (cardAdminPutDto.getSampleImageLocale() == Locale.JPN) {
+                JapaneseCardEntity japaneseCardEntity = JapaneseCardEntity.builder()
+                        .sampleWebpUrl(uploadCardImage)
+                        .cardEntity(cardEntity)
+                        .build();
+                japaneseCardRepository.save(japaneseCardEntity);
+                japaneseCardRepository.flush();
+            }
         }
-
 
         cardImgEntity.update(cardAdminPutDto);
         NoteEntity noteEntity = noteRepository.findById(cardAdminPutDto.getNoteId()).orElseThrow();

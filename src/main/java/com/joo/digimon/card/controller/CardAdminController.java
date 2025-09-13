@@ -39,7 +39,7 @@ public class CardAdminController {
     }
 
     @PostMapping("/card")
-    public ResponseEntity<?> createCard(@RequestPart("image") MultipartFile image,
+    public ResponseEntity<?> createCard(@RequestPart(value = "image", required = false) MultipartFile image,
                                         @RequestPart("card")  CardAdminPutDto cardAdminPutDto) throws IOException {
         return new ResponseEntity<>(cardAdminService.createCard(cardAdminPutDto, image), HttpStatus.CREATED);
     }
