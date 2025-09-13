@@ -44,6 +44,7 @@ public interface CardAdminService {
     void originUrlSet();
 
     Boolean createCard(CardAdminPutDto cardAdminPutDto, MultipartFile image) throws IOException;
+    Boolean updateSampleCardImage(CardAdminPutDto cardAdminPutDto, MultipartFile image) throws IOException;
 
     Boolean createType(String name);
 }

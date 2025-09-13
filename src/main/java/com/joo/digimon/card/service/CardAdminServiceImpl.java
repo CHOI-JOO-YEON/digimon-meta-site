@@ -482,7 +482,6 @@ public class CardAdminServiceImpl implements CardAdminService {
     @Override
     @Transactional
     public Boolean createCard(CardAdminPutDto cardAdminPutDto, MultipartFile image) throws IOException {
-
         Optional<CardEntity> card = cardRepository.findByCardNo(cardAdminPutDto.getCardNo());
         if (card.isPresent()) {
             return false;
@@ -532,6 +531,31 @@ public class CardAdminServiceImpl implements CardAdminService {
         updateType(cardAdminPutDto, cardImgEntity);
 
         cardImgRepository.save(cardImgEntity);
+        return true;
+    }
+
+    @Override
+    public Boolean updateSampleCardImage(CardAdminPutDto cardAdminPutDto, MultipartFile image) throws IOException {
+        Optional<CardEntity> card = cardRepository.findByCardNo(cardAdminPutDto.getCardNo());
+        if (card.isEmpty()) {
+            return false;
+        }
+        String uploadCardImage = uploadCardImage(cardAdminPutDto, image);
+        if (cardAdminPutDto.getSampleImageLocale() == Locale.ENG) {
+            EnglishCardEntity englishCard = EnglishCardEntity.builder()
+                    .sampleWebpUrl(uploadCardImage)
+                    .cardEntity(card.get())
+                    .build();
+            englishCardRepository.save(englishCard);
+            englishCardRepository.flush();
+        } else if (cardAdminPutDto.getSampleImageLocale() == Locale.JPN) {
+            JapaneseCardEntity japaneseCardEntity = JapaneseCardEntity.builder()
+                    .sampleWebpUrl(uploadCardImage)
+                    .cardEntity(card.get())
+                    .build();
+            japaneseCardRepository.save(japaneseCardEntity);
+            japaneseCardRepository.flush();
+        }
         return true;
     }
 

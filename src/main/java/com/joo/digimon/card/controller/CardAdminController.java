@@ -43,7 +43,12 @@ public class CardAdminController {
                                         @RequestPart("card")  CardAdminPutDto cardAdminPutDto) throws IOException {
         return new ResponseEntity<>(cardAdminService.createCard(cardAdminPutDto, image), HttpStatus.CREATED);
     }
-    
+
+    @PutMapping("/card/image")
+    public ResponseEntity<?> updateSampleCardImage(@RequestPart("image") MultipartFile image,
+                                        @RequestPart("card")  CardAdminPutDto cardAdminPutDto) throws IOException {
+        return new ResponseEntity<>(cardAdminService.createCard(cardAdminPutDto, image), HttpStatus.CREATED);
+    }
 
     @PutMapping("/card/update")
     public ResponseEntity<?> updateCard(@RequestBody List<CardAdminPutDto> cardAdminPutDtoList) {
