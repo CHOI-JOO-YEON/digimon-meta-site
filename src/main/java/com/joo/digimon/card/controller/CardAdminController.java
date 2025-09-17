@@ -46,7 +46,7 @@ public class CardAdminController {
 
     @PutMapping("/card/image")
     public ResponseEntity<?> updateSampleCardImage(@RequestPart("image") MultipartFile image,
-                                        @RequestPart("card")  CardAdminPutDto cardAdminPutDto) throws IOException {
+                                        @RequestPart("card") CardAdminPutDto cardAdminPutDto) throws IOException {
         return new ResponseEntity<>(cardAdminService.updateSampleCardImage(cardAdminPutDto, image), HttpStatus.OK);
     }
 

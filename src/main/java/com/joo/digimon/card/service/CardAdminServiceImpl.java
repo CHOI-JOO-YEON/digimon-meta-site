@@ -534,26 +534,33 @@ public class CardAdminServiceImpl implements CardAdminService {
     }
 
     @Override
+    @Transactional
     public Boolean updateSampleCardImage(CardAdminPutDto cardAdminPutDto, MultipartFile image) throws IOException {
         Optional<CardEntity> card = cardRepository.findByCardNo(cardAdminPutDto.getCardNo());
         if (card.isEmpty()) {
             return false;
         }
-        String uploadCardImage = uploadCardImage(cardAdminPutDto, image);
+        String url = uploadCardImage(cardAdminPutDto, image);
         if (cardAdminPutDto.getSampleImageLocale() == Locale.ENG) {
-            EnglishCardEntity englishCard = EnglishCardEntity.builder()
-                    .sampleWebpUrl(uploadCardImage)
-                    .cardEntity(card.get())
-                    .build();
+            EnglishCardEntity englishCard = card.get().getEnglishCard();
+
+            if (englishCard == null) {
+                englishCard = EnglishCardEntity.builder()
+                        .cardEntity(card.get())
+                        .build();
+            }
+            englishCard.updateSampleWebpUrl(url);
             englishCardRepository.save(englishCard);
-            englishCardRepository.flush();
         } else if (cardAdminPutDto.getSampleImageLocale() == Locale.JPN) {
-            JapaneseCardEntity japaneseCardEntity = JapaneseCardEntity.builder()
-                    .sampleWebpUrl(uploadCardImage)
-                    .cardEntity(card.get())
-                    .build();
+            JapaneseCardEntity japaneseCardEntity = card.get().getJapaneseCardEntity();
+
+            if (japaneseCardEntity == null) {
+                japaneseCardEntity = JapaneseCardEntity.builder()
+                        .cardEntity(card.get())
+                        .build();
+            }
+            japaneseCardEntity.updateSampleWebpUrl(url);
             japaneseCardRepository.save(japaneseCardEntity);
-            japaneseCardRepository.flush();
         }
         return true;
     }
@@ -563,11 +570,11 @@ public class CardAdminServiceImpl implements CardAdminService {
         if (typeRepository.findByName(name).isPresent()) {
             return false;
         }
-        
+
         TypeEntity typeEntity = TypeEntity.builder()
                 .name(name)
                 .build();
-        
+
         typeRepository.save(typeEntity);
         return true;
     }

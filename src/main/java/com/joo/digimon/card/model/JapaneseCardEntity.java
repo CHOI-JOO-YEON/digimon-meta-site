@@ -72,4 +72,8 @@ public class JapaneseCardEntity {
         cardName = dto.getCardName();
         originUrl = dto.getOriginUrl();
     }
+
+    public void updateSampleWebpUrl(String url) {
+        this.sampleWebpUrl = url;
+    }
 }

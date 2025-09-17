@@ -63,6 +63,9 @@ public class EnglishCardEntity {
     public void updateOriginUrl(String url) {
         this.originUrl = url;
     }
+    public void updateSampleWebpUrl(String url) {
+        this.sampleWebpUrl = url;
+    }
 
     public void update(ReflectCardRequestDto dto) {
         effect = dto.getEffect();
